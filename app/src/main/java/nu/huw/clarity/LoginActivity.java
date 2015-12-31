@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,7 +20,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.client.methods.DavMethod;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.version.DeltaVConstants;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+
+    private static final String TAG = LoginActivity.class.getName();
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -125,7 +140,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isPasswordValid(String password) {
-        return password.length() >= 4;
+        return password.length() >= 6;
     }
 
     /**
@@ -139,19 +154,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-            show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
             }
         });
 
         mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
         mProgressView.animate().setDuration(shortAnimTime).alpha(
-            show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         });
     }
@@ -185,10 +200,74 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mPassword = password;
         }
 
+        private Exception mLoginError;
+
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            return true;
+            HttpClient client = new HttpClient();
+
+            try {
+                // Omni Sync Server uses a load balancer to handle their data, so a user could
+                // exist on any of (it seems) sync1.omnigroup.com-sync99.omnigroup.com. To find
+                // the server, polling sync.omnigroup.com/<username> will issue a 300-series
+                // redirect, which newer HttpClients will follow.
+                //
+                // We don't have that luxury, so we need to issue a request to sync.omni and
+                // follow the response packet. We use a PropFindMethod because it's the least
+                // damaging of the methods, and we keep it as minimal as possible.
+
+                DavMethod findServerMethod = new PropFindMethod(
+                        "https://sync.omnigroup.com/" + mUsername,
+                        DavConstants.PROPFIND_ALL_PROP,
+                        DavConstants.DEPTH_0
+                );
+
+                client.executeMethod(findServerMethod);
+                findServerMethod.releaseConnection();
+
+                int statusCode = findServerMethod.getStatusCode();
+                if (300 <= statusCode && statusCode < 400) {
+
+                    Log.i(TAG, "Redirection caught");
+
+                    URI newHost = new URI(findServerMethod
+                            .getResponseHeader(DeltaVConstants.HEADER_LOCATION)
+                            .getValue()
+                    );
+
+                    // Set up the credentials manager
+                    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
+                            mUsername,
+                            mPassword
+                    );
+                    AuthScope newHostScope = new AuthScope(
+                            newHost.getHost(),
+                            newHost.getPort(),
+                            AuthScope.ANY_REALM
+                    );
+
+                    client.getState().setCredentials(newHostScope, credentials);
+
+                    DavMethod testLoginMethod = new PropFindMethod(
+                            newHost.toString(),
+                            DavConstants.PROPFIND_ALL_PROP,
+                            DavConstants.DEPTH_0
+                    );
+
+                    client.executeMethod(testLoginMethod);
+                    testLoginMethod.releaseConnection();
+                    return testLoginMethod.succeeded();
+                }
+            } catch (IOException e) {
+                mLoginError = e;
+                Log.e(TAG, "Problem creating/sending request.");
+            } catch (URISyntaxException e) {
+                mLoginError = e;
+                Log.e(TAG, "Omni Sync Server returned invalid redirection URI.");
+            }
+
+            return false;
         }
 
         @Override
@@ -199,7 +278,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+
+                String errorString;
+
+                if (mLoginError == null) {
+                    errorString = getString(R.string.error_incorrect_password);
+                } else {
+                    errorString = mLoginError.getCause().toString();
+                }
+
+                mPasswordView.setError(errorString);
                 mPasswordView.requestFocus();
             }
         }
