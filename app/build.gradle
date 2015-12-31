@@ -1,0 +1,37 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "nu.huw.clarity"
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // Apache http doesn't ship with API >=23, but we need it for jackrabbit.
+    useLibrary 'org.apache.http.legacy'
+
+    // Apache commons httpclient and commons codec have the same license.
+    // It's not legally ideal to, but we pick the first of the duplicates.
+    packagingOptions {
+        pickFirst 'META-INF/LICENSE.txt'
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'org.apache.jackrabbit:jackrabbit-webdav:2.11.3'
+}

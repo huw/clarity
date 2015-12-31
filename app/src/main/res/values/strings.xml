@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Clarity for OmniFocus</string>
+    <string name="app_name_short">Clarity</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_username">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="error_invalid_username">Usernames are at least 2 characters</string>
+    <string name="error_incorrect_username">This account isn\'t on the Omni Sync Server</string>
+    <string name="error_invalid_password">Passwords are at least 6 characters</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+</resources>
