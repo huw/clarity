@@ -6,9 +6,11 @@
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
-    <string name="error_invalid_username">Usernames are at least 2 characters</string>
-    <string name="error_incorrect_username">This account isn\'t on the Omni Sync Server</string>
-    <string name="error_invalid_password">Passwords are at least 6 characters</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
-    <string name="error_field_required">This field is required</string>
+    <string name="error_invalid_password">Use at least 6 characters.</string>
+    <string name="error_invalid_username">Use at least 2 characters and no spaces.</string>
+    <string name="error_incorrect_password">This password is incorrect.</string>
+    <string name="error_field_required">This field is required.</string>
+    <string name="error_not_registered">This user isn\'t registered.</string>
+    <string name="error_no_connection">You need a connection to sync.omnigroup.com to continue.</string>
+    <string name="error_server_fault">There\'s a problem with the server.</string>
 </resources>

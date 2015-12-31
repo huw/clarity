@@ -31,6 +31,7 @@ import org.apache.jackrabbit.webdav.version.DeltaVConstants;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
@@ -136,7 +137,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isUsernameValid(String username) {
-        return username.length() >= 2;
+        return username.length() >= 2 && !username.contains(" ");
     }
 
     private boolean isPasswordValid(String password) {
@@ -200,7 +201,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mPassword = password;
         }
 
-        private Exception mLoginError;
+        private String mLoginError = getString(R.string.error_incorrect_password);
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -257,13 +258,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     client.executeMethod(testLoginMethod);
                     testLoginMethod.releaseConnection();
+
                     return testLoginMethod.succeeded();
+
+                } else if (findServerMethod.getStatusText().equals("No such user")) {
+                    mLoginError = getString(R.string.error_not_registered);
+                    Log.e(TAG, "User not registered");
+                } else {
+                    mLoginError = getString(R.string.error_server_fault);
+                    Log.e(TAG, "Unexpected status " + findServerMethod.getStatusCode() + ": "
+                            + findServerMethod.getStatusText());
                 }
+            } catch (UnknownHostException e) {
+                mLoginError = getString(R.string.error_no_connection);
+                Log.e(TAG, "No connection for login.");
             } catch (IOException e) {
-                mLoginError = e;
                 Log.e(TAG, "Problem creating/sending request.");
             } catch (URISyntaxException e) {
-                mLoginError = e;
                 Log.e(TAG, "Omni Sync Server returned invalid redirection URI.");
             }
 
@@ -278,16 +289,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {
                 finish();
             } else {
-
-                String errorString;
-
-                if (mLoginError == null) {
-                    errorString = getString(R.string.error_incorrect_password);
-                } else {
-                    errorString = mLoginError.getCause().toString();
-                }
-
-                mPasswordView.setError(errorString);
+                mPasswordView.setError(mLoginError);
                 mPasswordView.requestFocus();
             }
         }
