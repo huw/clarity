@@ -3,14 +3,10 @@ package nu.huw.clarity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
-import android.content.Intent;
-import android.content.Loader;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
 
-import android.database.Cursor;
 import android.os.AsyncTask;
 
 import android.os.Bundle;
