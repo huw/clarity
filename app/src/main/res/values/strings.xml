@@ -3,6 +3,10 @@
     <string name="app_name_short">Clarity</string>
 
     <!-- Strings related to login -->
+    <string name="login_title">Welcome to Clarity</string>
+    <string name="login_message">With Clarity for OmniFocus, you can focus on your tasks or write down killer ideas.</string>
+    <string name="login_action">Sign in to the Omni Sync Server to begin.</string>
+
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
