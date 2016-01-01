@@ -2,7 +2,11 @@ package nu.huw.clarity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.Loader;
+import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -33,7 +37,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends AppCompatActivity implements ErrorDialog.onErrorDismissListener {
 
     private static final String TAG = LoginActivity.class.getName();
 
@@ -45,6 +49,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     // UI references.
     private EditText mUsernameView;
     private EditText mPasswordView;
+    private TextInputLayout mUsernameIL;
+    private TextInputLayout mPasswordIL;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -55,6 +61,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username);
         mPasswordView = (EditText) findViewById(R.id.password);
+
+        mUsernameIL = (TextInputLayout) findViewById(R.id.username_il);
+        mPasswordIL = (TextInputLayout) findViewById(R.id.password_il);
+
+        mUsernameIL.setErrorEnabled(true);
+        mPasswordIL.setErrorEnabled(true);
 
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -91,8 +103,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         // Reset errors.
-        mUsernameView.setError(null);
-        mPasswordView.setError(null);
+        mUsernameIL.setError(null);
+        mPasswordIL.setError(null);
 
         // Store values at the time of the login attempt.
         String username = mUsernameView.getText().toString();
@@ -103,22 +115,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         // Check for a valid password.
         if (TextUtils.isEmpty(password)) {
-            mPasswordView.setError(getString(R.string.error_field_required));
+            mPasswordIL.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
         } else if (!isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
+            mPasswordIL.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(username)) {
-            mUsernameView.setError(getString(R.string.error_field_required));
+            mUsernameIL.setError(getString(R.string.error_field_required));
             focusView = mUsernameView;
             cancel = true;
         } else if (!isUsernameValid(username)) {
-            mUsernameView.setError(getString(R.string.error_invalid_username));
+            mUsernameIL.setError(getString(R.string.error_invalid_username));
             focusView = mUsernameView;
             cancel = true;
         }
@@ -173,18 +185,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return null;
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
+    public void onErrorDismiss(int resultCode) {
+        if (resultCode == Activity.RESULT_OK) {
+            attemptLogin();
+        }
     }
 
     /**
@@ -201,7 +205,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mPassword = password;
         }
 
-        private String mLoginError = getString(R.string.error_incorrect_password);
+        // There are three types of error we can show on this page. Username and password
+        // errors are problems with validation/authentication for those specific data types.
+        // mLoginError is for connection/other errors which need to be shown in an alert.
+        private String mLoginError = "";
+        private String mUsernameError = "";
+        private String mPasswordError = "";
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -230,7 +239,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 int statusCode = findServerMethod.getStatusCode();
                 if (300 <= statusCode && statusCode < 400) {
 
-                    Log.i(TAG, "Redirection caught");
+                    Log.i(TAG, "Redirection caught (User exists)");
 
                     URI newHost = new URI(findServerMethod
                             .getResponseHeader(DeltaVConstants.HEADER_LOCATION)
@@ -259,10 +268,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     client.executeMethod(testLoginMethod);
                     testLoginMethod.releaseConnection();
 
-                    return testLoginMethod.succeeded();
-
+                    if (testLoginMethod.succeeded()) {
+                        return true;
+                    } else {
+                        mPasswordError = getString(R.string.error_incorrect_password);
+                        Log.e(TAG, "Incorrect password entered");
+                    }
                 } else if (findServerMethod.getStatusText().equals("No such user")) {
-                    mLoginError = getString(R.string.error_not_registered);
+                    mUsernameError = getString(R.string.error_not_registered);
                     Log.e(TAG, "User not registered");
                 } else {
                     mLoginError = getString(R.string.error_server_fault);
@@ -271,13 +284,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             } catch (UnknownHostException e) {
                 mLoginError = getString(R.string.error_no_connection);
-                Log.e(TAG, "No connection for login.");
+                Log.e(TAG, "No connection for login");
             } catch (IOException e) {
-                Log.e(TAG, "Problem creating/sending request.");
+                Log.e(TAG, "Problem creating/sending request");
             } catch (URISyntaxException e) {
-                Log.e(TAG, "Omni Sync Server returned invalid redirection URI.");
+                Log.e(TAG, "Omni Sync Server returned invalid redirection URI");
             }
 
+            // Catch all errors
             return false;
         }
 
@@ -289,8 +303,31 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {
                 finish();
             } else {
-                mPasswordView.setError(mLoginError);
-                mPasswordView.requestFocus();
+
+                // The order is a little important here. The most crucial errors,
+                // connection issues, should be notified first without showing any
+                // other errors. Then username issues should be presented, and
+                // finally password errors.
+
+                if (!mLoginError.isEmpty()) {
+
+                    DialogFragment errorDialog = new ErrorDialog();
+                    Bundle args = new Bundle();
+                    args.putString("message", mLoginError);
+                    errorDialog.setArguments(args);
+                    errorDialog.show(getSupportFragmentManager(), "Error Dialog");
+
+                } else if (!mUsernameError.isEmpty()) {
+
+                    mUsernameIL.setError(mUsernameError);
+                    mUsernameView.requestFocus();
+
+                } else if (!mPasswordError.isEmpty()) {
+
+                    mPasswordIL.setError(mPasswordError);
+                    mPasswordView.requestFocus();
+
+                }
             }
         }
 
