@@ -8,17 +8,18 @@
         <item name="android:buttonStyle">@style/ColouredButton</item>
     </style>
 
-    <style name="NoActionBarTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorPrimary</item>
-        <item name="android:buttonStyle">@style/ColouredButton</item>
-    </style>
-
     <!-- This isn't strictly necessary on lollipop and above, but I'm making
     the call to be consistent here -->
     <style name="ColouredButton" parent="Widget.AppCompat.Button.Colored">
         <item name="android:colorButtonNormal">@color/colorPrimary</item>
         <item name="android:textColor">@android:color/white</item>
+    </style>
+    >
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
     </style>
 </resources>

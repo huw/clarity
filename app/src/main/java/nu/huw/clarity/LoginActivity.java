@@ -249,10 +249,14 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
                 client.executeMethod(findServerMethod);
                 findServerMethod.releaseConnection();
 
+                // Only use 3xx codes which have a HEADER_LOCATION response
                 int statusCode = findServerMethod.getStatusCode();
-                if (300 <= statusCode && statusCode < 400) {
+                if (
+                    (301 <= statusCode && statusCode <= 304) ||
+                    (307 <= statusCode && statusCode <= 308)
+                ) {
 
-                    Log.i(TAG, "Redirection caught (User exists)");
+                    Log.i(TAG, "User exists (Redirection caught)");
 
                     URI newHost = new URI(findServerMethod
                             .getResponseHeader(DeltaVConstants.HEADER_LOCATION)

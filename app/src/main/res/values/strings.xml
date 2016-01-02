@@ -20,4 +20,5 @@
 
     <!-- Error dialog strings -->
     <string name="try_again">Try Again</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
