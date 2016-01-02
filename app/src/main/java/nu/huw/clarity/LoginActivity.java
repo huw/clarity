@@ -1,5 +1,7 @@
 package nu.huw.clarity;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
@@ -37,14 +39,16 @@ import java.net.UnknownHostException;
 
 public class LoginActivity extends AppCompatActivity implements ErrorDialog.onErrorDismissListener {
 
-    private static final String TAG = LoginActivity.class.getName();
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private OmniLoginTask mAuthTask = null;
 
-    // UI references.
+    /**
+     * References for the UI.
+     */
     private EditText mUsernameView;
     private EditText mPasswordView;
     private TextInputLayout mUsernameIL;
@@ -52,10 +56,21 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
     private View mProgressView;
     private View mLoginFormView;
 
+    /**
+     * Account-specific things.
+     */
+    private AccountManager mAccountManager;
+    private String mUsername;
+    private String mPassword;
+    private URI mServerDomain;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mAccountManager = AccountManager.get(getBaseContext());
+
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username);
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -198,9 +213,6 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
      */
     public class OmniLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mUsername;
-        private final String mPassword;
-
         OmniLoginTask(String username, String password) {
             mUsername = username;
             mPassword = password;
@@ -246,6 +258,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
                             .getResponseHeader(DeltaVConstants.HEADER_LOCATION)
                             .getValue()
                     );
+                    mServerDomain = newHost;
 
                     // Set up the credentials manager
                     UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
@@ -270,6 +283,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
                     testLoginMethod.releaseConnection();
 
                     if (testLoginMethod.succeeded()) {
+                        Log.i(TAG, "Account credentials correct");
                         return true;
                     } else {
                         mPasswordError = getString(R.string.error_incorrect_password);
@@ -301,7 +315,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
             mAuthTask = null;
 
             if (success) {
-                finish();
+                addAccount();
             } else {
 
                 showProgress(false);
@@ -338,6 +352,17 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+    private void addAccount() {
+
+        Account account = new Account(mUsername, this.getPackageName());
+        Bundle userData = new Bundle();
+        userData.putString("SERVER_DOMAIN", mServerDomain.getHost());
+
+        mAccountManager.addAccountExplicitly(account, mPassword, userData);
+
+        finish();
     }
 }
 

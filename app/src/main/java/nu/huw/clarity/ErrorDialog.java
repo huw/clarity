@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -15,7 +16,7 @@ import android.util.Log;
  */
 public class ErrorDialog extends DialogFragment {
 
-    private static final String TAG = ErrorDialog.class.getName();
+    private static final String TAG = ErrorDialog.class.getSimpleName();
 
     public ErrorDialog() {
         // Required empty public constructor
@@ -26,7 +27,9 @@ public class ErrorDialog extends DialogFragment {
     }
 
     @Override
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        super.onCreateDialog(savedInstanceState);
 
         Bundle args = getArguments();
         String message = args.getString("message", "");
