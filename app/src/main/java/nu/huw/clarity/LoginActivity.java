@@ -3,6 +3,7 @@ package nu.huw.clarity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.content.Context;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -84,6 +86,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
         });
 
         mProgressView = findViewById(R.id.login_progress);
+        mLoginFormView = findViewById(R.id.login_form);
     }
 
 
@@ -135,9 +138,13 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
+            // Show a progress spinner, hide the keyboard, and kick off a
+            // background task to perform the user login attempt.
             showProgress(true);
+
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mLoginFormView.getWindowToken(), 0);
+
             mAuthTask = new OmniLoginTask(username, password);
             mAuthTask.execute((Void) null);
         }
@@ -160,7 +167,15 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
         // activity template.
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mLoginFormView.setVisibility(View.VISIBLE);
+        mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+
         mProgressView.animate().setDuration(shortAnimTime).alpha(
                 show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
             @Override
@@ -284,11 +299,12 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-            showProgress(false);
 
             if (success) {
                 finish();
             } else {
+
+                showProgress(false);
 
                 // The order is a little important here. The most crucial errors,
                 // connection issues, should be notified first without showing any
@@ -306,12 +322,12 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
                 } else if (!mUsernameError.isEmpty()) {
 
                     mUsernameIL.setError(mUsernameError);
-                    mUsernameView.requestFocus();
+                    mUsernameIL.requestFocus();
 
                 } else if (!mPasswordError.isEmpty()) {
 
                     mPasswordIL.setError(mPasswordError);
-                    mPasswordView.requestFocus();
+                    mPasswordIL.requestFocus();
 
                 }
             }
