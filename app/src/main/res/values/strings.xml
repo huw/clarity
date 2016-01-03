@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Clarity for OmniFocus</string>
     <string name="app_name_short">Clarity</string>
+    <string name="account_type">nu.huw.clarity</string>
 
-    <!-- Strings related to login -->
+    <!-- LoginActivity -->
     <string name="login_title">Welcome to Clarity</string>
     <string name="login_message">With Clarity for OmniFocus, you can focus on your tasks or write down killer ideas.</string>
     <string name="login_action">Sign in to the Omni Sync Server to begin.</string>
@@ -18,7 +19,6 @@
     <string name="error_no_connection">You need a connection to sync.omnigroup.com to continue</string>
     <string name="error_server_fault">There\'s a problem with the server</string>
 
-    <!-- Error dialog strings -->
+    <!-- ErrorDialog -->
     <string name="try_again">Try Again</string>
-    <string name="title_activity_main">MainActivity</string>
 </resources>

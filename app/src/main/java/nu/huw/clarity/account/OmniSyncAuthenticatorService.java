@@ -1,4 +1,4 @@
-package nu.huw.clarity;
+package nu.huw.clarity.account;
 
 import android.app.Service;
 import android.content.Intent;

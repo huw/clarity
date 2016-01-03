@@ -1,4 +1,4 @@
-package nu.huw.clarity;
+package nu.huw.clarity.ui;
 
 
 import android.app.Activity;
@@ -10,6 +10,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+
+import nu.huw.clarity.R;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,8 +34,8 @@ public class ErrorDialog extends DialogFragment {
         super.onCreateDialog(savedInstanceState);
 
         Bundle args = getArguments();
-        String message = args.getString("message", "");
-        int positiveString = args.getInt("button", R.string.try_again);
+        String message = args.getString("MESSAGE", "");
+        int positiveString = args.getInt("BUTTON_STRING", R.string.try_again);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(message);

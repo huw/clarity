@@ -1,4 +1,4 @@
-package nu.huw.clarity;
+package nu.huw.clarity.account;
 
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
@@ -8,6 +8,8 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import nu.huw.clarity.activity.LoginActivity;
 
 /**
  * OmniSyncAuthenticator is a class to authenticate and create accounts
