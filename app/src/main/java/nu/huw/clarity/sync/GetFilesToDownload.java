@@ -85,6 +85,7 @@ public class GetFilesToDownload extends AsyncTask<Void, Void, List<String>> {
                     DavConstants.DEPTH_1
             );
             client.executeMethod(listAllFiles);
+            listAllFiles.releaseConnection();
 
             MultiStatusResponse[] responses = listAllFiles
                     .getResponseBodyAsMultiStatus()

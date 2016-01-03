@@ -35,7 +35,7 @@ public class ErrorDialog extends DialogFragment {
 
         Bundle args = getArguments();
         String message = args.getString("MESSAGE", "");
-        int positiveString = args.getInt("BUTTON_STRING", R.string.try_again);
+        String positiveString = args.getString("BUTTON_STRING", getString(R.string.try_again));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(message);
@@ -62,27 +62,36 @@ public class ErrorDialog extends DialogFragment {
                     Log.e(
                             TAG,
                             getActivity().getPackageName() +
-                            " should implement onErrorDismiss to receive results"
+                                    " should implement onErrorDismiss to receive results"
                     );
                 }
             }
         });
 
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    onErrorDismissListener activity = (onErrorDismissListener) getActivity();
-                    activity.onErrorDismiss(Activity.RESULT_CANCELED);
-                } catch (ClassCastException e) {
-                    Log.e(
-                            TAG,
-                            getActivity().getPackageName() +
-                            " should implement onErrorDismiss to receive results"
-                    );
+        // Only build a 'cancel' button if there's not another action.
+        // I.E. If the string on the positive button is 'Got it', then
+        // the negative button is doing exactly the same thing. So
+        // there's no need for duplicate buttons
+
+        if (!positiveString.equals(getString(R.string.got_it))) {
+
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    try {
+                        onErrorDismissListener activity = (onErrorDismissListener) getActivity();
+                        activity.onErrorDismiss(Activity.RESULT_CANCELED);
+                    } catch (ClassCastException e) {
+                        Log.e(
+                                TAG,
+                                getActivity().getPackageName() +
+                                        " should implement onErrorDismiss to receive results"
+                        );
+                    }
                 }
-            }
-        });
+            });
+
+        }
 
         return builder.create();
     }

@@ -97,7 +97,7 @@ public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
                 client.getParams().setAuthenticationPreemptive(true);
 
                 DavMethod testLoginMethod = new PropFindMethod(
-                        newHost.toString(),
+                        newHost.toString() + "OmniFocus.ofocus/",
                         DavConstants.PROPFIND_ALL_PROP,
                         DavConstants.DEPTH_0
                 );
@@ -113,9 +113,31 @@ public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
                 } else {
 
                     bundle.putBoolean("SUCCESS", false);
-                    bundle.putInt("ERROR_PASSWORD", R.string.error_incorrect_password);
-                    Log.w(TAG, "Incorrect password entered");
 
+                    statusCode = testLoginMethod.getStatusCode();
+
+                    if (statusCode == 401) {
+
+                        bundle.putInt("ERROR_PASSWORD", R.string.error_incorrect_password);
+                        Log.w(TAG, "Incorrect password entered");
+
+                    } else if (statusCode == 404) {
+
+                        bundle.putInt("ERROR_LOGIN", R.string.error_no_ofocus);
+                        bundle.putInt("ERROR_LOGIN_BUTTON", R.string.got_it);
+                        Log.w(TAG, "No OmniFocus.ofocus folder");
+
+                    } else {
+
+                        Log.e(
+                                TAG,
+                                "Returned HTTP status " +
+                                statusCode +
+                                ": " +
+                                testLoginMethod.getStatusText()
+                        );
+
+                    }
                 }
             } else if (findServerMethod.getStatusText().equals("No such user")) {
 
@@ -127,6 +149,7 @@ public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
 
                 bundle.putBoolean("SUCCESS", false);
                 bundle.putInt("ERROR_LOGIN", R.string.error_server_fault);
+                bundle.putBoolean("ERROR_LOGIN_RETRY", true);
                 Log.e(TAG, "Unexpected status " + findServerMethod.getStatusCode() + ": "
                         + findServerMethod.getStatusText());
 
@@ -135,6 +158,7 @@ public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
 
             bundle.putBoolean("SUCCESS", false);
             bundle.putInt("ERROR_LOGIN", R.string.error_no_connection);
+            bundle.putBoolean("ERROR_LOGIN_RETRY", true);
             Log.e(TAG, "No connection for login");
 
         } catch (IOException e) {

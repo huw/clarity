@@ -17,9 +17,11 @@
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_not_registered">This user isn\'t registered</string>
-    <string name="error_no_connection">You need a connection to sync.omnigroup.com to continue</string>
+    <string name="error_no_connection">You need a connection to sync.omnigroup.com to continue.</string>
+    <string name="error_no_ofocus">No OmniFocus data was found on your account. At the moment, Clarity can\'t create OmniFocus data from scratch, so to continue you\'ll need to sync with an official OmniFocus app.</string>
     <string name="error_server_fault">There\'s a problem with the server</string>
 
     <!-- ErrorDialog -->
-    <string name="try_again">Try Again</string>
+    <string name="try_again">Try again</string>
+    <string name="got_it">Got it</string>
 </resources>

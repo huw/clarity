@@ -51,6 +51,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
     private AccountManager mAccountManager;
     private String mUsername;
     private String mPassword;
+    private boolean mRetryOnErrorDismiss;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -226,9 +227,19 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
 
                 if (loginErrorRef != 0) {
 
+                    mRetryOnErrorDismiss = result.getBoolean("ERROR_LOGIN_RETRY");
+
                     DialogFragment errorDialog = new ErrorDialog();
                     Bundle args = new Bundle();
                     args.putString("MESSAGE", getString(loginErrorRef));
+
+                    // Text for the positive answer on the button
+                    int loginErrorButtonRef = result.getInt("ERROR_LOGIN_BUTTON");
+                    if (loginErrorButtonRef != 0) {
+
+                        args.putString("BUTTON_STRING", getString(loginErrorButtonRef));
+
+                    }
 
                     errorDialog.setArguments(args);
                     errorDialog.show(getSupportFragmentManager(), "Error Dialog");
@@ -249,7 +260,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
     }
 
     public void onErrorDismiss(int resultCode) {
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK && mRetryOnErrorDismiss) {
             attemptLogin();
         }
     }
