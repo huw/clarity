@@ -8,16 +8,20 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.activity.MainActivity;
 
 /**
- * Used for easy access to account data.
+ * Convenience methods for the Account Manager
  *
  * TODO: Multiple accounts
  */
-public class AccountHandler {
+public class AccountHelper {
 
-    private static final String TAG = AccountHandler.class.getSimpleName();
+    private static final String TAG = AccountHelper.class.getSimpleName();
     private static final Context context = MainActivity.context;
 
     public static final AccountManager accountManager = AccountManager.get(context);
+
+    public static boolean doesAccountExist() {
+        return accountManager.getAccountsByType(context.getString(R.string.account_type)).length != 0;
+    }
 
     public static Account getAccount() {
         return accountManager.getAccountsByType(context.getString(R.string.account_type))[0];
@@ -39,7 +43,16 @@ public class AccountHandler {
         return Integer.parseInt(accountManager.getUserData(getAccount(), "SERVER_PORT"));
     }
 
-    public static String getURI() {
-        return "https://" + getServerDomain() + "/" + getUsername() + "/OmniFocus.ofocus/";
+    public static String getBaseURI() {
+        return "https://" + getServerDomain();
+    }
+
+    /**
+     * The Ofocus URI is the location of the OmniFocus.ofocus folder which
+     * contains all of the useful syncing data. It is found at:
+     * `https://sync<your number>.omnigroup.com/<username>/OmniFocus.ofocus/`
+     */
+    public static String getOfocusURI() {
+        return getBaseURI() + "/" + getUsername() + "/OmniFocus.ofocus/";
     }
 }

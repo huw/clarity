@@ -22,7 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import nu.huw.clarity.account.OmniSyncLogin;
+import nu.huw.clarity.account.OmniSyncLoginTask;
 import nu.huw.clarity.ui.ErrorDialog;
 import nu.huw.clarity.R;
 
@@ -33,7 +33,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private OmniSyncLogin mAuthTask = null;
+    private OmniSyncLoginTask mAuthTask = null;
 
     /**
      * References for the UI.
@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mLoginFormView.getWindowToken(), 0);
 
-            mAuthTask = new OmniSyncLogin(mUsername, mPassword, new loginListener());
+            mAuthTask = new OmniSyncLoginTask(mUsername, mPassword, new loginListener());
             mAuthTask.execute((Void) null);
         }
     }
@@ -192,7 +192,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
         });
     }
 
-    public class loginListener implements OmniSyncLogin.TaskListener {
+    public class loginListener implements OmniSyncLoginTask.TaskListener {
         @Override
         public void onFinished(Bundle result) {
 

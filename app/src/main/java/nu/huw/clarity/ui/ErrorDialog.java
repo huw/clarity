@@ -62,7 +62,7 @@ public class ErrorDialog extends DialogFragment {
                     Log.e(
                             TAG,
                             getActivity().getPackageName() +
-                                    " should implement onErrorDismiss to receive results"
+                            " should implement onErrorDismiss to receive results"
                     );
                 }
             }
@@ -85,7 +85,7 @@ public class ErrorDialog extends DialogFragment {
                         Log.e(
                                 TAG,
                                 getActivity().getPackageName() +
-                                        " should implement onErrorDismiss to receive results"
+                                " should implement onErrorDismiss to receive results"
                         );
                     }
                 }

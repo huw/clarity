@@ -1,17 +1,17 @@
 package nu.huw.clarity.activity;
 
-import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import nu.huw.clarity.R;
+import nu.huw.clarity.account.AccountHelper;
+import nu.huw.clarity.sync.Synchroniser;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private AccountManager mAccountManager;
 
     /**
      * Okay, this is really bad practice but from what I've found it's
@@ -32,21 +32,14 @@ public class MainActivity extends AppCompatActivity {
 
         context = getApplicationContext();
 
-        mAccountManager = AccountManager.get(getBaseContext());
-        if (mAccountManager.getAccountsByType(this.getPackageName()).length == 0) {
+        if (!AccountHelper.doesAccountExist()) {
 
             // If there are no syncing accounts, sign in
             startActivity(new Intent(this, LoginActivity.class));
 
         } else {
-            finish();
+
+            Synchroniser.synchronise();
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        finish();
     }
 }
