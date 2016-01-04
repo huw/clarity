@@ -5,11 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.jackrabbit.webdav.DavConstants;
-import org.apache.jackrabbit.webdav.client.methods.DavMethod;
-import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.jackrabbit.webdav.version.DeltaVConstants;
 
 import java.io.IOException;
@@ -21,11 +20,11 @@ import nu.huw.clarity.R;
 
 /**
  * Authenticate the user on the Omni Sync Server.
- * TODO: Test if the user has an OmniFocus.ofocus, enable private servers.
+ * TODO: Enable private servers.
  */
-public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
+public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
 
-    private static final String TAG = OmniSyncLogin.class.getSimpleName();
+    private static final String TAG = OmniSyncLoginTask.class.getSimpleName();
 
     public interface TaskListener {
         void onFinished(Bundle result);
@@ -35,7 +34,7 @@ public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
     private String mPassword;
     private final TaskListener taskListener;
 
-    public OmniSyncLogin(String username, String password, TaskListener listener) {
+    public OmniSyncLoginTask(String username, String password, TaskListener listener) {
         mUsername = username;
         mPassword = password;
         taskListener = listener;
@@ -53,15 +52,16 @@ public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
             // the server, polling sync.omnigroup.com/<username> will issue a 300-series
             // redirect, which newer HttpClients will follow.
             //
-            // We don't have that luxury, so we need to issue a request to sync.omni and
-            // follow the response packet. We use a PropFindMethod because it's the least
-            // damaging of the methods, and we keep it as minimal as possible.
+            // An HttpMethod will craft an HTTP request, and stores the response once
+            // executed so we can access it. It also stores the connection, so
+            // `.releaseConnection()` needs to be called once data is received.
+            //
+            // Also, the HEAD HTTP method is basically the same as a GET method, but without
+            // receiving the message response. Because all we're looking at is the location
+            // header and whether the sync data is accessible, we only need to request the
+            // headers. This makes the request extra lightweight, which is good.
 
-            DavMethod findServerMethod = new PropFindMethod(
-                    "https://sync.omnigroup.com/" + mUsername,
-                    DavConstants.PROPFIND_ALL_PROP,
-                    DavConstants.DEPTH_0
-            );
+            HttpMethod findServerMethod = new HeadMethod("https://sync.omnigroup.com/" + mUsername);
 
             client.executeMethod(findServerMethod);
             findServerMethod.releaseConnection();
@@ -79,10 +79,16 @@ public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
                         .getResponseHeader(DeltaVConstants.HEADER_LOCATION)
                         .getValue()
                 );
+
+                // Return these values so they can be used later
                 bundle.putString("SERVER_DOMAIN", newHost.getHost());
                 bundle.putString("SERVER_PORT", String.valueOf(newHost.getPort()));
 
-                // Set up the credentials manager
+                // Set up the Apache credentials manager
+                // These credentials will be autosubmitted with the packet.
+                // They will be transported over https, so their connection
+                // to the server will be encrypted.
+
                 UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
                         mUsername,
                         mPassword
@@ -96,49 +102,42 @@ public class OmniSyncLogin extends AsyncTask<Void, Void, Bundle> {
                 client.getState().setCredentials(newHostScope, credentials);
                 client.getParams().setAuthenticationPreemptive(true);
 
-                DavMethod testLoginMethod = new PropFindMethod(
-                        newHost.toString() + "OmniFocus.ofocus/",
-                        DavConstants.PROPFIND_ALL_PROP,
-                        DavConstants.DEPTH_0
-                );
+                HttpMethod testLoginMethod = new HeadMethod(newHost.toString()
+                        + "OmniFocus.ofocus/");
 
                 client.executeMethod(testLoginMethod);
                 testLoginMethod.releaseConnection();
 
-                if (testLoginMethod.succeeded()) {
+                statusCode = testLoginMethod.getStatusCode();
 
-                    bundle.putBoolean("SUCCESS", true);
-                    Log.i(TAG, "Account credentials correct");
+                // HTTP Status 200: OK
+                // HTTP Status 401: Unauthorised
+                // HTTP Status 404: Not Found
+                // Anything else  : Probably a serious problem
 
-                } else {
+                bundle.putBoolean("SUCCESS", false);
+                switch (statusCode) {
+                    case 200:
 
-                    bundle.putBoolean("SUCCESS", false);
+                        bundle.putBoolean("SUCCESS", true);
+                        Log.i(TAG, "Account credentials correct");
 
-                    statusCode = testLoginMethod.getStatusCode();
-
-                    if (statusCode == 401) {
+                    case 401:
 
                         bundle.putInt("ERROR_PASSWORD", R.string.error_incorrect_password);
                         Log.w(TAG, "Incorrect password entered");
 
-                    } else if (statusCode == 404) {
+                    case 404:
 
                         bundle.putInt("ERROR_LOGIN", R.string.error_no_ofocus);
                         bundle.putInt("ERROR_LOGIN_BUTTON", R.string.got_it);
                         Log.w(TAG, "No OmniFocus.ofocus folder");
 
-                    } else {
-
-                        Log.e(
-                                TAG,
-                                "Returned HTTP status " +
-                                statusCode +
-                                ": " +
-                                testLoginMethod.getStatusText()
-                        );
-
-                    }
+                    default:
+                        Log.e(TAG, "Returned HTTP status " + statusCode + ": " +
+                                        testLoginMethod.getStatusText());
                 }
+
             } else if (findServerMethod.getStatusText().equals("No such user")) {
 
                 bundle.putBoolean("SUCCESS", false);
