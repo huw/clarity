@@ -122,7 +122,7 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
             return filesToDownload;
 
         } catch (IOException | DavException e) {
-            Log.e(TAG, "Problem creating/sending request");
+            Log.e(TAG, "Problem creating/sending request", e);
         }
 
         return null;

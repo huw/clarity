@@ -158,17 +158,17 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
             bundle.putBoolean("SUCCESS", false);
             bundle.putInt("ERROR_LOGIN", R.string.error_no_connection);
             bundle.putBoolean("ERROR_LOGIN_RETRY", true);
-            Log.e(TAG, "No connection for login");
+            Log.e(TAG, "No connection for login", e);
 
         } catch (IOException e) {
 
             bundle.putBoolean("SUCCESS", false);
-            Log.e(TAG, "Problem creating/sending request");
+            Log.e(TAG, "Problem creating/sending request", e);
 
         } catch (URISyntaxException e) {
 
             bundle.putBoolean("SUCCESS", false);
-            Log.e(TAG, "Omni Sync Server returned invalid redirection URI");
+            Log.e(TAG, "Omni Sync Server returned invalid redirection URI", e);
         }
 
         return bundle;

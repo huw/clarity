@@ -68,8 +68,7 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
                         + getFileMethod.getStatusText());
             }
         } catch (Exception e) {
-            Log.e(TAG, "Unexpected " + e.getClass().getName() + ": " + e.getMessage());
-            e.printStackTrace();
+            Log.e(TAG, "Unexpected " + e.getClass().getName() + ": " + e.getMessage(), e);
         }
 
         return null;

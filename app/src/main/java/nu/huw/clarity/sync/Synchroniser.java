@@ -131,8 +131,7 @@ public class Synchroniser {
                 listener.onFinished(file);
 
             } catch (InterruptedException | ExecutionException e) {
-                Log.e(TAG, "Unexpected error while getting result of DownloadFileTask");
-                e.printStackTrace();
+                Log.e(TAG, "Unexpected error while getting result of DownloadFileTask", e);
             }
         }
     }
