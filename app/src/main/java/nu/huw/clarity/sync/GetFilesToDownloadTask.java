@@ -16,6 +16,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import nu.huw.clarity.account.AccountHelper;
@@ -119,6 +120,7 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
 
             Log.i(TAG, "Got " + filesToDownload.size() + " files to download");
 
+            Collections.sort(filesToDownload);
             return filesToDownload;
 
         } catch (IOException | DavException e) {

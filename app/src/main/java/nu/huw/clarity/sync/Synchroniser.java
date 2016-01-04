@@ -85,7 +85,7 @@ public class Synchroniser {
                 @Override
                 public void onFinished(File file) {
 
-                    // Do something.
+                    Log.d(TAG, file.getName());
 
                 }
             });

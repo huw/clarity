@@ -59,7 +59,7 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
 
                 getFileMethod.releaseConnection();
 
-                Log.v(TAG, params[0] + " successfully downloaded (" + file.length() + ") bytes");
+                Log.v(TAG, params[0] + " successfully downloaded (" + file.length() + " bytes)");
 
                 return file;
 
