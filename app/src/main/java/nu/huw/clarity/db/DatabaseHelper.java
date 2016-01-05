@@ -31,10 +31,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Contexts.COLUMN_ID                              + " TEXT," +
                 Contexts.COLUMN_ACTIVE                          + " INTEGER," +
                 Contexts.COLUMN_ALTITUDE                        + " REAL," +
-                Contexts.COLUMN_CHILDREN_STATE                  + " INTEGER," +
                 Contexts.COLUMN_DATE_ADDED                      + " TIMESTAMP," +
                 Contexts.COLUMN_DATE_MODIFIED                   + " TIMESTAMP," +
                 Contexts.COLUMN_DUE_SOON_COUNT                  + " INTEGER," +
+                Contexts.COLUMN_HAS_CHILDREN                    + " INTEGER," +
                 Contexts.COLUMN_LATITTUDE                       + " REAL," +
                 Contexts.COLUMN_LOCATION_NAME                   + " TEXT," +
                 Contexts.COLUMN_LONGITUDE                       + " REAL," +
@@ -49,10 +49,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String SQL_CREATE_FOLDERS =
             "CREATE TABLE " + Folders.TABLE_NAME + "(" +
                 Folders.COLUMN_ID                               + " TEXT," +
-                Folders.COLUMN_CHILDREN_STATE                   + " INTEGER," +
                 Folders.COLUMN_DATE_ADDED                       + " TIMESTAMP," +
                 Folders.COLUMN_DATE_MODIFIED                    + " TIMESTAMP," +
                 Folders.COLUMN_DUE_SOON_COUNT                   + " INTEGER," +
+                Folders.COLUMN_HAS_CHILDREN + " INTEGER," +
                 Folders.COLUMN_NAME                             + " TEXT," +
                 Folders.COLUMN_OVERDUE_COUNT                    + " INTEGER," +
                 Folders.COLUMN_PARENT                           + " TEXT," +
@@ -93,7 +93,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + Tasks.TABLE_NAME + "(" +
                 Tasks.COLUMN_ID                                 + " TEXT," +
                 Tasks.COLUMN_BLOCKED_BY_DEFER                   + " INTEGER," +
-                Tasks.COLUMN_CHILDREN_STATE                     + " INTEGER," +
                 Tasks.COLUMN_COMPLETE_WITH_CHILDREN             + " INTEGER," +
                 Tasks.COLUMN_CONTAINING_PROJECT                 + " TEXT," +
                 Tasks.COLUMN_CONTEXT                            + " TEXT," +
@@ -104,6 +103,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Tasks.COLUMN_DEFER                              + " TIMESTAMP," +
                 Tasks.COLUMN_ESTIMATED_TIME                     + " INTEGER," +
                 Tasks.COLUMN_FLAGGED                            + " INTEGER," +
+                Tasks.COLUMN_HAS_CHILDREN                       + " INTEGER," +
                 Tasks.COLUMN_INBOX                              + " INTEGER," +
                 Tasks.COLUMN_NAME                               + " TEXT," +
                 Tasks.COLUMN_NOTE_PLAINTEXT                     + " TEXT," +

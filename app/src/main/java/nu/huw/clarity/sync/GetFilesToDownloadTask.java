@@ -63,14 +63,14 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
 
         if (contentType != null) {
 
-            boolean isFolder = contentType.getValue().toString().equals("httpd/unix-directory");
+            boolean isZip = contentType.getValue().toString().equals("application/zip");
 
-            Log.v(TAG, response.getHref() + (isFolder ? " isn't " : " is ") + "valid");
-            return !isFolder;
+            Log.v(TAG, response.getHref() + (isZip ? " is " : " isn't ") + "valid");
+            return isZip;
         } else {
 
-            Log.v(TAG, response.getHref() + " has no content-type property, assuming valid");
-            return true;
+            Log.v(TAG, response.getHref() + " has no content-type property, assuming invalid");
+            return false;
         }
     }
 

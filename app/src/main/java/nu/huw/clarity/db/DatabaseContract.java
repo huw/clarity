@@ -36,18 +36,16 @@ class DatabaseContract {
         public static final String COLUMN_ID = "persistentIdentifier";
         public static final String COLUMN_ACTIVE = "active";
         public static final String COLUMN_ACTIVE_EFFECTIVE = "effectiveActive";
-        public static final String COLUMN_ON_HOLD = "allowsNextAction";                             // 0 = On Hold, 1 = Not On Hold
         public static final String COLUMN_ALTITUDE = "altitude";                                    // Altitude for geofencing
         public static final String COLUMN_AVAILABLE_COUNT = "availableTaskCount";
         public static final String COLUMN_CHILDREN_COUNT = "childrenCount";
-        public static final String COLUMN_CHILDREN_STATE = "childrenState";                         // Does this have children? 0 = No, 2 = Yes
         public static final String COLUMN_CONTAINED_COUNT = "containedTaskCount";
         public static final String COLUMN_CREATION_ORDINAL = "creationOrdinal";                     // Possibly to do with auto-creation of contexts like 'Waiting'
         public static final String COLUMN_DATE_ADDED = "dateAdded";
         public static final String COLUMN_DATE_MODIFIED = "dateModified";
-        public static final String COLUMN_LATITTUDE = "latitude";
         public static final String COLUMN_DUE_SOON_COUNT = "localNumberOfDueSoonTasks";             // Number of due soon in this context not including children
-        public static final String COLUMN_OVERDUE_COUNT = "localNumberOfOverdueTasks";              // See above
+        public static final String COLUMN_HAS_CHILDREN = "childrenState";                           // Does this have children? 0 = No, 2 = Yes
+        public static final String COLUMN_LATITTUDE = "latitude";
         public static final String COLUMN_LOCATION_NAME = "locationName";                           // User-editable context location name
         public static final String COLUMN_LONGITUDE = "longitude";
         public static final String COLUMN_NAME = "name";
@@ -55,6 +53,8 @@ class DatabaseContract {
         public static final String COLUMN_NOTE_PLAINTEXT = "plainTextNote";                         // Contexts can't have notes - Omni error
         public static final String COLUMN_NOTE_XML = "noteXMLData";
         public static final String COLUMN_NOTIFICATION_FLAGS = "notificationFlags";                 // Not sure. All 0s in my database.
+        public static final String COLUMN_ON_HOLD = "allowsNextAction";                             // 0 = On Hold, 1 = Not On Hold
+        public static final String COLUMN_OVERDUE_COUNT = "localNumberOfOverdueTasks";              // See above
         public static final String COLUMN_PARENT = "parent";
         public static final String COLUMN_RADIUS = "radius";
         public static final String COLUMN_RANK = "rank";                                            // Used for ordering. Seems to be a misrepresented 32-bit little endian.
@@ -70,12 +70,12 @@ class DatabaseContract {
         public static final String COLUMN_ACTIVE_EFFECTIVE = "effectiveActive";
         public static final String COLUMN_AVAILABLE_COUNT = "numberOfAvailableTasks";
         public static final String COLUMN_CHILDREN_COUNT = "childrenCount";
-        public static final String COLUMN_CHILDREN_STATE = "childrenState";
         public static final String COLUMN_CONTAINED_COUNT = "numberOfContainedTasks";
         public static final String COLUMN_CREATION_ORDINAL = "creationOrdinal";
         public static final String COLUMN_DATE_ADDED = "dateAdded";
         public static final String COLUMN_DATE_MODIFIED = "dateModified";
         public static final String COLUMN_DUE_SOON_COUNT = "numberOfDueSoonTasks";
+        public static final String COLUMN_HAS_CHILDREN = "childrenState";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_NOTE_PLAINTEXT = "plainTextNote";
         public static final String COLUMN_NOTE_XML = "noteXMLData";
@@ -135,9 +135,9 @@ class DatabaseContract {
         public static final String COLUMN_CHILDREN_AVAILABLE_COUNT = "childrenCountAvailable";
         public static final String COLUMN_CHILDREN_COMPLETED_COUNT = "childrenCountCompleted";
         public static final String COLUMN_CHILDREN_COUNT = "childrenCount";
-        public static final String COLUMN_CHILDREN_STATE = "childrenState";
         public static final String COLUMN_COMPLETE_WITH_CHILDREN = "completeWhenChildrenComplete";
-        public static final String COLUMN_CONTAINS_NEXT_TASK = "containsNextTask";
+        public static final String COLUMN_CONTAINING_PROJECT = "containingProjectInfo";             // ID of the project that contains this
+        public static final String COLUMN_CONTAINS_NEXT_TASK = "containsNextTask";                  // Boolean, does it contain a next task?
         public static final String COLUMN_CONTEXT = "context";
         public static final String COLUMN_CREATION_ORDINAL = "creationOrdinal";
         public static final String COLUMN_DATE_ADDED = "dateAdded";
@@ -145,12 +145,13 @@ class DatabaseContract {
         public static final String COLUMN_DATE_DUE = "dateDue";
         public static final String COLUMN_DATE_DUE_EFFECTIVE = "effectiveDateDue";
         public static final String COLUMN_DATE_MODIFIED = "dateModified";
-        public static final String COLUMN_DEFER = "dateToStart";
         public static final String COLUMN_DATE_START_EFFECTIVE = "effectiveDateToStart";
+        public static final String COLUMN_DEFER = "dateToStart";
         public static final String COLUMN_DUE_SOON = "isDueSoon";
-        public static final String COLUMN_ESTIMATED_TIME = "estimatedInMinutes";
+        public static final String COLUMN_ESTIMATED_TIME = "estimatedInMinutes";                    // Always a number
         public static final String COLUMN_FLAGGED = "flagged";
         public static final String COLUMN_FLAGGED_EFFECTIVE = "effectiveFlagged";
+        public static final String COLUMN_HAS_CHILDREN = "childrenState";
         public static final String COLUMN_HAS_COMPLETED_DESCENDANT = "hasCompletedDescendant";
         public static final String COLUMN_HAS_FLAGGED_IN_TREE = "hasFlaggedTaskInTree";
         public static final String COLUMN_HAS_UNESTIMATED_IN_TREE = "hasUnestimatedLeafTaskInTree";
@@ -159,16 +160,15 @@ class DatabaseContract {
         public static final String COLUMN_MAXIMUM_ESTIMATE_IN_TREE = "maximumEstimateInTree";
         public static final String COLUMN_MINIMUM_ESTIMATE_IN_TREE = "minimumEstimateInTree";
         public static final String COLUMN_NAME = "name";
-        public static final String COLUMN_NOTE_PLAINTEXT = "plainTextNote";
-        public static final String COLUMN_NOTE_XML = "noteXMLData";
+        public static final String COLUMN_NOTE_PLAINTEXT = "plainTextNote";                         // Note in plaintext
+        public static final String COLUMN_NOTE_XML = "noteXMLData";                                 // Note in weird Omni XML format
         public static final String COLUMN_OVERDUE = "isOverdue";
-        public static final String COLUMN_PARENT = "parent";
-        public static final String COLUMN_PROJECT = "projectInfo";
+        public static final String COLUMN_PARENT = "parent";                                        // Parent task/project
+        public static final String COLUMN_PROJECT = "projectInfo";                                  // If this is a project, what's it's project ID?
         public static final String COLUMN_PROJECT_ACTIVE_EFFECTIVE = "effectiveContainingProjectInfoActive";
-        public static final String COLUMN_PROJECT_SINGLE_ACTION = "containingProjectContainsSingletons";
-        public static final String COLUMN_CONTAINING_PROJECT = "containingProjectInfo";
         public static final String COLUMN_PROJECT_NEXT_TASK = "nextTaskOfProjectInfo";
         public static final String COLUMN_PROJECT_REMAINING_EFFECTIVE = "effectiveContainingProjectInfoRemaining";
+        public static final String COLUMN_PROJECT_SINGLE_ACTION = "containingProjectContainsSingletons";
         public static final String COLUMN_RANK = "rank";
         public static final String COLUMN_REPETITION_METHOD = "repetitionMethodString";
         public static final String COLUMN_REPETITION_RULE = "repetitionRuleString";
