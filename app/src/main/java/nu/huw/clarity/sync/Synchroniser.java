@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import nu.huw.clarity.account.AccountHelper;
+import nu.huw.clarity.activity.MainActivity;
+import nu.huw.clarity.db.DatabaseHelper;
 
 /**
  * This class handles all of the synchronisation methods.
@@ -85,7 +87,7 @@ public class Synchroniser {
                 @Override
                 public void onFinished(File file) {
 
-                    Log.d(TAG, file.getName());
+                    // Do something
 
                 }
             });
@@ -118,21 +120,33 @@ public class Synchroniser {
         void onFinished(File file);
     }
 
-    private static void runEachFile(List<DownloadFileTask> downloadList, TaskListener listener) {
+    /**
+     * These are all run in a background thread so that we don't
+     * block the UI thread. Respect it.
+     */
+    private static void runEachFile(final List<DownloadFileTask> downloadList, final TaskListener listener) {
 
-        for (DownloadFileTask download: downloadList) {
-            try {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
 
-                // Holding the thread until the download is done is perfect
-                // for this style of execution. This way, we can make these
-                // callbacks one-by-one in the order that we wanted to.
+                for (DownloadFileTask download: downloadList) {
+                    try {
 
-                File file = download.get();
-                listener.onFinished(file);
+                        // Holding the thread until the download is done is perfect
+                        // for this style of execution. This way, we can make these
+                        // callbacks one-by-one in the order that we wanted to.
 
-            } catch (InterruptedException | ExecutionException e) {
-                Log.e(TAG, "Unexpected error while getting result of DownloadFileTask", e);
+                        File file = download.get();
+                        listener.onFinished(file);
+
+                    } catch (InterruptedException | ExecutionException e) {
+                        Log.e(TAG, "Unexpected error while getting result of DownloadFileTask", e);
+                    }
+                }
+
+                return null;
             }
-        }
+        };
     }
 }

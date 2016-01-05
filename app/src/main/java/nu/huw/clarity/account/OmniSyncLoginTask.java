@@ -8,7 +8,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.version.DeltaVConstants;
 
 import java.io.IOException;
@@ -56,12 +59,16 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
             // executed so we can access it. It also stores the connection, so
             // `.releaseConnection()` needs to be called once data is received.
             //
-            // Also, the HEAD HTTP method is basically the same as a GET method, but without
-            // receiving the message response. Because all we're looking at is the location
-            // header and whether the sync data is accessible, we only need to request the
-            // headers. This makes the request extra lightweight, which is good.
+            // I thought I was going to be able to use a HEAD method to query the server
+            // minimally, but it looks like the Omni Sync Server only responds to DavMethods
+            // when it wants to (it responds fine to a HEAD request below). For a run-down
+            // on DavMethods, see GetFilesToDownloadTask.
 
-            HttpMethod findServerMethod = new HeadMethod("https://sync.omnigroup.com/" + mUsername);
+            HttpMethod findServerMethod = new PropFindMethod(
+                    "https://sync.omnigroup.com/" + mUsername,
+                    DavConstants.PROPFIND_PROPERTY_NAMES,
+                    DavConstants.DEPTH_1
+            );
 
             client.executeMethod(findServerMethod);
             findServerMethod.releaseConnection();
@@ -70,8 +77,8 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
             int statusCode = findServerMethod.getStatusCode();
             if (
                     (301 <= statusCode && statusCode <= 304) ||
-                            (307 <= statusCode && statusCode <= 308)
-                    ) {
+                    (307 <= statusCode && statusCode <= 308)
+            ) {
 
                 Log.i(TAG, "User exists (Redirection caught)");
 
@@ -121,21 +128,25 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
 
                         bundle.putBoolean("SUCCESS", true);
                         Log.i(TAG, "Account credentials correct");
+                        break;
 
                     case 401:
 
                         bundle.putInt("ERROR_PASSWORD", R.string.error_incorrect_password);
                         Log.w(TAG, "Incorrect password entered");
+                        break;
 
                     case 404:
 
                         bundle.putInt("ERROR_LOGIN", R.string.error_no_ofocus);
                         bundle.putInt("ERROR_LOGIN_BUTTON", R.string.got_it);
                         Log.w(TAG, "No OmniFocus.ofocus folder");
+                        break;
 
                     default:
                         Log.e(TAG, "Returned HTTP status " + statusCode + ": " +
                                         testLoginMethod.getStatusText());
+                        break;
                 }
 
             } else if (findServerMethod.getStatusText().equals("No such user")) {
