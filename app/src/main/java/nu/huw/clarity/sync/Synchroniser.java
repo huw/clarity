@@ -8,9 +8,13 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import nu.huw.clarity.account.AccountHelper;
 import nu.huw.clarity.activity.MainActivity;
@@ -71,30 +75,32 @@ public class Synchroniser {
      */
     public static void synchronise() {
 
-        GetFilesToDownloadTask task = new GetFilesToDownloadTask();
+        new GetFilesToDownloadTask(new GetFilesToDownloadTask.TaskListener() {
+            @Override
+            public void onFinished(List<String> result) {
 
-        try {
+                List<DownloadFileTask> downloadList = downloadFiles(result);
 
-            task.execute();
+                runEachFile(downloadList, new TaskListener() {
+                    @Override
+                    public void onFinished(File file) {
 
-            // `task.get()` holds up the thread that this is running on until
-            // execution completes. See `runAllFiles()`.
+                        try {
 
-            List<String> fileList = task.get();
-            List<DownloadFileTask> downloadList = downloadFiles(fileList);
+                            ZipFile zipFile = new ZipFile(file);
+                            ZipEntry contentsXml = zipFile.getEntry("contents.xml");
+                            InputStream input = zipFile.getInputStream(contentsXml);
 
-            runEachFile(downloadList, new TaskListener() {
-                @Override
-                public void onFinished(File file) {
+                            ContentsConverter.parse(input);
 
-                    // Do something
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error reading downloaded zip file", e);
+                        }
+                    }
+                });
 
-                }
-            });
-
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+            }
+        }).execute();
     }
 
     private static List<DownloadFileTask> downloadFiles(List<String> nameList) {
