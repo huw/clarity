@@ -52,7 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Folders.COLUMN_DATE_ADDED                       + " TIMESTAMP," +
                 Folders.COLUMN_DATE_MODIFIED                    + " TIMESTAMP," +
                 Folders.COLUMN_DUE_SOON_COUNT                   + " INTEGER," +
-                Folders.COLUMN_HAS_CHILDREN + " INTEGER," +
+                Folders.COLUMN_HAS_CHILDREN                     + " INTEGER," +
                 Folders.COLUMN_NAME                             + " TEXT," +
                 Folders.COLUMN_OVERDUE_COUNT                    + " INTEGER," +
                 Folders.COLUMN_PARENT                           + " TEXT," +
@@ -74,6 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Projects.COLUMN_DUE_SOON_COUNT                  + " INTEGER," +
                 Projects.COLUMN_FOLDER                          + " TEXT," +
                 Projects.COLUMN_LAST_REVIEW                     + " TIMESTAMP," +
+                Projects.COLUMN_NEXT_REVIEW                     + " TIMESTAMP," +
                 Projects.COLUMN_OVERDUE_COUNT                   + " INTEGER," +
                 Projects.COLUMN_REMAINING_COUNT                 + " INTEGER," +
                 Projects.COLUMN_REPEAT_REVIEW                   + " TEXT," +

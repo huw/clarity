@@ -8,6 +8,11 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Converts a contents.xml into a usable object
@@ -47,6 +52,9 @@ public class ContentsConverter {
                 Log.d(TAG, "Found a " + tagName);
 
                 switch (tagName) {
+                    case "attachment":
+                        parseAttachment(parser);
+                        break;
                     case "setting":
                         parseSetting(parser);
                         break;
@@ -75,6 +83,13 @@ public class ContentsConverter {
         } catch (IOException e) {
             Log.e(TAG, "Streams unexpectedly crossed", e);
         }
+    }
+
+    /**
+     * TODO: Parse attachments (complex!)
+     */
+    private static void parseAttachment(XmlPullParser parser) {
+        Log.i(TAG, "Attachment element skipped, not being parsed yet");
     }
 
     /**
@@ -130,6 +145,25 @@ public class ContentsConverter {
                     depth++;
                     break;
             }
+        }
+    }
+
+    /**
+     * Given a string representing an ISO 8601 full datetime,
+     * convert it to a usable Java object.
+     */
+    public Date convertToJavaDate(String dateString) {
+        try {
+
+            SimpleDateFormat format = new SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            return format.parse(dateString);
+
+        } catch (ParseException e) {
+            Log.e(TAG, "Invalid date format", e);
+            return null;
         }
     }
 }
