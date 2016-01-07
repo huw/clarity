@@ -23,6 +23,20 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
 
     private static final String TAG = DownloadFileTask.class.getSimpleName();
 
+    public interface TaskListener {
+        void onFinished(File result);
+    }
+
+    private final TaskListener taskListener;
+
+    public DownloadFileTask(TaskListener listener) {
+        taskListener = listener;
+    }
+
+    public DownloadFileTask() {
+        taskListener = null;
+    }
+
     @Override
     protected File doInBackground(String... params) {
 
@@ -74,4 +88,12 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
         return null;
     }
 
+    @Override
+    protected void onPostExecute(File result) {
+        super.onPostExecute(result);
+
+        if (this.taskListener != null) {
+            this.taskListener.onFinished(result);
+        }
+    }
 }

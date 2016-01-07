@@ -13,12 +13,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import nu.huw.clarity.account.AccountHelper;
-import nu.huw.clarity.activity.MainActivity;
-import nu.huw.clarity.db.DatabaseHelper;
+import nu.huw.clarity.db.ParseSyncIn;
 
 /**
  * This class handles all of the synchronisation methods.
@@ -91,7 +92,7 @@ public class Synchroniser {
                             ZipEntry contentsXml = zipFile.getEntry("contents.xml");
                             InputStream input = zipFile.getInputStream(contentsXml);
 
-                            ContentsConverter.parse(input);
+                            ParseSyncIn.parse(input);
 
                         } catch (IOException e) {
                             Log.e(TAG, "Error reading downloaded zip file", e);
@@ -107,6 +108,22 @@ public class Synchroniser {
 
         List<DownloadFileTask> downloadList = new ArrayList<>();
 
+        /**
+         * The setup we want for the threading is as follows:
+         * | 1  | 2 - n-1  |   n   |
+         * | UI | Download | Parse |
+         * So we need to create a thread pool with 1 less thread than the maximum,
+         * to leave a free thread for parsing.
+         *
+         * We want to do this because the parsing subprocess is sequential (so has
+         * a maximum of 1 thread), but is also bottlenecked by the download process.
+         * We may as well start it as soon as possible (i.e. after the first file
+         * has downloaded), and it should run parallel to the downloads.
+         */
+        int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
+
+        ExecutorService downloadPool = Executors.newFixedThreadPool(NUMBER_OF_CORES - 1);
+
         for (String filename: nameList) {
 
             // Immediately add each file to the downloadList while they're
@@ -114,7 +131,7 @@ public class Synchroniser {
             // a list of these objects to be called up later.
 
             DownloadFileTask download = new DownloadFileTask();
-            download.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, filename);
+            download.executeOnExecutor(downloadPool, filename);
             downloadList.add(download);
 
         }
@@ -144,6 +161,7 @@ public class Synchroniser {
                         // callbacks one-by-one in the order that we wanted to.
 
                         File file = download.get();
+
                         listener.onFinished(file);
 
                     } catch (InterruptedException | ExecutionException e) {
@@ -153,6 +171,6 @@ public class Synchroniser {
 
                 return null;
             }
-        };
+        }.execute();
     }
 }

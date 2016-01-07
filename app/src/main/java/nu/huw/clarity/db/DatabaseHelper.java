@@ -16,7 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = DatabaseHelper.class.getSimpleName();
 
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "OmniFocus.db";
+    public static final String DATABASE_NAME = "OmniFocus";
 
     public static String SQL_CREATE_ATTACHMENTS;
     public static String SQL_CREATE_CONTEXTS;
@@ -90,6 +90,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQL_CREATE_TASKS += ",";
         }
         SQL_CREATE_TASKS = SQL_CREATE_TASKS.substring(0, SQL_CREATE_TASKS.length() - 1) + ")";
+
+        MainActivity.context.deleteDatabase(DATABASE_NAME);
     }
 
     @Override
