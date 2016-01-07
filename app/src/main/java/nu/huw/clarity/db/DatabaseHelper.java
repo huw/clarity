@@ -17,132 +17,93 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "OmniFocus.db";
 
-    public static final String SQL_CREATE_ATTACHMENTS =
-            "CREATE TABLE " + Attachments.TABLE_NAME + "(" +
-                Attachments.COLUMN_ID                           + " TEXT," +
-                Attachments.COLUMN_CONTAINING_TRANSACTION       + " TEXT," +
-                Attachments.COLUMN_DATE_ADDED                   + " TIMESTAMP," +
-                Attachments.COLUMN_DATE_MODIFIED                + " TIMESTAMP," +
-                Attachments.COLUMN_NAME                         + " TEXT," +
-                Attachments.COLUMN_TASK                         + " TEXT" +
-            ")";
-    public static final String SQL_CREATE_CONTEXTS =
-            "CREATE TABLE " + Contexts.TABLE_NAME + "(" +
-                Contexts.COLUMN_ID                              + " TEXT," +
-                Contexts.COLUMN_ACTIVE                          + " INTEGER," +
-                Contexts.COLUMN_ALTITUDE                        + " REAL," +
-                Contexts.COLUMN_DATE_ADDED                      + " TIMESTAMP," +
-                Contexts.COLUMN_DATE_MODIFIED                   + " TIMESTAMP," +
-                Contexts.COLUMN_DUE_SOON_COUNT                  + " INTEGER," +
-                Contexts.COLUMN_HAS_CHILDREN                    + " INTEGER," +
-                Contexts.COLUMN_LATITTUDE                       + " REAL," +
-                Contexts.COLUMN_LOCATION_NAME                   + " TEXT," +
-                Contexts.COLUMN_LONGITUDE                       + " REAL," +
-                Contexts.COLUMN_NAME                            + " TEXT," +
-                Contexts.COLUMN_ON_HOLD                         + " INTEGER," +
-                Contexts.COLUMN_OVERDUE_COUNT                   + " INTEGER," +
-                Contexts.COLUMN_PARENT                          + " TEXT," +
-                Contexts.COLUMN_RADIUS                          + " REAL," +
-                Contexts.COLUMN_RANK                            + " INTEGER," +
-                Contexts.COLUMN_REMAINING_COUNT                 + " INTEGER" +
-            " ) ";
-    public static final String SQL_CREATE_FOLDERS =
-            "CREATE TABLE " + Folders.TABLE_NAME + "(" +
-                Folders.COLUMN_ID                               + " TEXT," +
-                Folders.COLUMN_DATE_ADDED                       + " TIMESTAMP," +
-                Folders.COLUMN_DATE_MODIFIED                    + " TIMESTAMP," +
-                Folders.COLUMN_DUE_SOON_COUNT                   + " INTEGER," +
-                Folders.COLUMN_HAS_CHILDREN                     + " INTEGER," +
-                Folders.COLUMN_NAME                             + " TEXT," +
-                Folders.COLUMN_OVERDUE_COUNT                    + " INTEGER," +
-                Folders.COLUMN_PARENT                           + " TEXT," +
-                Folders.COLUMN_RANK                             + " INTEGER," +
-                Folders.COLUMN_REMAINING_COUNT                  + " INTEGER" +
-            ")";
-    public static final String SQL_CREATE_PERSPECTIVES =
-            "CREATE TABLE " + Perspectives.TABLE_NAME + "(" +
-                Perspectives.COLUMN_ID                          + " TEXT," +
-                Perspectives.COLUMN_DATE_ADDED                  + " TIMESTAMP," +
-                Perspectives.COLUMN_DATE_MODIFIED               + " TIMESTAMP," +
-                Perspectives.COLUMN_VALUE                       + " BLOB" +
-            ")";
-    public static final String SQL_CREATE_PROJECTS =
-            "CREATE TABLE " + Projects.TABLE_NAME + "(" +
-                Projects.COLUMN_ID                              + " TEXT," +
-                Projects.COLUMN_DEFER                           + " TIMESTAMP," +
-                Projects.COLUMN_DUE                             + " TIMESTAMP," +
-                Projects.COLUMN_DUE_SOON_COUNT                  + " INTEGER," +
-                Projects.COLUMN_FOLDER                          + " TEXT," +
-                Projects.COLUMN_LAST_REVIEW                     + " TIMESTAMP," +
-                Projects.COLUMN_NEXT_REVIEW                     + " TIMESTAMP," +
-                Projects.COLUMN_OVERDUE_COUNT                   + " INTEGER," +
-                Projects.COLUMN_REMAINING_COUNT                 + " INTEGER," +
-                Projects.COLUMN_REPEAT_REVIEW                   + " TEXT," +
-                Projects.COLUMN_SINGLE_ACTION                   + " INTEGER," +
-                Projects.COLUMN_STATUS                          + " TEXT," +
-                Projects.COLUMN_TASK                            + " TEXT," +
-                Projects.COLUMN_TASK_BLOCKED_BY_DEFER           + " INTEGER" +
-            ")";
-    public static final String SQL_CREATE_SETTINGS =
-            "CREATE TABLE " + Settings.TABLE_NAME + "(" +
-                Settings.COLUMN_ID                              + " TEXT," +
-                Settings.COLUMN_DATE_ADDED                      + " TIMESTAMP," +
-                Settings.COLUMN_DATE_MODIFIED                   + " TIMESTAMP," +
-                Settings.COLUMN_VALUE                           + " BLOB" +
-            ")";
-    public static final String SQL_CREATE_TASKS =
-            "CREATE TABLE " + Tasks.TABLE_NAME + "(" +
-                Tasks.COLUMN_ID                                 + " TEXT," +
-                Tasks.COLUMN_BLOCKED_BY_DEFER                   + " INTEGER," +
-                Tasks.COLUMN_COMPLETE_WITH_CHILDREN             + " INTEGER," +
-                Tasks.COLUMN_CONTAINING_PROJECT                 + " TEXT," +
-                Tasks.COLUMN_CONTEXT                            + " TEXT," +
-                Tasks.COLUMN_DATE_ADDED                         + " TIMESTAMP," +
-                Tasks.COLUMN_DATE_COMPLETED                     + " TIMESTAMP," +
-                Tasks.COLUMN_DATE_DUE                           + " TIMESTAMP," +
-                Tasks.COLUMN_DATE_MODIFIED                      + " TIMESTAMP," +
-                Tasks.COLUMN_DEFER                              + " TIMESTAMP," +
-                Tasks.COLUMN_ESTIMATED_TIME                     + " INTEGER," +
-                Tasks.COLUMN_FLAGGED                            + " INTEGER," +
-                Tasks.COLUMN_HAS_CHILDREN                       + " INTEGER," +
-                Tasks.COLUMN_INBOX                              + " INTEGER," +
-                Tasks.COLUMN_NAME                               + " TEXT," +
-                Tasks.COLUMN_NOTE_PLAINTEXT                     + " TEXT," +
-                Tasks.COLUMN_NOTE_XML                           + " BLOB," +
-                Tasks.COLUMN_PARENT                             + " TEXT," +
-                Tasks.COLUMN_PROJECT                            + " TEXT," +
-                Tasks.COLUMN_PROJECT_SINGLE_ACTION              + " INTEGER," +
-                Tasks.COLUMN_RANK                               + " INTEGER," +
-                Tasks.COLUMN_REPETITION_METHOD                  + " TEXT," +
-                Tasks.COLUMN_REPETITION_RULE                    + " TEXT," +
-                Tasks.COLUMN_SEQUENTIAL                         + " INTEGER" +
-            ")";
-
-    public static final String SQL_CREATE_ENTRIES =
-         // SQL_CREATE_ATTACHMENTS + ";" + (Not yet)
-            SQL_CREATE_CONTEXTS + ";" +
-            SQL_CREATE_FOLDERS + ";" +
-         // SQL_CREATE_PERSPECTIVES + ";" +
-            SQL_CREATE_PROJECTS + ";" +
-         // SQL_CREATE_SETTINGS + ";" +
-            SQL_CREATE_TASKS;
-
-    public static final String SQL_DROP_TABLES =
-            " DROP TABLE IF EXISTS" + Attachments.TABLE_NAME +
-            " DROP TABLE IF EXISTS" + Contexts.TABLE_NAME +
-            " DROP TABLE IF EXISTS" + Folders.TABLE_NAME +
-            " DROP TABLE IF EXISTS" + Perspectives.TABLE_NAME +
-            " DROP TABLE IF EXISTS" + Projects.TABLE_NAME +
-            " DROP TABLE IF EXISTS" + Settings.TABLE_NAME +
-            " DROP TABLE IF EXISTS" + Tasks.TABLE_NAME;
+    public static String SQL_CREATE_TABLES;
+    public static String SQL_DROP_TABLES;
 
     public DatabaseHelper() {
         super(MainActivity.context, DATABASE_NAME, null, DATABASE_VERSION);
+
+        /**
+         * For each table, generate a CREATE TABLE statement from the values
+         * we have in the table.keys field. At the end, remove the final comma
+         * with a call to substring, and move on.
+         */
+        String createAttachments = "CREATE TABLE " + Attachments.TABLE_NAME + "(";
+        for (SQLKeyValue keyValue: Attachments.keys) {
+            createAttachments += keyValue;
+            if (keyValue.name.equals("id")) { createAttachments += " PRIMARY KEY"; }
+            if (keyValue.val != null) { createAttachments += " DEFAULT " + keyValue.val; }
+            createAttachments += ",";
+        }
+        createAttachments = createAttachments.substring(0, createAttachments.length() - 1) + ")";
+
+        String createContexts = "CREATE TABLE " + Contexts.TABLE_NAME + "(";
+        for (SQLKeyValue keyValue: Contexts.keys) {
+            createContexts += keyValue;
+            if (keyValue.name.equals("id")) { createContexts += " PRIMARY KEY"; }
+            if (keyValue.val != null) { createContexts += " DEFAULT " + keyValue.val; }
+            createContexts += ",";
+        }
+        createContexts = createContexts.substring(0, createContexts.length() - 1) + ")";
+
+        String createFolders = "CREATE TABLE " + Folders.TABLE_NAME + "(";
+        for (SQLKeyValue keyValue: Folders.keys) {
+            createFolders += keyValue;
+            if (keyValue.name.equals("id")) { createFolders += " PRIMARY KEY"; }
+            if (keyValue.val != null) { createFolders += " DEFAULT " + keyValue.val; }
+            createFolders += ",";
+        }
+        createFolders = createFolders.substring(0, createFolders.length() - 1) + ")";
+
+        String createPerspectives = "CREATE TABLE " + Perspectives.TABLE_NAME + "(";
+        for (SQLKeyValue keyValue: Perspectives.keys) {
+            createPerspectives += keyValue;
+            if (keyValue.name.equals("id")) { createPerspectives += " PRIMARY KEY"; }
+            if (keyValue.val != null) { createPerspectives += " DEFAULT " + keyValue.val; }
+            createPerspectives += ",";
+        }
+        createPerspectives = createPerspectives.substring(0, createPerspectives.length() - 1) + ")";
+
+        String createSettings = "CREATE TABLE " + Settings.TABLE_NAME + "(";
+        for (SQLKeyValue keyValue: Settings.keys) {
+            createSettings += keyValue;
+            if (keyValue.name.equals("id")) { createSettings += " PRIMARY KEY"; }
+            if (keyValue.val != null) { createSettings += " DEFAULT " + keyValue.val; }
+            createSettings += ",";
+        }
+        createSettings = createSettings.substring(0, createSettings.length() - 1) + ")";
+
+        String createTasks = "CREATE TABLE " + Tasks.TABLE_NAME + "(";
+        for (SQLKeyValue keyValue: Tasks.keys) {
+            createTasks += keyValue;
+            if (keyValue.name.equals("id")) { createTasks += " PRIMARY KEY"; }
+            if (keyValue.val != null) { createTasks += " DEFAULT " + keyValue.val; }
+            createTasks += ",";
+        }
+        createTasks = createTasks.substring(0, createTasks.length() - 1) + ")";
+
+        SQL_CREATE_TABLES =
+                createAttachments + ";" +
+                createContexts + ";" +
+                createFolders + ";" +
+                createPerspectives + ";" +
+                createSettings + ";" +
+                createTasks;
+
+        SQL_DROP_TABLES =
+                "DROP TABLE IF EXISTS " + Attachments.TABLE_NAME + ";" +
+                "DROP TABLE IF EXISTS " + Contexts.TABLE_NAME + ";" +
+                "DROP TABLE IF EXISTS " + Folders.TABLE_NAME + ";" +
+                "DROP TABLE IF EXISTS " + Perspectives.TABLE_NAME + ";" +
+                "DROP TABLE IF EXISTS " + Settings.TABLE_NAME + ";" +
+                "DROP TABLE IF EXISTS " + Tasks.TABLE_NAME;
+
+        Log.d(TAG, SQL_CREATE_TABLES);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(SQL_CREATE_TABLES);
         Log.i(TAG, "Database successfully created");
     }
 
