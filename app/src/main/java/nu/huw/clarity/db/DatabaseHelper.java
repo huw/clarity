@@ -1,5 +1,6 @@
 package nu.huw.clarity.db;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -17,8 +18,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "OmniFocus.db";
 
-    public static String SQL_CREATE_TABLES;
-    public static String SQL_DROP_TABLES;
+    public static String SQL_CREATE_ATTACHMENTS;
+    public static String SQL_CREATE_CONTEXTS;
+    public static String SQL_CREATE_FOLDERS;
+    public static String SQL_CREATE_PERSPECTIVES;
+    public static String SQL_CREATE_SETTINGS;
+    public static String SQL_CREATE_TASKS;
 
     public DatabaseHelper() {
         super(MainActivity.context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -28,87 +33,84 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          * we have in the table.keys field. At the end, remove the final comma
          * with a call to substring, and move on.
          */
-        String createAttachments = "CREATE TABLE " + Attachments.TABLE_NAME + "(";
+        SQL_CREATE_ATTACHMENTS = "CREATE TABLE " + Attachments.TABLE_NAME + "(";
         for (SQLKeyValue keyValue: Attachments.keys) {
-            createAttachments += keyValue;
-            if (keyValue.name.equals("id")) { createAttachments += " PRIMARY KEY"; }
-            if (keyValue.val != null) { createAttachments += " DEFAULT " + keyValue.val; }
-            createAttachments += ",";
+            SQL_CREATE_ATTACHMENTS += keyValue;
+            if (keyValue.name.equals("id")) { SQL_CREATE_ATTACHMENTS += " PRIMARY KEY"; }
+            if (keyValue.val != null) { SQL_CREATE_ATTACHMENTS += " DEFAULT " + keyValue.val; }
+            SQL_CREATE_ATTACHMENTS += ",";
         }
-        createAttachments = createAttachments.substring(0, createAttachments.length() - 1) + ")";
+        SQL_CREATE_ATTACHMENTS = SQL_CREATE_ATTACHMENTS.substring(0,
+                SQL_CREATE_ATTACHMENTS.length() - 1) + ")";
 
-        String createContexts = "CREATE TABLE " + Contexts.TABLE_NAME + "(";
+        SQL_CREATE_CONTEXTS = "CREATE TABLE " + Contexts.TABLE_NAME + "(";
         for (SQLKeyValue keyValue: Contexts.keys) {
-            createContexts += keyValue;
-            if (keyValue.name.equals("id")) { createContexts += " PRIMARY KEY"; }
-            if (keyValue.val != null) { createContexts += " DEFAULT " + keyValue.val; }
-            createContexts += ",";
+            SQL_CREATE_CONTEXTS += keyValue;
+            if (keyValue.name.equals("id")) { SQL_CREATE_CONTEXTS += " PRIMARY KEY"; }
+            if (keyValue.val != null) { SQL_CREATE_CONTEXTS += " DEFAULT " + keyValue.val; }
+            SQL_CREATE_CONTEXTS += ",";
         }
-        createContexts = createContexts.substring(0, createContexts.length() - 1) + ")";
+        SQL_CREATE_CONTEXTS = SQL_CREATE_CONTEXTS.substring(0, 
+                SQL_CREATE_CONTEXTS.length() - 1) + ")";
 
-        String createFolders = "CREATE TABLE " + Folders.TABLE_NAME + "(";
+        SQL_CREATE_FOLDERS = "CREATE TABLE " + Folders.TABLE_NAME + "(";
         for (SQLKeyValue keyValue: Folders.keys) {
-            createFolders += keyValue;
-            if (keyValue.name.equals("id")) { createFolders += " PRIMARY KEY"; }
-            if (keyValue.val != null) { createFolders += " DEFAULT " + keyValue.val; }
-            createFolders += ",";
+            SQL_CREATE_FOLDERS += keyValue;
+            if (keyValue.name.equals("id")) { SQL_CREATE_FOLDERS += " PRIMARY KEY"; }
+            if (keyValue.val != null) { SQL_CREATE_FOLDERS += " DEFAULT " + keyValue.val; }
+            SQL_CREATE_FOLDERS += ",";
         }
-        createFolders = createFolders.substring(0, createFolders.length() - 1) + ")";
+        SQL_CREATE_FOLDERS = SQL_CREATE_FOLDERS.substring(0, SQL_CREATE_FOLDERS.length() - 1) + ")";
 
-        String createPerspectives = "CREATE TABLE " + Perspectives.TABLE_NAME + "(";
+        SQL_CREATE_PERSPECTIVES = "CREATE TABLE " + Perspectives.TABLE_NAME + "(";
         for (SQLKeyValue keyValue: Perspectives.keys) {
-            createPerspectives += keyValue;
-            if (keyValue.name.equals("id")) { createPerspectives += " PRIMARY KEY"; }
-            if (keyValue.val != null) { createPerspectives += " DEFAULT " + keyValue.val; }
-            createPerspectives += ",";
+            SQL_CREATE_PERSPECTIVES += keyValue;
+            if (keyValue.name.equals("id")) { SQL_CREATE_PERSPECTIVES += " PRIMARY KEY"; }
+            if (keyValue.val != null) { SQL_CREATE_PERSPECTIVES += " DEFAULT " + keyValue.val; }
+            SQL_CREATE_PERSPECTIVES += ",";
         }
-        createPerspectives = createPerspectives.substring(0, createPerspectives.length() - 1) + ")";
+        SQL_CREATE_PERSPECTIVES = SQL_CREATE_PERSPECTIVES.substring(0,
+                SQL_CREATE_PERSPECTIVES.length() - 1) + ")";
 
-        String createSettings = "CREATE TABLE " + Settings.TABLE_NAME + "(";
+        SQL_CREATE_SETTINGS = "CREATE TABLE " + Settings.TABLE_NAME + "(";
         for (SQLKeyValue keyValue: Settings.keys) {
-            createSettings += keyValue;
-            if (keyValue.name.equals("id")) { createSettings += " PRIMARY KEY"; }
-            if (keyValue.val != null) { createSettings += " DEFAULT " + keyValue.val; }
-            createSettings += ",";
+            SQL_CREATE_SETTINGS += keyValue;
+            if (keyValue.name.equals("id")) { SQL_CREATE_SETTINGS += " PRIMARY KEY"; }
+            if (keyValue.val != null) { SQL_CREATE_SETTINGS += " DEFAULT " + keyValue.val; }
+            SQL_CREATE_SETTINGS += ",";
         }
-        createSettings = createSettings.substring(0, createSettings.length() - 1) + ")";
+        SQL_CREATE_SETTINGS = SQL_CREATE_SETTINGS.substring(0,
+                SQL_CREATE_SETTINGS.length() - 1) + ")";
 
-        String createTasks = "CREATE TABLE " + Tasks.TABLE_NAME + "(";
+        SQL_CREATE_TASKS = "CREATE TABLE " + Tasks.TABLE_NAME + "(";
         for (SQLKeyValue keyValue: Tasks.keys) {
-            createTasks += keyValue;
-            if (keyValue.name.equals("id")) { createTasks += " PRIMARY KEY"; }
-            if (keyValue.val != null) { createTasks += " DEFAULT " + keyValue.val; }
-            createTasks += ",";
+            SQL_CREATE_TASKS += keyValue;
+            if (keyValue.name.equals("id")) { SQL_CREATE_TASKS += " PRIMARY KEY"; }
+            if (keyValue.val != null) { SQL_CREATE_TASKS += " DEFAULT " + keyValue.val; }
+            SQL_CREATE_TASKS += ",";
         }
-        createTasks = createTasks.substring(0, createTasks.length() - 1) + ")";
-
-        SQL_CREATE_TABLES =
-                createAttachments + ";" +
-                createContexts + ";" +
-                createFolders + ";" +
-                createPerspectives + ";" +
-                createSettings + ";" +
-                createTasks;
-
-        SQL_DROP_TABLES =
-                "DROP TABLE IF EXISTS " + Attachments.TABLE_NAME + ";" +
-                "DROP TABLE IF EXISTS " + Contexts.TABLE_NAME + ";" +
-                "DROP TABLE IF EXISTS " + Folders.TABLE_NAME + ";" +
-                "DROP TABLE IF EXISTS " + Perspectives.TABLE_NAME + ";" +
-                "DROP TABLE IF EXISTS " + Settings.TABLE_NAME + ";" +
-                "DROP TABLE IF EXISTS " + Tasks.TABLE_NAME;
-
-        Log.d(TAG, SQL_CREATE_TABLES);
+        SQL_CREATE_TASKS = SQL_CREATE_TASKS.substring(0, SQL_CREATE_TASKS.length() - 1) + ")";
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_TABLES);
+        db.execSQL(SQL_CREATE_ATTACHMENTS);
+        db.execSQL(SQL_CREATE_CONTEXTS);
+        db.execSQL(SQL_CREATE_FOLDERS);
+        db.execSQL(SQL_CREATE_PERSPECTIVES);
+        db.execSQL(SQL_CREATE_SETTINGS);
+        db.execSQL(SQL_CREATE_TASKS);
         Log.i(TAG, "Database successfully created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DROP_TABLES);
+        db.execSQL("DROP TABLE IF EXISTS " + Attachments.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Contexts.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Folders.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Perspectives.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Settings.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Tasks.TABLE_NAME);
+        onCreate(db);
     }
 }
