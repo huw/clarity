@@ -75,12 +75,13 @@ class DatabaseContract {
     public static abstract class Attachments extends Base {
         public static final String TABLE_NAME = "Attachments";
         public static final SQLKeyValue COLUMN_NAME = new SQLKeyValue("name");
+        public static final SQLKeyValue COLUMN_PARENT_ID = new SQLKeyValue("parentID");
         public static final SQLKeyValue COLUMN_PATH = new SQLKeyValue("path");                                            // The local path which contains the file
         public static final SQLKeyValue COLUMN_PNG_PREVIEW = new SQLKeyValue("previewPNGData");
-        public static final SQLKeyValue COLUMN_TASK = new SQLKeyValue("task");
 
         public static final SQLKeyValue[] keys = {COLUMN_ID, COLUMN_DATE_ADDED,
-                COLUMN_DATE_MODIFIED, COLUMN_NAME, COLUMN_PATH, COLUMN_PNG_PREVIEW, COLUMN_TASK};
+                COLUMN_DATE_MODIFIED, COLUMN_NAME, COLUMN_PATH, COLUMN_PARENT_ID,
+                COLUMN_PNG_PREVIEW};
     }
 
     public static abstract class Contexts extends Entry {
@@ -144,7 +145,7 @@ class DatabaseContract {
         public static final SQLKeyValue COLUMN_PROJECT_LAST_REVIEW = new SQLKeyValue("projectReviewDateLast");
         public static final SQLKeyValue COLUMN_PROJECT_NEXT_REVIEW = new SQLKeyValue("projectReviewDateNext");
         public static final SQLKeyValue COLUMN_PROJECT_REPEAT_REVIEW = new SQLKeyValue("projectReviewInterval");
-        public static final SQLKeyValue COLUMN_PROJECT_STATUS = new SQLKeyValue("projectStatus", "0");
+        public static final SQLKeyValue COLUMN_PROJECT_STATUS = new SQLKeyValue("projectStatus", "active");
         public static final SQLKeyValue COLUMN_REPETITION_METHOD = new SQLKeyValue("repetitionMethod");
         public static final SQLKeyValue COLUMN_REPETITION_RULE = new SQLKeyValue("repetitionRule");
         public static final SQLKeyValue COLUMN_TYPE = new SQLKeyValue("type", "sequential");                              // sequential, parallel or single action

@@ -29,6 +29,8 @@ public class ParseSyncIn {
 
     public static void parse(InputStream input) {
 
+        Log.v(TAG, "New file encountered");
+
         try {
 
             XmlPullParser parser = Xml.newPullParser();
@@ -98,9 +100,9 @@ public class ParseSyncIn {
         ContentValues values = new ContentValues();
 
         String id = parser.getAttributeValue(null, "id");
+        String operation = parser.getAttributeValue(null, "op");
 
         if (id != null) {
-            values.put(Base.COLUMN_ID.name, id);
 
             try {
 
@@ -114,7 +116,7 @@ public class ParseSyncIn {
                     if (next == XmlPullParser.START_TAG) {
                         depth++;
 
-                        parseTag(parser, values);
+                        parseTag(parser, values, tableName);
 
                     } else if (next == XmlPullParser.END_TAG) {
                         depth--;
@@ -125,24 +127,74 @@ public class ParseSyncIn {
             }
         }
 
-        if (values.size() != 0) {
-            db.insert(tableName, null, values);
-        }
+        if (operation == null) {
 
-        Log.v(TAG, values.getAsString("id") + " parsed to " + tableName);
+            // This statement needs to be contained inside the first,
+            // otherwise it may fall through to the else if statement,
+            // which will return a NullPointerException.
+
+            if (values.size() != 0) {
+
+                // null means insert
+                values.put(Base.COLUMN_ID.name, id);
+                db.insert(tableName, null, values);
+
+                Log.v(TAG, id + " added to " + tableName);
+
+            }
+
+        } else if (operation.equals("update") && values.size() != 0) {
+
+            // The 'selection' parameter determines which rows to add the values
+            // to. It creates a 'SELECT' statement, and adds a 'WHERE' before our
+            // addition. Then it replaces all '?'s with your arguments in the
+            // order that they appear.
+
+            String selection = Base.COLUMN_ID.name + "=?";
+            String[] selectionArgs = { id };
+            db.update(tableName, values, selection, selectionArgs);
+
+            Log.v(TAG, id + " updated in " + tableName);
+
+        } else if (operation.equals("delete")) {
+
+            String selection = Base.COLUMN_ID.name + "=?";
+            String[] selectionArgs = { id };
+            db.delete(tableName, selection, selectionArgs);
+
+            Log.v(TAG, id + " deleted from " + tableName);
+
+        }
     }
 
     /**
      * Given a parser object, parses the current XML tag appropriately,
      * and adds the result to the passed ContentValues.
      */
-    private static void parseTag(XmlPullParser parser, ContentValues values)
+    private static void parseTag(XmlPullParser parser, ContentValues values, String table)
             throws IOException, XmlPullParserException {
 
         String name = "";
         String value = "";
 
         switch (parser.getName()) {
+
+            /**
+             * Parents
+             */
+            case "context":
+                if (table.equals(Tasks.TABLE_NAME)) {
+                    name = Tasks.COLUMN_CONTEXT.name;
+                    value = parser.getAttributeValue(null, "idref");
+                    break;
+                }
+                // else, fall through to adding a parent ID
+
+            case "folder":
+            case "task":
+                name = Entry.COLUMN_PARENT_ID.name;
+                value = parser.getAttributeValue(null, "idref");
+                break;
 
             /**
              * Base
@@ -187,6 +239,7 @@ public class ParseSyncIn {
                 parser.next();
                 name = Attachments.COLUMN_PNG_PREVIEW.name;
                 value = parser.getText();
+                break;
 
             /**
              * Context
@@ -209,7 +262,7 @@ public class ParseSyncIn {
             case "prohibits-next-action":
                 parser.next();
                 name = Contexts.COLUMN_ON_HOLD.name;
-                value = parser.getText();
+                value = String.valueOf(5 - parser.getText().length()); // I'm so sorry
                 break;
 
             /**
@@ -220,18 +273,27 @@ public class ParseSyncIn {
                 break;
 
             /**
-             * Tasks/Projects
+             * Tasks
              */
             case "order":
-                parser.next();
-                name = Tasks.COLUMN_TYPE.name;
-                value = parser.getText();
+
+                // The task type is a tricky one, because it can be either 'sequential',
+                // 'parallel' or 'single action', but 'single action' is only applicable
+                // to projects and comes from a different tag (see "singleton" below).
+                // As the "singleton" tag will always come first, we can test to see if
+                // we've already added the 'type' column, and only proceed if we haven't.
+
+                if (!values.containsKey(Tasks.COLUMN_TYPE.name)) {
+                    parser.next();
+                    name = Tasks.COLUMN_TYPE.name;
+                    value = parser.getText();
+                }
                 break;
 
             case "completed-by-children":
                 parser.next();
                 name = Tasks.COLUMN_COMPLETE_WITH_CHILDREN.name;
-                value = String.valueOf(5 - parser.getText().length()); // I'm so sorry
+                value = parser.getText().equals("true") ? "1" : "0";
                 break;
 
             case "start":
@@ -274,12 +336,55 @@ public class ParseSyncIn {
                 break;
 
             case "repetition-rule":
+                parser.next();
                 name = Tasks.COLUMN_REPETITION_RULE.name;
                 value = parser.getText();
                 break;
 
             case "repetition-method":
+                parser.next();
                 name = Tasks.COLUMN_REPETITION_METHOD.name;
+                value = parser.getText();
+                break;
+
+            /**
+             * Projects
+             */
+
+            case "project":
+                name = Tasks.COLUMN_PROJECT.name;
+                value = "1";
+                break;
+
+            case "singleton":
+                parser.next();
+                if (parser.getText().equals("true")) {
+                    name = Tasks.COLUMN_TYPE.name;
+                    value = "single action";
+                }
+                break;
+
+            case "last-review":
+                parser.next();
+                name = Tasks.COLUMN_PROJECT_LAST_REVIEW.name;
+                value = convertToMilliseconds(parser.getText());
+                break;
+
+            case "next-review":
+                parser.next();
+                name = Tasks.COLUMN_PROJECT_NEXT_REVIEW.name;
+                value = convertToMilliseconds(parser.getText());
+                break;
+
+            case "review-interval":
+                parser.next();
+                name = Tasks.COLUMN_PROJECT_REPEAT_REVIEW.name;
+                value = parser.getText();
+                break;
+
+            case "status":
+                parser.next();
+                name = Tasks.COLUMN_PROJECT_STATUS.name;
                 value = parser.getText();
                 break;
         }
