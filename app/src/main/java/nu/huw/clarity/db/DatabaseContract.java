@@ -136,7 +136,7 @@ class DatabaseContract {
         public static final SQLKeyValue COLUMN_DUE_SOON = new SQLKeyValue("isDueSoon", "0");
         public static final SQLKeyValue COLUMN_ESTIMATED_TIME = new SQLKeyValue("estimatedInMinutes");                    // Always a number
         public static final SQLKeyValue COLUMN_FLAGGED = new SQLKeyValue("flagged", "0");
-        public static final SQLKeyValue COLUMN_FLAGGED_EFFECTIVE = new SQLKeyValue("flaggedEffective");                   // Effectively flagged because a parent is flagged
+        public static final SQLKeyValue COLUMN_FLAGGED_EFFECTIVE = new SQLKeyValue("flaggedEffective", "0");              // Effectively flagged because a parent is flagged
         public static final SQLKeyValue COLUMN_INBOX = new SQLKeyValue("inInbox", "0");
         public static final SQLKeyValue COLUMN_NOTE_PLAINTEXT = new SQLKeyValue("notePlaintext");                         // Note in plaintext
         public static final SQLKeyValue COLUMN_NOTE_XML = new SQLKeyValue("noteXML");                                     // Note in weird Omni XML format
