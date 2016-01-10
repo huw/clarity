@@ -1,5 +1,6 @@
 package nu.huw.clarity.db;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -114,5 +115,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + Settings.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Tasks.TABLE_NAME);
         onCreate(db);
+    }
+
+    public void insert(String tableName, String rowID, ContentValues values) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        if (values.size() != 0) {
+
+            // null means insert
+            values.put(Base.COLUMN_ID.name, rowID);
+            db.insert(tableName, null, values);
+
+            Log.v(TAG, rowID + " added to " + tableName);
+        }
+    }
+
+    public void update(String tableName, String rowID, ContentValues values) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        if (values.size() != 0) {
+
+            // The 'selection' parameter determines which rows to add the values
+            // to. It creates a 'SELECT' statement, and adds a 'WHERE' before our
+            // addition. Then it replaces all '?'s with your arguments in the
+            // order that they appear.
+
+            String selection = Base.COLUMN_ID.name + "=?";
+            String[] selectionArgs = {rowID};
+            db.update(tableName, values, selection, selectionArgs);
+
+            Log.v(TAG, rowID + " updated in " + tableName);
+        }
+    }
+
+    public void delete(String tableName, String rowID) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selection = Base.COLUMN_ID.name + "=?";
+        String[] selectionArgs = { rowID };
+        db.delete(tableName, selection, selectionArgs);
+
+        Log.v(TAG, rowID + " deleted from " + tableName);
     }
 }

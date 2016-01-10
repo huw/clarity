@@ -1,6 +1,7 @@
 package nu.huw.clarity.db;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.util.Xml;
@@ -94,13 +95,15 @@ public class ParseSyncIn {
 
     private static void parseEntry(String tableName, XmlPullParser parser) {
 
-        SQLiteDatabase db = mDBHelper.getWritableDatabase();
-
         // Create a map of values to add in the new line
         ContentValues values = new ContentValues();
 
         String id = parser.getAttributeValue(null, "id");
-        String operation = parser.getAttributeValue(null, "op");
+        String operation = "";
+
+        if (parser.getAttributeValue(null, "op") != null) {
+            operation = parser.getAttributeValue(null, "op");
+        }
 
         if (id != null) {
 
@@ -127,43 +130,44 @@ public class ParseSyncIn {
             }
         }
 
-        if (operation == null) {
+        switch (operation) {
+            case "reference":
 
-            // This statement needs to be contained inside the first,
-            // otherwise it may fall through to the else if statement,
-            // which will return a NullPointerException.
+                SQLiteDatabase db = mDBHelper.getReadableDatabase();
 
-            if (values.size() != 0) {
+                String[] columns = { Base.COLUMN_ID.name };
+                String selection = Base.COLUMN_ID.name + "=?";
+                String[] selectionArgs = { id };
 
-                // null means insert
-                values.put(Base.COLUMN_ID.name, id);
-                db.insert(tableName, null, values);
+                Cursor cursor = db.query(
+                        tableName,
+                        columns,
+                        selection,
+                        selectionArgs,
+                        null, null, null
+                );
 
-                Log.v(TAG, id + " added to " + tableName);
+                // If there are rows where the 'id' attribute is equal to the
+                // id being referenced, then we haven't accidentally lost them,
+                // so we can just continue.
+                //
+                // Otherwise, we've lost these rows for some reason, and we
+                // need to get them back. So just fall through to the 'insert'
+                // statement.
 
-            }
+                if (cursor.getCount() > 0) {
+                    break;
+                }
 
-        } else if (operation.equals("update") && values.size() != 0) {
-
-            // The 'selection' parameter determines which rows to add the values
-            // to. It creates a 'SELECT' statement, and adds a 'WHERE' before our
-            // addition. Then it replaces all '?'s with your arguments in the
-            // order that they appear.
-
-            String selection = Base.COLUMN_ID.name + "=?";
-            String[] selectionArgs = { id };
-            db.update(tableName, values, selection, selectionArgs);
-
-            Log.v(TAG, id + " updated in " + tableName);
-
-        } else if (operation.equals("delete")) {
-
-            String selection = Base.COLUMN_ID.name + "=?";
-            String[] selectionArgs = { id };
-            db.delete(tableName, selection, selectionArgs);
-
-            Log.v(TAG, id + " deleted from " + tableName);
-
+            case "":
+                mDBHelper.insert(tableName, id, values);
+                break;
+            case "update":
+                mDBHelper.update(tableName, id, values);
+                break;
+            case "delete":
+                mDBHelper.delete(tableName, id);
+                break;
         }
     }
 
