@@ -2,12 +2,13 @@ package nu.huw.clarity.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountHelper;
-import nu.huw.clarity.sync.Synchroniser;
+import nu.huw.clarity.db.DatabaseHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,8 +39,14 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
 
         } else {
-
-            Synchroniser.synchronise();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    DatabaseHelper dbHelper = new DatabaseHelper();
+                    dbHelper.updateTree();
+                    return null;
+                }
+            }.execute();
         }
     }
 }

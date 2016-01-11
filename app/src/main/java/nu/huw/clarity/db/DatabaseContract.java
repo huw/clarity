@@ -124,8 +124,8 @@ class DatabaseContract {
 
     public static abstract class Tasks extends Entry {
         public static final String TABLE_NAME = "Tasks";
-        public static final SQLKeyValue COLUMN_BLOCKED = new SQLKeyValue("blocked", "0");
-        public static final SQLKeyValue COLUMN_BLOCKED_BY_DEFER = new SQLKeyValue("blockedByDefer", "0");
+        public static final SQLKeyValue COLUMN_BLOCKED = new SQLKeyValue("blocked", "0");                                 // Is this in a sequential project and are there things in front of it?
+        public static final SQLKeyValue COLUMN_BLOCKED_BY_DEFER = new SQLKeyValue("blockedByDefer", "0");                 // Will always set 'blocked' to true
         public static final SQLKeyValue COLUMN_COMPLETE_WITH_CHILDREN = new SQLKeyValue("completeWithChildren", "0");
         public static final SQLKeyValue COLUMN_CONTEXT = new SQLKeyValue("context");
         public static final SQLKeyValue COLUMN_DATE_COMPLETED = new SQLKeyValue("dateCompleted");
@@ -151,16 +151,16 @@ class DatabaseContract {
         public static final SQLKeyValue COLUMN_TYPE = new SQLKeyValue("type", "sequential");                              // sequential, parallel or single action
 
         public static final SQLKeyValue[] keys = {COLUMN_ID, COLUMN_DATE_ADDED,
-                COLUMN_DATE_MODIFIED, COLUMN_ACTIVE, COLUMN_ACTIVE_EFFECTIVE,
-                COLUMN_COUNT_AVAILABLE, COLUMN_COUNT_CHILDREN, COLUMN_COUNT_COMPLETED,
-                COLUMN_COUNT_DUE_SOON, COLUMN_COUNT_OVERDUE, COLUMN_COUNT_REMAINING,
-                COLUMN_HAS_CHILDREN, COLUMN_NAME, COLUMN_PARENT_ID, COLUMN_RANK, COLUMN_BLOCKED,
-                COLUMN_BLOCKED_BY_DEFER, COLUMN_COMPLETE_WITH_CHILDREN, COLUMN_CONTEXT,
-                COLUMN_DATE_COMPLETED, COLUMN_DATE_DEFER, COLUMN_DATE_DEFER_EFFECTIVE,
-                COLUMN_DATE_DUE, COLUMN_DATE_DUE_EFFECTIVE, COLUMN_DUE_SOON, COLUMN_ESTIMATED_TIME,
-                COLUMN_FLAGGED, COLUMN_FLAGGED_EFFECTIVE, COLUMN_INBOX, COLUMN_NOTE_PLAINTEXT,
-                COLUMN_NOTE_XML, COLUMN_OVERDUE, COLUMN_PROJECT, COLUMN_PROJECT_LAST_REVIEW,
-                COLUMN_PROJECT_NEXT_REVIEW, COLUMN_PROJECT_REPEAT_REVIEW, COLUMN_PROJECT_STATUS,
-                COLUMN_REPETITION_METHOD, COLUMN_REPETITION_RULE, COLUMN_TYPE};
+                COLUMN_DATE_MODIFIED, COLUMN_COUNT_AVAILABLE, COLUMN_COUNT_CHILDREN,
+                COLUMN_COUNT_COMPLETED, COLUMN_COUNT_DUE_SOON, COLUMN_COUNT_OVERDUE,
+                COLUMN_COUNT_REMAINING, COLUMN_HAS_CHILDREN, COLUMN_NAME, COLUMN_PARENT_ID,
+                COLUMN_RANK, COLUMN_BLOCKED, COLUMN_BLOCKED_BY_DEFER, COLUMN_COMPLETE_WITH_CHILDREN,
+                COLUMN_CONTEXT, COLUMN_DATE_COMPLETED, COLUMN_DATE_DEFER,
+                COLUMN_DATE_DEFER_EFFECTIVE, COLUMN_DATE_DUE, COLUMN_DATE_DUE_EFFECTIVE,
+                COLUMN_DUE_SOON, COLUMN_ESTIMATED_TIME, COLUMN_FLAGGED, COLUMN_FLAGGED_EFFECTIVE,
+                COLUMN_INBOX, COLUMN_NOTE_PLAINTEXT, COLUMN_NOTE_XML, COLUMN_OVERDUE,
+                COLUMN_PROJECT, COLUMN_PROJECT_LAST_REVIEW, COLUMN_PROJECT_NEXT_REVIEW,
+                COLUMN_PROJECT_REPEAT_REVIEW, COLUMN_PROJECT_STATUS, COLUMN_REPETITION_METHOD,
+                COLUMN_REPETITION_RULE, COLUMN_TYPE};
     }
 }

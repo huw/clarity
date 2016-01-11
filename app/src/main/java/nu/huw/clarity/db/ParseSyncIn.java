@@ -156,8 +156,13 @@ public class ParseSyncIn {
                 // statement.
 
                 if (cursor.getCount() > 0) {
+                    cursor.close();
+                    db.close();
                     break;
                 }
+
+                cursor.close();
+                db.close();
 
             case "":
                 mDBHelper.insert(tableName, id, values);

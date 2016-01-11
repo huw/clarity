@@ -1,10 +1,12 @@
 package nu.huw.clarity.db;
 
 import android.content.ContentValues;
-import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import java.util.Date;
 
 import nu.huw.clarity.activity.MainActivity;
 import nu.huw.clarity.db.DatabaseContract.*;
@@ -91,8 +93,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQL_CREATE_TASKS += ",";
         }
         SQL_CREATE_TASKS = SQL_CREATE_TASKS.substring(0, SQL_CREATE_TASKS.length() - 1) + ")";
-
-        MainActivity.context.deleteDatabase(DATABASE_NAME);
     }
 
     @Override
@@ -117,6 +117,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    /**
+     * Given important data, insert a new row into the database with
+     * the given rowID. The values should have keys that correspond
+     * to columns in the database, and appropriate values, but this
+     * isn't validated because that would be wasteful. However, we
+     * check to see if there are any values to be added first.
+     */
     public void insert(String tableName, String rowID, ContentValues values) {
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -129,8 +136,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             Log.v(TAG, rowID + " added to " + tableName);
         }
+
+        db.close();
     }
 
+    /**
+     * Update the database
+     */
     public void update(String tableName, String rowID, ContentValues values) {
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -148,8 +160,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             Log.v(TAG, rowID + " updated in " + tableName);
         }
+
+        db.close();
     }
 
+    /**
+     * Delete the entry with the given ID. No need for any ContentValues.
+     */
     public void delete(String tableName, String rowID) {
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -159,5 +176,208 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(tableName, selection, selectionArgs);
 
         Log.v(TAG, rowID + " deleted from " + tableName);
+
+        db.close();
+    }
+
+    /**
+     * Just a nice shorthand for getting strings from the database cursor,
+     * but also with some bonus null checking.
+     */
+    public String getString(Cursor cursor, String columnName) {
+        int index = cursor.getColumnIndex(columnName);
+        if (index != -1 && cursor.getColumnCount() != 0) {
+            return cursor.getString(index);
+        }
+        return null;
+    }
+
+    /**
+     * Shorthands for querying without the stuff with the normal methods want.
+     */
+    public Cursor query(SQLiteDatabase db, String tableName, String[] columns, String selection) {
+        return db.query(tableName, columns, selection, null, null, null, null);
+    }
+
+    public Cursor query(SQLiteDatabase db, String tableName, String[] columns, String selection,
+                        String[] selectionArgs) {
+        return db.query(tableName, columns, selection, selectionArgs, null, null, null);
+    }
+
+    /**
+     * Build the tree into the database, and any other cell data that is
+     * built after a sync instead of handed down with the rest of the data.
+     *
+     * Order of operations:
+     *  1. Recursively move down the tree from each project, updating
+     *     children with defer/due dates and flags in 'dateDueEffective'
+     *     and the like.
+     *     1.1 Run through each child, and calculate its due soon/overdue
+     *         columns using the new data.
+     *  3. Each child then updates its parent's and context's counts for
+     *     everything but the 'available' column. Also updates the
+     *     'nextTask' column by comparing ranks.
+     *  4. Each child determines if it's blocked by checking its parent's
+     *     'nextTask' column.
+     *  5. Each child updates its parent's and context's 'available' column.
+     */
+    public void updateTree() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        /**
+         * Step 1: Recursively update children of projects
+         */
+        Cursor projects = query(
+                db,
+                Tasks.TABLE_NAME,
+                new String[] {
+                        Tasks.COLUMN_ID.name,
+                        Tasks.COLUMN_DATE_DEFER.name,
+                        Tasks.COLUMN_DATE_DUE.name,
+                        Tasks.COLUMN_FLAGGED.name
+                },
+                Tasks.COLUMN_PROJECT.name + "='1'"
+        );
+
+        // The Cursor object is used to lazy-load SQLite databases, which
+        // is important when we're dealing with lots and lots of data (not
+        // so much applicable in this case, but you never know).
+        //
+        // Basically, it's been designed so that its positioning functions
+        // (moveToNext, moveToFirst, etc) return booleans for whether they
+        // were successful or not. Here, we call `moveToNext()`, and if it
+        // returns `true`, then this task has a child we can iterate over.
+        //
+        // On this first call to `updateChildren()`, we set off the huge
+        // recursive update. See the method itself for more details.
+
+        while (projects.moveToNext()) {
+
+            String id = getString(projects, Tasks.COLUMN_ID.name);
+            String deferDate = getString(projects, Tasks.COLUMN_DATE_DEFER.name);
+            String dueDate = getString(projects, Tasks.COLUMN_DATE_DUE.name);
+            String flagged = getString(projects, Tasks.COLUMN_FLAGGED.name);
+
+            updateChildren(db, id, deferDate, dueDate, flagged);
+        }
+
+        Log.i(TAG, "Effective defer dates, due dates, flags, due soons and overdues updated");
+
+        projects.close();
+        db.close();
+    }
+
+    /**
+     * Given a database and some other info, find the task's children (if any),
+     * and update them with their parent's dateDue and dateDefer. We iterate
+     * over any element which lists the task's ID as its parent, and fill in
+     * the parent's data in their 'effective' fields.
+     *
+     * Once this is done, we check to see if the child has any of the same info
+     * to pass down to its descendants. If there are any, we update the row.
+     *
+     * Then, finally, we recursively call the function again on each of these
+     * children, until we've eventually descended the tree.
+     */
+    private void updateChildren(SQLiteDatabase db, String id, String dateDefer, String dateDue,
+                                String flagged) {
+
+        Cursor children = query(
+                db,
+                Tasks.TABLE_NAME,
+                new String[]{
+                        Tasks.COLUMN_ID.name,
+                        Tasks.COLUMN_DATE_DEFER.name,
+                        Tasks.COLUMN_DATE_DUE.name,
+                        Tasks.COLUMN_FLAGGED.name
+                },
+                Tasks.COLUMN_PARENT_ID.name + "=?",
+                new String[]{ id }
+        );
+
+        while (children.moveToNext()) {
+
+            String childID = getString(children, Tasks.COLUMN_ID.name);
+            String childDateDefer = getString(children, Tasks.COLUMN_DATE_DEFER.name);
+            String childDateDue = getString(children, Tasks.COLUMN_DATE_DUE.name);
+            String childFlagged = getString(children, Tasks.COLUMN_FLAGGED.name);
+
+            ContentValues values = new ContentValues();
+
+            values.put(Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name, dateDefer);
+            values.put(Tasks.COLUMN_FLAGGED_EFFECTIVE.name, flagged);
+            values.put(Tasks.COLUMN_DATE_DUE_EFFECTIVE.name, dateDue);
+
+            if (values.size() > 0) {
+                db.update(
+                        Tasks.TABLE_NAME,
+                        values,
+                        Tasks.COLUMN_ID.name + "=?",
+                        new String[]{childID}
+                );
+            }
+
+            if (childDateDefer != null) { dateDefer = childDateDefer; }
+            if (childDateDue != null) { dateDue = childDateDue; }
+            if (childFlagged.equals("1")) { flagged = childFlagged; }
+
+            updateChildren(db, childID, dateDefer, dateDue, flagged);
+        }
+
+        children.close();
+
+        /**
+         * Step 1.5: Overdue/due soon
+         */
+        Cursor dueDates = query(
+                db,
+                Tasks.TABLE_NAME,
+                new String[] {
+                        Tasks.COLUMN_DATE_DUE.name,
+                        Tasks.COLUMN_DATE_DUE_EFFECTIVE.name
+                },
+                Tasks.COLUMN_ID.name + "=?",
+                new String[] { id }
+        );
+
+        dueDates.moveToNext();
+
+        String normalDate = getString(dueDates, Tasks.COLUMN_DATE_DUE.name);
+        String effectiveDate = getString(dueDates, Tasks.COLUMN_DATE_DUE_EFFECTIVE.name);
+
+        if (normalDate != null || effectiveDate != null) {
+            Date dueDate = new Date();
+            Date today = new Date();
+            ContentValues values = new ContentValues();
+
+            // If we don't have a normal due date, then we default back on the
+            // effective due date. That one becomes the one to compare with the
+            // the current date to determine Due Soon and Overdue. Look up the
+            // ternary operator if this is confusing.
+
+            dueDate.setTime(Long.valueOf(normalDate == null ? effectiveDate : normalDate));
+
+            if (today.after(dueDate)) {
+                values.put(Tasks.COLUMN_OVERDUE.name, true);
+            } else {
+
+                // Add two days to the current time, and if the due date is now
+                // before that, AND not overdue, then it's due soon, right?
+
+                long ONE_DAY = 86400000;
+                today.setTime(today.getTime() + (ONE_DAY * 2)); // TODO: Read in from settings class
+
+                values.put(Tasks.COLUMN_DUE_SOON.name, today.after(dueDate));
+
+            }
+
+            db.update(
+                    Tasks.TABLE_NAME,
+                    values,
+                    Tasks.COLUMN_ID.name + "=?",
+                    new String[]{id}
+            );
+        }
     }
 }

@@ -19,6 +19,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import nu.huw.clarity.account.AccountHelper;
+import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.db.ParseSyncIn;
 
 /**
@@ -170,6 +171,14 @@ public class Synchroniser {
                 }
 
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                super.onPostExecute(result);
+
+                DatabaseHelper dbHelper = new DatabaseHelper();
+                dbHelper.updateTree();
             }
         }.execute();
     }
