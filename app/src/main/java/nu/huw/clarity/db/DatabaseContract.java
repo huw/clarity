@@ -138,6 +138,7 @@ class DatabaseContract {
         public static final SQLKeyValue COLUMN_FLAGGED = new SQLKeyValue("flagged", "0");
         public static final SQLKeyValue COLUMN_FLAGGED_EFFECTIVE = new SQLKeyValue("flaggedEffective", "0");              // Effectively flagged because a parent is flagged
         public static final SQLKeyValue COLUMN_INBOX = new SQLKeyValue("inInbox", "0");
+        public static final SQLKeyValue COLUMN_NEXT = new SQLKeyValue("nextTask");                                        // The first available child of this task/project
         public static final SQLKeyValue COLUMN_NOTE_PLAINTEXT = new SQLKeyValue("notePlaintext");                         // Note in plaintext
         public static final SQLKeyValue COLUMN_NOTE_XML = new SQLKeyValue("noteXML");                                     // Note in weird Omni XML format
         public static final SQLKeyValue COLUMN_OVERDUE = new SQLKeyValue("isOverdue", "0");
@@ -158,7 +159,7 @@ class DatabaseContract {
                 COLUMN_CONTEXT, COLUMN_DATE_COMPLETED, COLUMN_DATE_DEFER,
                 COLUMN_DATE_DEFER_EFFECTIVE, COLUMN_DATE_DUE, COLUMN_DATE_DUE_EFFECTIVE,
                 COLUMN_DUE_SOON, COLUMN_ESTIMATED_TIME, COLUMN_FLAGGED, COLUMN_FLAGGED_EFFECTIVE,
-                COLUMN_INBOX, COLUMN_NOTE_PLAINTEXT, COLUMN_NOTE_XML, COLUMN_OVERDUE,
+                COLUMN_INBOX, COLUMN_NEXT, COLUMN_NOTE_PLAINTEXT, COLUMN_NOTE_XML, COLUMN_OVERDUE,
                 COLUMN_PROJECT, COLUMN_PROJECT_LAST_REVIEW, COLUMN_PROJECT_NEXT_REVIEW,
                 COLUMN_PROJECT_REPEAT_REVIEW, COLUMN_PROJECT_STATUS, COLUMN_REPETITION_METHOD,
                 COLUMN_REPETITION_RULE, COLUMN_TYPE};

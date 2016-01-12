@@ -214,12 +214,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      *     and the like.
      *     1.1 Run through each child, and calculate its due soon/overdue
      *         columns using the new data.
-     *  3. Each child then updates its parent's and context's counts for
-     *     everything but the 'available' column. Also updates the
-     *     'nextTask' column by comparing ranks.
-     *  4. Each child determines if it's blocked by checking its parent's
+     *  2. Each parent gets the number of children for each count.
+     *  3. Each child determines if it's blocked by checking its parent's
      *     'nextTask' column.
-     *  5. Each child updates its parent's and context's 'available' column.
+     *  4. Each child updates its parent's and context's 'available' column.
      */
     public void updateTree() {
 
@@ -262,9 +260,101 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             updateChildren(db, id, deferDate, dueDate, flagged);
         }
 
+        projects.close();
         Log.i(TAG, "Effective defer dates, due dates, flags, due soons and overdues updated");
 
-        projects.close();
+        /**
+         * Step 2: Update counts on parents
+         */
+
+        Cursor allParents = query(
+                db,
+                Tasks.TABLE_NAME,
+                new String[] {
+                        Tasks.COLUMN_ID.name
+                },
+
+                // This SQL statement will get all parents.
+                // How? It finds all entries where their ID is found in a child's
+                // PARENT_ID column. That's some goddamn SQL magic, son.
+
+                Tasks.COLUMN_ID.name + " IN (SELECT " + Tasks.COLUMN_PARENT_ID.name + " FROM " +
+                        Tasks.TABLE_NAME + ")"
+        );
+
+        while (allParents.moveToNext()) {
+            String id = getString(allParents, Tasks.COLUMN_ID.name);
+
+            // Gets all remaining items ordered by rank. This was going to
+            // be a full list of children, but I realised I could re-use
+            // this cursor for the 'next' parameter. So it's kinda cool.
+
+            Cursor remaining = db.query(
+                    Tasks.TABLE_NAME,
+                    null,
+                    Tasks.COLUMN_PARENT_ID.name + "=? AND " +
+                    Tasks.COLUMN_DATE_COMPLETED + " IS NULL",
+                    new String[]{id},
+                    null,
+                    null,
+                    Tasks.COLUMN_RANK.name + " ASC"
+            );
+
+            // This bit gets the first child, when the list of children is
+            // ordered by the rank. That child will be the 'next' task to
+
+            String next = "";
+            if (remaining.moveToFirst()) {
+                next = getString(remaining, Tasks.COLUMN_ID.name);
+            }
+
+            // These three just get row counts straight from the query
+
+            int countCompleted = query(db, Tasks.TABLE_NAME, null,
+                    Tasks.COLUMN_PARENT_ID.name + "=? AND " +
+                    Tasks.COLUMN_DATE_COMPLETED.name + " IS NOT NULL",
+                    new String[]{id}).getCount();
+
+            int countDueSoon = query(db, Tasks.TABLE_NAME, null,
+                    Tasks.COLUMN_PARENT_ID.name + "=? AND " +
+                    Tasks.COLUMN_DUE_SOON.name + "=1",
+                    new String[]{id}).getCount();
+
+            int countOverdue = query(db, Tasks.TABLE_NAME, null,
+                    Tasks.COLUMN_PARENT_ID.name + "=? AND " +
+                    Tasks.COLUMN_OVERDUE.name + "=1 AND " +
+
+                    // Only get an overdue count for tasks that aren't complete
+
+                    Tasks.COLUMN_DATE_COMPLETED.name + " IS NULL",
+                    new String[]{id}).getCount();
+
+            // The child count is always the number remaining (not completed)
+            // plus the number of completed. So just build it here.
+
+            int countRemaining = remaining.getCount();
+            int countChildren = countRemaining + countCompleted;
+
+            ContentValues values = new ContentValues();
+            values.put(Tasks.COLUMN_COUNT_CHILDREN.name, countChildren);
+            values.put(Tasks.COLUMN_COUNT_COMPLETED.name, countCompleted);
+            values.put(Tasks.COLUMN_COUNT_DUE_SOON.name, countDueSoon);
+            values.put(Tasks.COLUMN_COUNT_OVERDUE.name, countOverdue);
+            values.put(Tasks.COLUMN_COUNT_REMAINING.name, countRemaining);
+            values.put(Tasks.COLUMN_HAS_CHILDREN.name, 1);
+            values.put(Tasks.COLUMN_NEXT.name, next);
+
+            db.update(
+                    Tasks.TABLE_NAME,
+                    values,
+                    Tasks.COLUMN_ID + "=?",
+                    new String[] { id }
+            );
+        }
+        allParents.close();
+
+        Log.i(TAG, "All parent counts (except blocked) updated");
+
         db.close();
     }
 
