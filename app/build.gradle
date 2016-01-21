@@ -35,4 +35,5 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'com.android.support:support-v4:23.1.1'
     compile 'org.apache.jackrabbit:jackrabbit-webdav:2.11.3'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
 }

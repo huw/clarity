@@ -12,7 +12,7 @@ import android.util.Log;
  *
  * This shouldn't be instantiated, and will log a warning if you do.
  */
-class DatabaseContract {
+public class DatabaseContract {
 
     public DatabaseContract() { Log.w("DatabaseContract", "Database contract instantiated?"); }
 

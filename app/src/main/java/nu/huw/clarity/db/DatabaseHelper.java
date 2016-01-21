@@ -2,6 +2,7 @@ package nu.huw.clarity.db;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -9,7 +10,14 @@ import android.util.Log;
 import java.util.Date;
 
 import nu.huw.clarity.activity.MainActivity;
-import nu.huw.clarity.db.DatabaseContract.*;
+import nu.huw.clarity.db.DatabaseContract.Attachments;
+import nu.huw.clarity.db.DatabaseContract.Base;
+import nu.huw.clarity.db.DatabaseContract.Contexts;
+import nu.huw.clarity.db.DatabaseContract.Folders;
+import nu.huw.clarity.db.DatabaseContract.Perspectives;
+import nu.huw.clarity.db.DatabaseContract.SQLKeyValue;
+import nu.huw.clarity.db.DatabaseContract.Settings;
+import nu.huw.clarity.db.DatabaseContract.Tasks;
 
 /**
  * A set of helper methods for dealing with the SQLite database.
@@ -132,9 +140,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             // null means insert
             values.put(Base.COLUMN_ID.name, rowID);
-            db.insert(tableName, null, values);
 
-            Log.v(TAG, rowID + " added to " + tableName);
+            try {
+                db.insertOrThrow(tableName, null, values);
+
+                Log.v(TAG, rowID + " added to " + tableName);
+            } catch (SQLiteConstraintException e) {
+
+                // If there's an error because we already have this key,
+                // then just update it! Yay!
+
+                Log.v(TAG, rowID + " already exists, updating");
+                update(tableName, rowID, values);
+            }
         }
 
         db.close();
@@ -355,6 +373,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         Log.i(TAG, "All parent counts (except blocked) updated");
 
+        /**
+         * Step 3
+         * TODO: This
+         */
+
         db.close();
     }
 
@@ -456,7 +479,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // before that, AND not overdue, then it's due soon, right?
 
                 long ONE_DAY = 86400000;
-                today.setTime(today.getTime() + (ONE_DAY * 2)); // TODO: Read in from settings class
+                today.setTime(today.getTime() + (ONE_DAY * 7)); // TODO: Read in from settings class
 
                 values.put(Tasks.COLUMN_DUE_SOON.name, today.after(dueDate));
 
