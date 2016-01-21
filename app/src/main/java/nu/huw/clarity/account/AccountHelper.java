@@ -55,4 +55,8 @@ public class AccountHelper {
     public static String getOfocusURI() {
         return getBaseURI() + "/" + getUsername() + "/OmniFocus.ofocus/";
     }
+
+    public static void setUserData(String key, String value) {
+        accountManager.setUserData(getAccount(), key, value);
+    }
 }

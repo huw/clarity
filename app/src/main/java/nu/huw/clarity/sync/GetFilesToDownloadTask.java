@@ -12,9 +12,12 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.version.DeltaVConstants;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,14 +43,14 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
         void onFinished(List<String> result);
     }
 
-    private final TaskListener taskListener;
+    private TaskListener mTaskListener;
 
     public GetFilesToDownloadTask(TaskListener listener) {
-        taskListener = listener;
+        mTaskListener = listener;
     }
 
     public GetFilesToDownloadTask() {
-        taskListener = null;
+        mTaskListener = null;
     }
 
     /**
@@ -100,33 +103,65 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
             client.executeMethod(listAllFiles);
             listAllFiles.releaseConnection();
 
-            MultiStatusResponse[] responses = listAllFiles
-                    .getResponseBodyAsMultiStatus()
-                    .getResponses();
+            // Sometimes Omni will change around their servers,
+            // so we need to update the user's server in their
+            // account settings.
 
-            for (MultiStatusResponse response : responses) {
-                if (shouldDownloadFile(response)) {
+            int statusCode = listAllFiles.getStatusCode();
+            if (
+                    (301 <= statusCode && statusCode <= 304) ||
+                    (307 <= statusCode && statusCode <= 308)
+            ) {
+                try {
 
-                    // Because we can recreate the URL, and because we
-                    // need the name of the file (without the path)
-                    // later on, we convert it to the raw name.
+                    // Get the data about the new host, and update it using
+                    // a convenience method from AccountHelper
 
-                    filesToDownload.add(
-                            new File(response.getHref()).getName()
+                    URI newHost = new URI(listAllFiles
+                            .getResponseHeader(DeltaVConstants.HEADER_LOCATION)
+                            .getValue()
                     );
 
+                    AccountHelper.setUserData("SERVER_DOMAIN", newHost.getHost());
+                    AccountHelper.setUserData("SERVER_PORT", String.valueOf(newHost.getPort()));
+
+                    // Start the sync loop again
+                    Synchroniser.synchronise();
+
+                } catch (URISyntaxException e) {
+                    Log.e(TAG, "Omni Sync Server returned invalid redirection URI", e);
                 }
+            } else {
+
+                MultiStatusResponse[] responses = listAllFiles
+                        .getResponseBodyAsMultiStatus()
+                        .getResponses();
+
+                for (MultiStatusResponse response : responses) {
+                    if (shouldDownloadFile(response)) {
+
+                        // Because we can recreate the URL, and because we
+                        // need the name of the file (without the path)
+                        // later on, we convert it to the raw name.
+
+                        filesToDownload.add(
+                                new File(response.getHref()).getName()
+                        );
+                    }
+                }
+
+                Log.i(TAG, "Got " + filesToDownload.size() + " files to download");
+
+                Collections.sort(filesToDownload);
+                return filesToDownload;
             }
-
-            Log.i(TAG, "Got " + filesToDownload.size() + " files to download");
-
-            Collections.sort(filesToDownload);
-            return filesToDownload;
 
         } catch (IOException | DavException e) {
             Log.e(TAG, "Problem creating/sending request", e);
         }
 
+        // Nullify the listener so nothing happens
+        this.mTaskListener = null;
         return null;
     }
 
@@ -137,8 +172,8 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
     protected void onPostExecute(List<String> result) {
         super.onPostExecute(result);
 
-        if (this.taskListener != null) {
-            this.taskListener.onFinished(result);
+        if (this.mTaskListener != null) {
+            this.mTaskListener.onFinished(result);
         }
     }
 }
