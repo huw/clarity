@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ClarityforOmniFocus.iml" filepath="$PROJECT_DIR$/ClarityforOmniFocus.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/clarity.iml" filepath="$PROJECT_DIR$/clarity.iml" />
     </modules>
   </component>
 </project>
