@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/recycler"
@@ -9,5 +10,6 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     app:layoutManager="LinearLayoutManager"
-    tools:context="nu.huw.clarity.ui.EntryListFragment"
-    tools:listitem="@layout/fragment_entrylist" />
+    tools:context=".ui.fragments.EntryListFragment"
+    tools:listitem="@layout/fragment_entrylist"
+    />

@@ -1,4 +1,4 @@
-package nu.huw.clarity.activity;
+package nu.huw.clarity.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountHelper;
-import nu.huw.clarity.ui.EntryListFragment;
+import nu.huw.clarity.ui.fragments.EntryListFragment;
 
 public class MainActivity extends AppCompatActivity implements EntryListFragment.ListInteractionListener {
 

@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import nu.huw.clarity.activity.LoginActivity;
+import nu.huw.clarity.ui.LoginActivity;
 
 /**
  * OmniSyncAuthenticator is a class to authenticate and create accounts

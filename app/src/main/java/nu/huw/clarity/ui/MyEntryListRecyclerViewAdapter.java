@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract;
+import nu.huw.clarity.ui.fragments.EntryListFragment;
 
 /**
  * Get items from the database as appropriate, and put them into views which

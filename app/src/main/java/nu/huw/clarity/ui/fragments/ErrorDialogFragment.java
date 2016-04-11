@@ -1,4 +1,4 @@
-package nu.huw.clarity.ui;
+package nu.huw.clarity.ui.fragments;
 
 
 import android.app.Activity;
@@ -16,11 +16,11 @@ import nu.huw.clarity.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ErrorDialog extends DialogFragment {
+public class ErrorDialogFragment extends DialogFragment {
 
-    private static final String TAG = ErrorDialog.class.getSimpleName();
+    private static final String TAG = ErrorDialogFragment.class.getSimpleName();
 
-    public ErrorDialog() {
+    public ErrorDialogFragment() {
         // Required empty public constructor
     }
 

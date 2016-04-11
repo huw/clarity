@@ -9,7 +9,7 @@ import android.util.Log;
 
 import java.util.Date;
 
-import nu.huw.clarity.activity.MainActivity;
+import nu.huw.clarity.ui.MainActivity;
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;

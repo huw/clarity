@@ -1,4 +1,4 @@
-package nu.huw.clarity.activity;
+package nu.huw.clarity.ui;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -23,10 +23,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import nu.huw.clarity.account.OmniSyncLoginTask;
-import nu.huw.clarity.ui.ErrorDialog;
 import nu.huw.clarity.R;
+import nu.huw.clarity.ui.fragments.ErrorDialogFragment;
 
-public class LoginActivity extends AppCompatActivity implements ErrorDialog.onErrorDismissListener {
+public class LoginActivity extends AppCompatActivity implements ErrorDialogFragment.onErrorDismissListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
@@ -229,7 +229,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialog.onEr
 
                     mRetryOnErrorDismiss = result.getBoolean("ERROR_LOGIN_RETRY");
 
-                    DialogFragment errorDialog = new ErrorDialog();
+                    DialogFragment errorDialog = new ErrorDialogFragment();
                     Bundle args = new Bundle();
                     args.putString("MESSAGE", getString(loginErrorRef));
 

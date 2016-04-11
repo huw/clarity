@@ -5,7 +5,7 @@ import android.accounts.AccountManager;
 import android.content.Context;
 
 import nu.huw.clarity.R;
-import nu.huw.clarity.activity.MainActivity;
+import nu.huw.clarity.ui.MainActivity;
 
 /**
  * Convenience methods for the Account Manager

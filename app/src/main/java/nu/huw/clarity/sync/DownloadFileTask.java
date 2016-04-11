@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import nu.huw.clarity.account.AccountHelper;
-import nu.huw.clarity.activity.MainActivity;
+import nu.huw.clarity.ui.MainActivity;
 
 /**
  * Given a single file, downloads it and returns the file object.

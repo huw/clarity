@@ -1,4 +1,4 @@
-package nu.huw.clarity.ui;
+package nu.huw.clarity.ui.fragments;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract;
 import nu.huw.clarity.db.DatabaseCursorLoader;
+import nu.huw.clarity.ui.MyEntryListRecyclerViewAdapter;
 
 /**
  * This class holds the full-screen list container fragment.
