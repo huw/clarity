@@ -31,8 +31,8 @@ import nu.huw.clarity.db.DatabaseContract.Tasks;
 public class SyncDownParser {
 
     private static final String         TAG       = SyncDownParser.class.getSimpleName();
-    private static final String         namespace = "http://www.omnigroup.com/namespace/OmniFocus/v1";
-
+    private static final String         namespace =
+            "http://www.omnigroup.com/namespace/OmniFocus/v1";
     private static final DatabaseHelper mDBHelper = new DatabaseHelper();
 
     public static void parse(InputStream input) {
@@ -92,7 +92,6 @@ public class SyncDownParser {
             }
 
             input.close();
-
         } catch (XmlPullParserException e) {
             Log.e(TAG, "Error parsing XML", e);
         } catch (IOException e) {
@@ -105,7 +104,7 @@ public class SyncDownParser {
         // Create a map of values to add in the new line
         ContentValues values = new ContentValues();
 
-        String id = parser.getAttributeValue(null, "id");
+        String id        = parser.getAttributeValue(null, "id");
         String operation = "";
 
         if (parser.getAttributeValue(null, "op") != null) {
@@ -127,7 +126,6 @@ public class SyncDownParser {
                         depth++;
 
                         parseTag(parser, values, tableName);
-
                     } else if (next == XmlPullParser.END_TAG) {
                         depth--;
                     }
@@ -142,17 +140,12 @@ public class SyncDownParser {
 
                 SQLiteDatabase db = mDBHelper.getReadableDatabase();
 
-                String[] columns = { Base.COLUMN_ID.name };
+                String[] columns = {Base.COLUMN_ID.name};
                 String selection = Base.COLUMN_ID.name + "=?";
-                String[] selectionArgs = { id };
+                String[] selectionArgs = {id};
 
-                Cursor cursor = db.query(
-                        tableName,
-                        columns,
-                        selection,
-                        selectionArgs,
-                        null, null, null
-                );
+                Cursor cursor =
+                        db.query(tableName, columns, selection, selectionArgs, null, null, null);
 
                 // If there are rows where the 'id' attribute is equal to the
                 // id being referenced, then we haven't accidentally lost them,
@@ -184,13 +177,13 @@ public class SyncDownParser {
     }
 
     /**
-     * Given a parser object, parses the current XML tag appropriately,
-     * and adds the result to the passed ContentValues.
+     * Given a parser object, parses the current XML tag appropriately, and adds the result to the
+     * passed ContentValues.
      */
     private static void parseTag(XmlPullParser parser, ContentValues values, String table)
             throws IOException, XmlPullParserException {
 
-        String name = "";
+        String name  = "";
         String value = "";
 
         switch (parser.getName()) {
@@ -411,19 +404,18 @@ public class SyncDownParser {
     }
 
     /**
-     * Given a string representing an ISO 8601 full datetime,
-     * convert it to a string in milliseconds that represents
-     * the time since the UNIX epoch.
+     * Given a string representing an ISO 8601 full datetime, convert it to a string in milliseconds
+     * that represents the time since the UNIX epoch.
      */
     public static String convertToMilliseconds(String dateString) {
+
         try {
 
-            SimpleDateFormat format = new SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            SimpleDateFormat format =
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
             format.setTimeZone(TimeZone.getTimeZone("UTC"));
 
             return String.valueOf(format.parse(dateString).getTime());
-
         } catch (ParseException e) {
             Log.e(TAG, "Invalid date format", e);
             return null;

@@ -23,35 +23,33 @@ import nu.huw.clarity.db.RecursiveColumnUpdater;
 import nu.huw.clarity.db.SyncDownParser;
 
 /**
- * This class handles all of the synchronisation methods.
- * A.K.A. Anything that needs an Apache library.
+ * This class handles all of the synchronisation methods. A.K.A. Anything that needs an Apache
+ * library.
  */
 public class Synchroniser {
 
     private static final String TAG = Synchroniser.class.getSimpleName();
 
     /**
-     * This function will create a new HttpClient and automatically add the
-     * account's credentials in an appropriate form.
+     * This function will create a new HttpClient and automatically add the account's credentials in
+     * an appropriate form.
      *
-     * It's really useful, because we can just call `getHttpClient()` and
-     * run WebDAV/HTTP methods on it straightaway, without having to
-     * configure it.
+     * It's really useful, because we can just call `getHttpClient()` and run WebDAV/HTTP methods on
+     * it straightaway, without having to configure it.
      *
-     * This code will be the appropriate setup code 100% of the time, AFTER
-     * AN ACCOUNT HAS BEEN MADE.
+     * This code will be the appropriate setup code 100% of the time, AFTER AN ACCOUNT HAS BEEN
+     * MADE.
      */
     public static HttpClient getHttpClient() {
 
         HttpClient client = new HttpClient();
 
         UsernamePasswordCredentials credentials =
-                new UsernamePasswordCredentials(AccountManagerHelper.getUsername(), AccountManagerHelper.getPassword()
-        );
-        AuthScope newHostScope =
-                new AuthScope(AccountManagerHelper.getServerDomain(), AccountManagerHelper.getServerPort(),
-                              AuthScope.ANY_REALM
-        );
+                new UsernamePasswordCredentials(AccountManagerHelper.getUsername(),
+                                                AccountManagerHelper.getPassword());
+        AuthScope newHostScope = new AuthScope(AccountManagerHelper.getServerDomain(),
+                                               AccountManagerHelper.getServerPort(),
+                                               AuthScope.ANY_REALM);
 
         client.getState().setCredentials(newHostScope, credentials);
         client.getParams().setAuthenticationPreemptive(true);
@@ -59,46 +57,39 @@ public class Synchroniser {
     }
 
     /**
-     * This function gets a list of files to download, and then downloads
-     * them (wow!). However, it's all a little tricky because it downloads
-     * the files asynchronously across the device's available cores for
-     * speed.
+     * This function gets a list of files to download, and then downloads them (wow!). However, it's
+     * all a little tricky because it downloads the files asynchronously across the device's
+     * available cores for speed.
      *
-     * Then, for extra speedy speed, it adds them all to the database (TODO),
-     * AS THEY ARRIVE. But we can't use callbacks because we need a specific
-     * order. So over in `runEachFile()` we get each file as it finishes, in
-     * the order that we hand the files to `downloadFiles()` in.
+     * Then, for extra speedy speed, it adds them all to the database (TODO), AS THEY ARRIVE. But we
+     * can't use callbacks because we need a specific order. So over in `runEachFile()` we get each
+     * file as it finishes, in the order that we hand the files to `downloadFiles()` in.
      *
-     * A slow sync is a disruptive sync. A killer sync, like this sync, is
-     * a fucking achievement of programming. And impossible to represent in
-     * a goddamn flowchart.
+     * A slow sync is a disruptive sync. A killer sync, like this sync, is a fucking achievement of
+     * programming. And impossible to represent in a goddamn flowchart.
      */
     public static void synchronise() {
 
         new GetFilesToDownloadTask(new GetFilesToDownloadTask.TaskListener() {
-            @Override
-            public void onFinished(List<String> result) {
+            @Override public void onFinished(List<String> result) {
 
                 List<DownloadFileTask> downloadList = downloadFiles(result);
 
                 runEachFile(downloadList, new TaskListener() {
-                    @Override
-                    public void onFinished(File file) {
+                    @Override public void onFinished(File file) {
 
                         try {
 
-                            ZipFile zipFile = new ZipFile(file);
-                            ZipEntry contentsXml = zipFile.getEntry("contents.xml");
-                            InputStream input = zipFile.getInputStream(contentsXml);
+                            ZipFile     zipFile     = new ZipFile(file);
+                            ZipEntry    contentsXml = zipFile.getEntry("contents.xml");
+                            InputStream input       = zipFile.getInputStream(contentsXml);
 
                             SyncDownParser.parse(input);
-
                         } catch (IOException e) {
                             Log.e(TAG, "Error reading downloaded zip file", e);
                         }
                     }
                 });
-
             }
         }).execute();
     }
@@ -123,7 +114,7 @@ public class Synchroniser {
 
         ExecutorService downloadPool = Executors.newFixedThreadPool(NUMBER_OF_CORES - 1);
 
-        for (String filename: nameList) {
+        for (String filename : nameList) {
 
             // Immediately add each file to the downloadList while they're
             // starting to download in the background threads. Then return
@@ -132,7 +123,6 @@ public class Synchroniser {
             DownloadFileTask download = new DownloadFileTask();
             download.executeOnExecutor(downloadPool, filename);
             downloadList.add(download);
-
         }
 
         return downloadList;
@@ -141,7 +131,8 @@ public class Synchroniser {
     /**
      * These are all run in a background thread so that we don't block the UI thread. Respect it.
      */
-    private static void runEachFile(final List<DownloadFileTask> downloadList, final TaskListener listener) {
+    private static void runEachFile(final List<DownloadFileTask> downloadList,
+                                    final TaskListener listener) {
 
         new AsyncTask<Void, Void, Void>() {
             @Override protected Void doInBackground(Void... params) {

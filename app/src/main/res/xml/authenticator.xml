@@ -3,6 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:accountType="@string/account_type"
     android:icon="@mipmap/ic_launcher"
-    android:smallIcon="@mipmap/ic_launcher"
     android:label="@string/account_name"
+    android:smallIcon="@mipmap/ic_launcher"
     />

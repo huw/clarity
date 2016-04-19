@@ -1,6 +1,5 @@
 package nu.huw.clarity.ui.fragments;
 
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -24,25 +23,19 @@ public class ErrorDialogFragment extends DialogFragment {
         // Required empty public constructor
     }
 
-    public interface onErrorDismissListener {
-        void onErrorDismiss(int resultCode);
-    }
+    @Override @NonNull public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-    @Override
-    @NonNull
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
 
-        Bundle args = getArguments();
-        String message = args.getString("MESSAGE", "");
+        Bundle args           = getArguments();
+        String message        = args.getString("MESSAGE", "");
         String positiveString = args.getString("BUTTON_STRING", getString(R.string.try_again));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(message);
 
         builder.setPositiveButton(positiveString, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+            @Override public void onClick(DialogInterface dialog, int which) {
 
                 // (The code up to here explains itself)
                 // These two onClick responses pass a result back to the Activity
@@ -57,13 +50,9 @@ public class ErrorDialogFragment extends DialogFragment {
 
                     onErrorDismissListener activity = (onErrorDismissListener) getActivity();
                     activity.onErrorDismiss(Activity.RESULT_OK);
-
                 } catch (ClassCastException e) {
-                    Log.e(
-                            TAG,
-                            getActivity().getPackageName() +
-                            " should implement onErrorDismiss to receive results"
-                    );
+                    Log.e(TAG, getActivity().getPackageName() +
+                               " should implement onErrorDismiss to receive results");
                 }
             }
         });
@@ -75,25 +64,29 @@ public class ErrorDialogFragment extends DialogFragment {
 
         if (!positiveString.equals(getString(R.string.got_it))) {
 
-            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    try {
-                        onErrorDismissListener activity = (onErrorDismissListener) getActivity();
-                        activity.onErrorDismiss(Activity.RESULT_CANCELED);
-                    } catch (ClassCastException e) {
-                        Log.e(
-                                TAG,
-                                getActivity().getPackageName() +
-                                " should implement onErrorDismiss to receive results"
-                        );
-                    }
-                }
-            });
+            builder.setNegativeButton(android.R.string.cancel,
+                                      new DialogInterface.OnClickListener() {
+                                          @Override
+                                          public void onClick(DialogInterface dialog, int which) {
 
+                                              try {
+                                                  onErrorDismissListener activity =
+                                                          (onErrorDismissListener) getActivity();
+                                                  activity.onErrorDismiss(Activity.RESULT_CANCELED);
+                                              } catch (ClassCastException e) {
+                                                  Log.e(TAG, getActivity().getPackageName() +
+                                                             " should implement onErrorDismiss to" +
+                                                             " receive results");
+                                              }
+                                          }
+                                      });
         }
 
         return builder.create();
     }
 
+    public interface onErrorDismissListener {
+
+        void onErrorDismiss(int resultCode);
+    }
 }

@@ -33,6 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static String SQL_CREATE_TASKS;
 
     public DatabaseHelper() {
+
         super(MainActivity.context, DATABASE_NAME, null, DATABASE_VERSION);
 
         /**
@@ -42,66 +43,90 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          * TODO: Replace all this with hardcoded strings (in final version)
          */
         SQL_CREATE_ATTACHMENTS = "CREATE TABLE " + Attachments.TABLE_NAME + "(";
-        for (SQLKeyValue keyValue: Attachments.keys) {
+        for (SQLKeyValue keyValue : Attachments.keys) {
             SQL_CREATE_ATTACHMENTS += keyValue;
-            if (keyValue.name.equals("id")) { SQL_CREATE_ATTACHMENTS += " PRIMARY KEY"; }
-            if (keyValue.val != null) { SQL_CREATE_ATTACHMENTS += " DEFAULT " + keyValue.val; }
+            if (keyValue.name.equals("id")) {
+                SQL_CREATE_ATTACHMENTS += " PRIMARY KEY";
+            }
+            if (keyValue.val != null) {
+                SQL_CREATE_ATTACHMENTS += " DEFAULT " + keyValue.val;
+            }
             SQL_CREATE_ATTACHMENTS += ",";
         }
-        SQL_CREATE_ATTACHMENTS = SQL_CREATE_ATTACHMENTS.substring(0,
-                SQL_CREATE_ATTACHMENTS.length() - 1) + ")";
+        SQL_CREATE_ATTACHMENTS =
+                SQL_CREATE_ATTACHMENTS.substring(0, SQL_CREATE_ATTACHMENTS.length() - 1) + ")";
 
         SQL_CREATE_CONTEXTS = "CREATE TABLE " + Contexts.TABLE_NAME + "(";
-        for (SQLKeyValue keyValue: Contexts.keys) {
+        for (SQLKeyValue keyValue : Contexts.keys) {
             SQL_CREATE_CONTEXTS += keyValue;
-            if (keyValue.name.equals("id")) { SQL_CREATE_CONTEXTS += " PRIMARY KEY"; }
-            if (keyValue.val != null) { SQL_CREATE_CONTEXTS += " DEFAULT " + keyValue.val; }
+            if (keyValue.name.equals("id")) {
+                SQL_CREATE_CONTEXTS += " PRIMARY KEY";
+            }
+            if (keyValue.val != null) {
+                SQL_CREATE_CONTEXTS += " DEFAULT " + keyValue.val;
+            }
             SQL_CREATE_CONTEXTS += ",";
         }
-        SQL_CREATE_CONTEXTS = SQL_CREATE_CONTEXTS.substring(0, 
-                SQL_CREATE_CONTEXTS.length() - 1) + ")";
+        SQL_CREATE_CONTEXTS =
+                SQL_CREATE_CONTEXTS.substring(0, SQL_CREATE_CONTEXTS.length() - 1) + ")";
 
         SQL_CREATE_FOLDERS = "CREATE TABLE " + Folders.TABLE_NAME + "(";
-        for (SQLKeyValue keyValue: Folders.keys) {
+        for (SQLKeyValue keyValue : Folders.keys) {
             SQL_CREATE_FOLDERS += keyValue;
-            if (keyValue.name.equals("id")) { SQL_CREATE_FOLDERS += " PRIMARY KEY"; }
-            if (keyValue.val != null) { SQL_CREATE_FOLDERS += " DEFAULT " + keyValue.val; }
+            if (keyValue.name.equals("id")) {
+                SQL_CREATE_FOLDERS += " PRIMARY KEY";
+            }
+            if (keyValue.val != null) {
+                SQL_CREATE_FOLDERS += " DEFAULT " + keyValue.val;
+            }
             SQL_CREATE_FOLDERS += ",";
         }
         SQL_CREATE_FOLDERS = SQL_CREATE_FOLDERS.substring(0, SQL_CREATE_FOLDERS.length() - 1) + ")";
 
         SQL_CREATE_PERSPECTIVES = "CREATE TABLE " + Perspectives.TABLE_NAME + "(";
-        for (SQLKeyValue keyValue: Perspectives.keys) {
+        for (SQLKeyValue keyValue : Perspectives.keys) {
             SQL_CREATE_PERSPECTIVES += keyValue;
-            if (keyValue.name.equals("id")) { SQL_CREATE_PERSPECTIVES += " PRIMARY KEY"; }
-            if (keyValue.val != null) { SQL_CREATE_PERSPECTIVES += " DEFAULT " + keyValue.val; }
+            if (keyValue.name.equals("id")) {
+                SQL_CREATE_PERSPECTIVES += " PRIMARY KEY";
+            }
+            if (keyValue.val != null) {
+                SQL_CREATE_PERSPECTIVES += " DEFAULT " + keyValue.val;
+            }
             SQL_CREATE_PERSPECTIVES += ",";
         }
-        SQL_CREATE_PERSPECTIVES = SQL_CREATE_PERSPECTIVES.substring(0,
-                SQL_CREATE_PERSPECTIVES.length() - 1) + ")";
+        SQL_CREATE_PERSPECTIVES =
+                SQL_CREATE_PERSPECTIVES.substring(0, SQL_CREATE_PERSPECTIVES.length() - 1) + ")";
 
         SQL_CREATE_SETTINGS = "CREATE TABLE " + Settings.TABLE_NAME + "(";
-        for (SQLKeyValue keyValue: Settings.keys) {
+        for (SQLKeyValue keyValue : Settings.keys) {
             SQL_CREATE_SETTINGS += keyValue;
-            if (keyValue.name.equals("id")) { SQL_CREATE_SETTINGS += " PRIMARY KEY"; }
-            if (keyValue.val != null) { SQL_CREATE_SETTINGS += " DEFAULT " + keyValue.val; }
+            if (keyValue.name.equals("id")) {
+                SQL_CREATE_SETTINGS += " PRIMARY KEY";
+            }
+            if (keyValue.val != null) {
+                SQL_CREATE_SETTINGS += " DEFAULT " + keyValue.val;
+            }
             SQL_CREATE_SETTINGS += ",";
         }
-        SQL_CREATE_SETTINGS = SQL_CREATE_SETTINGS.substring(0,
-                SQL_CREATE_SETTINGS.length() - 1) + ")";
+        SQL_CREATE_SETTINGS =
+                SQL_CREATE_SETTINGS.substring(0, SQL_CREATE_SETTINGS.length() - 1) + ")";
 
         SQL_CREATE_TASKS = "CREATE TABLE " + Tasks.TABLE_NAME + "(";
-        for (SQLKeyValue keyValue: Tasks.keys) {
+        for (SQLKeyValue keyValue : Tasks.keys) {
             SQL_CREATE_TASKS += keyValue;
-            if (keyValue.name.equals("id")) { SQL_CREATE_TASKS += " PRIMARY KEY"; }
-            if (keyValue.val != null) { SQL_CREATE_TASKS += " DEFAULT " + keyValue.val; }
+            if (keyValue.name.equals("id")) {
+                SQL_CREATE_TASKS += " PRIMARY KEY";
+            }
+            if (keyValue.val != null) {
+                SQL_CREATE_TASKS += " DEFAULT " + keyValue.val;
+            }
             SQL_CREATE_TASKS += ",";
         }
         SQL_CREATE_TASKS = SQL_CREATE_TASKS.substring(0, SQL_CREATE_TASKS.length() - 1) + ")";
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
+    @Override public void onCreate(SQLiteDatabase db) {
+
         db.execSQL(SQL_CREATE_ATTACHMENTS);
         db.execSQL(SQL_CREATE_CONTEXTS);
         db.execSQL(SQL_CREATE_FOLDERS);
@@ -111,8 +136,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.i(TAG, "Database successfully created");
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
         db.execSQL("DROP TABLE IF EXISTS " + Attachments.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Contexts.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Folders.TABLE_NAME);
@@ -123,11 +148,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Given important data, insert a new row into the database with
-     * the given rowID. The values should have keys that correspond
-     * to columns in the database, and appropriate values, but this
-     * isn't validated because that would be wasteful. However, we
-     * check to see if there are any values to be added first.
+     * Given important data, insert a new row into the database with the given rowID. The values
+     * should have keys that correspond to columns in the database, and appropriate values, but this
+     * isn't validated because that would be wasteful. However, we check to see if there are any
+     * values to be added first.
      */
     public void insert(String tableName, String rowID, ContentValues values) {
 
@@ -169,7 +193,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // addition. Then it replaces all '?'s with your arguments in the
             // order that they appear.
 
-            String selection = Base.COLUMN_ID.name + "=?";
+            String   selection     = Base.COLUMN_ID.name + "=?";
             String[] selectionArgs = {rowID};
             db.update(tableName, values, selection, selectionArgs);
 
@@ -186,8 +210,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String selection = Base.COLUMN_ID.name + "=?";
-        String[] selectionArgs = { rowID };
+        String   selection     = Base.COLUMN_ID.name + "=?";
+        String[] selectionArgs = {rowID};
         db.delete(tableName, selection, selectionArgs);
 
         Log.v(TAG, rowID + " deleted from " + tableName);
@@ -196,10 +220,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Just a nice shorthand for getting strings from the database cursor,
-     * but also with some bonus null checking.
+     * Just a nice shorthand for getting strings from the database cursor, but also with some bonus
+     * null checking.
      */
     public String getString(Cursor cursor, String columnName) {
+
         int index = cursor.getColumnIndex(columnName);
         if (index != -1 && cursor.getColumnCount() != 0) {
             return cursor.getString(index);
@@ -211,11 +236,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * Shorthands for querying without the stuff with the normal methods want.
      */
     public Cursor query(SQLiteDatabase db, String tableName, String[] columns, String selection) {
+
         return db.query(tableName, columns, selection, null, null, null, null);
     }
 
     public Cursor query(SQLiteDatabase db, String tableName, String[] columns, String selection,
                         String[] selectionArgs) {
+
         return db.query(tableName, columns, selection, selectionArgs, null, null, null);
     }
 }

@@ -15,9 +15,8 @@ import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.ui.MainActivity;
 
 /**
- * Given a single file, downloads it and returns the file object.
- * Designed to be used in an asynchronous context with multiple
- * files at once, along with `.get()` instead of callbacks.
+ * Given a single file, downloads it and returns the file object. Designed to be used in an
+ * asynchronous context with multiple files at once, along with `.get()` instead of callbacks.
  */
 public class DownloadFileTask extends AsyncTask<String, Void, File> {
 
@@ -25,10 +24,12 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
     private final TaskListener taskListener;
 
     public DownloadFileTask(TaskListener listener) {
+
         taskListener = listener;
     }
 
     public DownloadFileTask() {
+
         taskListener = null;
     }
 
@@ -49,7 +50,8 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
                 // stream to the out stream. THEN we close everything. File downloaded.
 
                 InputStream  input  = getFileMethod.getResponseBodyAsStream();
-                File         file   = File.createTempFile(params[0], null, MainActivity.context.getCacheDir());
+                File file =
+                        File.createTempFile(params[0], null, MainActivity.context.getCacheDir());
                 OutputStream output = new FileOutputStream(file);
 
                 // Copy input stream to output stream, bitwise
@@ -81,8 +83,8 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
         return null;
     }
 
-    @Override
-    protected void onPostExecute(File result) {
+    @Override protected void onPostExecute(File result) {
+
         super.onPostExecute(result);
 
         if (this.taskListener != null) {

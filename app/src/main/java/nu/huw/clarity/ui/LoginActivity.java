@@ -6,11 +6,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -22,39 +21,37 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import nu.huw.clarity.account.OmniSyncLoginTask;
 import nu.huw.clarity.R;
+import nu.huw.clarity.account.OmniSyncLoginTask;
 import nu.huw.clarity.ui.fragments.ErrorDialogFragment;
 
-public class LoginActivity extends AppCompatActivity implements ErrorDialogFragment.onErrorDismissListener {
+public class LoginActivity extends AppCompatActivity
+        implements ErrorDialogFragment.onErrorDismissListener {
 
-    private static final String TAG = LoginActivity.class.getSimpleName();
-
+    private static final String            TAG       = LoginActivity.class.getSimpleName();
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private OmniSyncLoginTask mAuthTask = null;
-
+    private              OmniSyncLoginTask mAuthTask = null;
     /**
      * References for the UI.
      */
-    private EditText mUsernameView;
-    private EditText mPasswordView;
+    private EditText        mUsernameView;
+    private EditText        mPasswordView;
     private TextInputLayout mUsernameIL;
     private TextInputLayout mPasswordIL;
-    private View mProgressView;
-    private View mLoginFormView;
-
+    private View            mProgressView;
+    private View            mLoginFormView;
     /**
      * Other
      */
-    private AccountManager mAccountManager;
-    private String mUsername;
-    private String mPassword;
-    private boolean mRetryOnErrorDismiss;
+    private AccountManager  mAccountManager;
+    private String          mUsername;
+    private String          mPassword;
+    private boolean         mRetryOnErrorDismiss;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -71,8 +68,8 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
         mPasswordIL.setErrorEnabled(true);
 
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+            @Override public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
                     attemptLogin();
                     return true;
@@ -83,8 +80,8 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
 
         Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
         mSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            @Override public void onClick(View view) {
+
                 attemptLogin();
             }
         });
@@ -93,13 +90,13 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
         mLoginFormView = findViewById(R.id.login_form);
     }
 
-
     /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
+     * Attempts to sign in or register the account specified by the login form. If there are form
+     * errors (invalid email, missing fields, etc.), the errors are presented and no actual login
+     * attempt is made.
      */
     private void attemptLogin() {
+
         if (mAuthTask != null) {
             return;
         }
@@ -112,8 +109,8 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
         mUsername = mUsernameView.getText().toString();
         mPassword = mPasswordView.getText().toString();
 
-        boolean cancel = false;
-        View focusView = null;
+        boolean cancel    = false;
+        View    focusView = null;
 
         // Check for a valid password.
         if (TextUtils.isEmpty(mPassword)) {
@@ -146,7 +143,8 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
             // background task to perform the user login attempt.
             showProgress(true);
 
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm =
+                    (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mLoginFormView.getWindowToken(), 0);
 
             mAuthTask = new OmniSyncLoginTask(mUsername, mPassword, new loginListener());
@@ -155,10 +153,12 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
     }
 
     private boolean isUsernameValid(String username) {
+
         return username.length() >= 2 && !username.contains(" ");
     }
 
     private boolean isPasswordValid(String password) {
+
         return password.length() >= 6;
     }
 
@@ -175,46 +175,62 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         mLoginFormView.setVisibility(View.VISIBLE);
-        mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            }
-        });
+        mLoginFormView.animate().setDuration(shortAnimTime).alpha(show ? 0 : 1)
+                      .setListener(new AnimatorListenerAdapter() {
+                          @Override public void onAnimationEnd(Animator animation) {
 
-        mProgressView.animate().setDuration(shortAnimTime).alpha(
-                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        });
+                              mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                          }
+                      });
+
+        mProgressView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0)
+                     .setListener(new AnimatorListenerAdapter() {
+                         @Override public void onAnimationEnd(Animator animation) {
+
+                             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                         }
+                     });
+    }
+
+    public void onErrorDismiss(int resultCode) {
+
+        if (resultCode == Activity.RESULT_OK && mRetryOnErrorDismiss) {
+            attemptLogin();
+        }
+    }
+
+    private void addAccount(String username, String password, String serverDomain,
+                            String serverPort) {
+
+        Account account  = new Account(username, this.getPackageName());
+        Bundle  userData = new Bundle();
+        userData.putString("SERVER_DOMAIN", serverDomain);
+        userData.putString("SERVER_PORT", serverPort);
+
+        mAccountManager.addAccountExplicitly(account, password, userData);
+        Log.i(TAG, "Added account to system");
+
+        finish();
     }
 
     public class loginListener implements OmniSyncLoginTask.TaskListener {
-        @Override
-        public void onFinished(Bundle result) {
+
+        @Override public void onFinished(Bundle result) {
 
             // Null the task so it can be rebuilt later
             mAuthTask = null;
 
             if (result.getBoolean("SUCCESS")) {
 
-                addAccount(
-                        mUsername,
-                        mPassword,
-                        result.getString("SERVER_DOMAIN"),
-                        result.getString("SERVER_PORT")
-                );
-
+                addAccount(mUsername, mPassword, result.getString("SERVER_DOMAIN"),
+                           result.getString("SERVER_PORT"));
             } else {
 
                 // There are three types of error we can show on this page. Username and password
                 // errors are problems with validation/authentication for those specific data types.
                 // These errors show in red text below the input box. mLoginError is for connection/
                 // other errors which need to be shown in an alert.
-                int loginErrorRef = result.getInt("ERROR_LOGIN");
+                int loginErrorRef    = result.getInt("ERROR_LOGIN");
                 int usernameErrorRef = result.getInt("ERROR_USERNAME");
                 int passwordErrorRef = result.getInt("ERROR_PASSWORD");
 
@@ -230,7 +246,7 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
                     mRetryOnErrorDismiss = result.getBoolean("ERROR_LOGIN_RETRY");
 
                     DialogFragment errorDialog = new ErrorDialogFragment();
-                    Bundle args = new Bundle();
+                    Bundle         args        = new Bundle();
                     args.putString("MESSAGE", getString(loginErrorRef));
 
                     // Text for the positive answer on the button
@@ -238,49 +254,21 @@ public class LoginActivity extends AppCompatActivity implements ErrorDialogFragm
                     if (loginErrorButtonRef != 0) {
 
                         args.putString("BUTTON_STRING", getString(loginErrorButtonRef));
-
                     }
 
                     errorDialog.setArguments(args);
                     errorDialog.show(getSupportFragmentManager(), "Error Dialog");
-
                 } else if (usernameErrorRef != 0) {
 
                     mUsernameIL.setError(getString(usernameErrorRef));
                     mUsernameIL.requestFocus();
-
                 } else if (passwordErrorRef != 0) {
 
                     mPasswordIL.setError(getString(passwordErrorRef));
                     mPasswordIL.requestFocus();
-
                 }
             }
         }
-    }
-
-    public void onErrorDismiss(int resultCode) {
-        if (resultCode == Activity.RESULT_OK && mRetryOnErrorDismiss) {
-            attemptLogin();
-        }
-    }
-
-    private void addAccount(
-            String username,
-            String password,
-            String serverDomain,
-            String serverPort
-    ) {
-
-        Account account = new Account(username, this.getPackageName());
-        Bundle userData = new Bundle();
-        userData.putString("SERVER_DOMAIN", serverDomain);
-        userData.putString("SERVER_PORT", serverPort);
-
-        mAccountManager.addAccountExplicitly(account, password, userData);
-        Log.i(TAG, "Added account to system");
-
-        finish();
     }
 }
 

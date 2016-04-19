@@ -20,32 +20,25 @@ import java.net.UnknownHostException;
 import nu.huw.clarity.R;
 
 /**
- * Authenticate the user on the Omni Sync Server.
- * TODO: Enable private servers.
+ * Authenticate the user on the Omni Sync Server. TODO: Enable private servers.
  */
 public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
 
     private static final String TAG = OmniSyncLoginTask.class.getSimpleName();
-
-    public interface TaskListener {
-        void onFinished(Bundle result);
-    }
-
-    private String mUsername;
-    private String mPassword;
     private final TaskListener taskListener;
-
+    private       String       mUsername;
+    private       String       mPassword;
     public OmniSyncLoginTask(String username, String password, TaskListener listener) {
+
         mUsername = username;
         mPassword = password;
         taskListener = listener;
     }
 
-    @Override
-    protected Bundle doInBackground(Void... params) {
+    @Override protected Bundle doInBackground(Void... params) {
 
         HttpClient client = new HttpClient();
-        Bundle bundle = new Bundle();
+        Bundle     bundle = new Bundle();
 
         try {
             URI newHost = verifyOmniSyncHost(client, bundle);
@@ -57,7 +50,6 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
             bundle.putInt("ERROR_LOGIN", R.string.error_no_connection);
             bundle.putBoolean("ERROR_LOGIN_RETRY", true);
             Log.e(TAG, "No connection for login", e);
-
         } catch (URISyntaxException e) {
 
             bundle.putBoolean("SUCCESS", false);
@@ -66,14 +58,13 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
 
             bundle.putBoolean("SUCCESS", false);
             Log.e(TAG, "Problem creating/sending request", e);
-
         }
 
         return bundle;
     }
 
-    @Override
-    protected void onPostExecute(final Bundle result) {
+    @Override protected void onPostExecute(final Bundle result) {
+
         super.onPostExecute(result);
 
         if (this.taskListener != null) {
@@ -82,27 +73,24 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
     }
 
     /**
-     * Omni Sync Server uses a load balancer to handle their data, so a user could
-     * exist on any of (it seems) sync1.omnigroup.com-sync99.omnigroup.com. To find
-     * the server, polling sync.omnigroup.com/<username> will issue a 300-series
-     * redirect, which newer HttpClients will follow.
+     * Omni Sync Server uses a load balancer to handle their data, so a user could exist on any of
+     * (it seems) sync1.omnigroup.com-sync99.omnigroup.com. To find the server, polling
+     * sync.omnigroup.com/<username> will issue a 300-series redirect, which newer HttpClients will
+     * follow.
      *
-     * An HttpMethod will craft an HTTP request, and stores the response once
-     * executed so we can access it. It also stores the connection, so
-     * `.releaseConnection()` needs to be called once data is received.
+     * An HttpMethod will craft an HTTP request, and stores the response once executed so we can
+     * access it. It also stores the connection, so `.releaseConnection()` needs to be called once
+     * data is received.
      *
-     * I thought I was going to be able to use a HEAD method to query the server
-     * minimally, but it looks like the Omni Sync Server only responds to DavMethods
-     * when it wants to (it responds fine to a HEAD request below). For a run-down
-     * on DavMethods, see GetFilesToDownloadTask.
+     * I thought I was going to be able to use a HEAD method to query the server minimally, but it
+     * looks like the Omni Sync Server only responds to DavMethods when it wants to (it responds
+     * fine to a HEAD request below). For a run-down on DavMethods, see GetFilesToDownloadTask.
      */
     private URI verifyOmniSyncHost(HttpClient client, Bundle bundle) throws Exception {
 
-        HttpMethod findServerMethod = new PropFindMethod(
-                "https://sync.omnigroup.com/" + mUsername,
-                DavConstants.PROPFIND_PROPERTY_NAMES,
-                DavConstants.DEPTH_1
-        );
+        HttpMethod findServerMethod = new PropFindMethod("https://sync.omnigroup.com/" + mUsername,
+                                                         DavConstants.PROPFIND_PROPERTY_NAMES,
+                                                         DavConstants.DEPTH_1);
 
         client.executeMethod(findServerMethod);
         findServerMethod.releaseConnection();
@@ -113,17 +101,15 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
 
             Log.i(TAG, "User exists (Redirection caught)");
 
-            URI newHost = new URI(findServerMethod
-                    .getResponseHeader(DeltaVConstants.HEADER_LOCATION)
-                    .getValue()
-            );
+            URI newHost =
+                    new URI(findServerMethod.getResponseHeader(DeltaVConstants.HEADER_LOCATION)
+                                            .getValue());
 
             // Return these values so they can be used later
             bundle.putString("SERVER_DOMAIN", newHost.getHost());
             bundle.putString("SERVER_PORT", String.valueOf(newHost.getPort()));
 
             return newHost;
-
         } else if (findServerMethod.getStatusText().equals("No such user")) {
 
             bundle.putBoolean("SUCCESS", false);
@@ -131,22 +117,20 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
             Log.w(TAG, "User not registered");
 
             return null;
-
         } else {
 
             bundle.putBoolean("SUCCESS", false);
             bundle.putInt("ERROR_LOGIN", R.string.error_server_fault);
             bundle.putBoolean("ERROR_LOGIN_RETRY", true);
-            Log.e(TAG, "Unexpected status " + findServerMethod.getStatusCode() + ": "
-                    + findServerMethod.getStatusText());
+            Log.e(TAG, "Unexpected status " + findServerMethod.getStatusCode() + ": " +
+                       findServerMethod.getStatusText());
 
             return null;
         }
     }
 
     /**
-     * WebDAV Login Verification. Will work with all servers,
-     * not just official Omni Sync stuff.
+     * WebDAV Login Verification. Will work with all servers, not just official Omni Sync stuff.
      */
     private void verifyLogin(HttpClient client, Bundle bundle, URI host) throws Exception {
 
@@ -155,21 +139,14 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
         // They will be transported over https, so their connection
         // to the server will be encrypted.
 
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                mUsername,
-                mPassword
-        );
-        AuthScope newHostScope = new AuthScope(
-                host.getHost(),
-                host.getPort(),
-                AuthScope.ANY_REALM
-        );
+        UsernamePasswordCredentials credentials =
+                new UsernamePasswordCredentials(mUsername, mPassword);
+        AuthScope newHostScope = new AuthScope(host.getHost(), host.getPort(), AuthScope.ANY_REALM);
 
         client.getState().setCredentials(newHostScope, credentials);
         client.getParams().setAuthenticationPreemptive(true);
 
-        HttpMethod testLoginMethod = new HeadMethod(host.toString()
-                + "OmniFocus.ofocus/");
+        HttpMethod testLoginMethod = new HeadMethod(host.toString() + "OmniFocus.ofocus/");
 
         client.executeMethod(testLoginMethod);
         testLoginMethod.releaseConnection();
@@ -204,8 +181,13 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
 
             default:
                 Log.e(TAG, "Returned HTTP status " + statusCode + ": " +
-                        testLoginMethod.getStatusText());
+                           testLoginMethod.getStatusText());
                 break;
         }
+    }
+
+    public interface TaskListener {
+
+        void onFinished(Bundle result);
     }
 }
