@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import nu.huw.clarity.R;
-import nu.huw.clarity.account.AccountHelper;
+import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.ui.fragments.EntryListFragment;
 
 public class MainActivity extends AppCompatActivity implements EntryListFragment.ListInteractionListener {
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements EntryListFragment
 
         context = getApplicationContext();
 
-        if (!AccountHelper.doesAccountExist()) {
+        if (!AccountManagerHelper.doesAccountExist()) {
 
             // If there are no syncing accounts, sign in
             startActivity(new Intent(this, LoginActivity.class));

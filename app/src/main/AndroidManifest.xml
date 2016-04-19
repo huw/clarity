@@ -27,7 +27,9 @@
             android:name=".ui.LoginActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <service android:name=".account.OmniSyncAuthenticatorService">
+        <service
+            android:name=".account.AccountManagerAuthenticatorService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>

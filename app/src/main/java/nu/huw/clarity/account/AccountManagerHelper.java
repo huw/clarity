@@ -12,12 +12,11 @@ import nu.huw.clarity.ui.MainActivity;
  *
  * TODO: Multiple accounts
  */
-public class AccountHelper {
+public class AccountManagerHelper {
 
-    private static final String TAG = AccountHelper.class.getSimpleName();
-    private static final Context context = MainActivity.context;
-
-    public static final AccountManager accountManager = AccountManager.get(context);
+    private static final String         TAG            = AccountManagerHelper.class.getSimpleName();
+    private static final Context        context        = MainActivity.context;
+    public static final  AccountManager accountManager = AccountManager.get(context);
 
     public static boolean doesAccountExist() {
         return accountManager.getAccountsByType(context.getString(R.string.account_type)).length != 0;

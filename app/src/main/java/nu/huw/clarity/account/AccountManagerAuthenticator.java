@@ -12,15 +12,15 @@ import android.os.Bundle;
 import nu.huw.clarity.ui.LoginActivity;
 
 /**
- * OmniSyncAuthenticator is a class to authenticate and create accounts
+ * AccountManagerAuthenticator is a class to authenticate and create accounts
  * using the AccountManager service. It doesn't implement many methods
  * because it doesn't really need to.
  */
-public class OmniSyncAuthenticator extends AbstractAccountAuthenticator {
+public class AccountManagerAuthenticator extends AbstractAccountAuthenticator {
 
     private final Context mContext;
 
-    public OmniSyncAuthenticator(Context context) {
+    public AccountManagerAuthenticator(Context context) {
         super(context);
 
         mContext = context;

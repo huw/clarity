@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import nu.huw.clarity.account.AccountHelper;
+import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.ui.MainActivity;
 
 /**
@@ -22,11 +22,6 @@ import nu.huw.clarity.ui.MainActivity;
 public class DownloadFileTask extends AsyncTask<String, Void, File> {
 
     private static final String TAG = DownloadFileTask.class.getSimpleName();
-
-    public interface TaskListener {
-        void onFinished(File result);
-    }
-
     private final TaskListener taskListener;
 
     public DownloadFileTask(TaskListener listener) {
@@ -37,11 +32,10 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
         taskListener = null;
     }
 
-    @Override
-    protected File doInBackground(String... params) {
+    @Override protected File doInBackground(String... params) {
 
-        HttpClient client = Synchroniser.getHttpClient();
-        GetMethod getFileMethod = new GetMethod(AccountHelper.getOfocusURI() + params[0]);
+        HttpClient client        = Synchroniser.getHttpClient();
+        GetMethod  getFileMethod = new GetMethod(AccountManagerHelper.getOfocusURI() + params[0]);
 
         try {
 
@@ -54,13 +48,13 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
                 // `.releaseConnection()` until we're done), and bitwise copy the in
                 // stream to the out stream. THEN we close everything. File downloaded.
 
-                InputStream input = getFileMethod.getResponseBodyAsStream();
-                File file = File.createTempFile(params[0], null, MainActivity.context.getCacheDir());
+                InputStream  input  = getFileMethod.getResponseBodyAsStream();
+                File         file   = File.createTempFile(params[0], null, MainActivity.context.getCacheDir());
                 OutputStream output = new FileOutputStream(file);
 
                 // Copy input stream to output stream, bitwise
                 byte data[] = new byte[4096];
-                int count;
+                int  count;
                 while ((count = input.read(data)) != -1) {
                     output.write(data, 0, count);
                 }
@@ -76,10 +70,9 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
                 Log.v(TAG, params[0] + " successfully downloaded (" + file.length() + " bytes)");
 
                 return file;
-
             } else {
-                Log.e(TAG, "Unexpected WebDAV status " + getFileMethod.getStatusCode() + ": "
-                        + getFileMethod.getStatusText());
+                Log.e(TAG, "Unexpected WebDAV status " + getFileMethod.getStatusCode() + ": " +
+                           getFileMethod.getStatusText());
             }
         } catch (Exception e) {
             Log.e(TAG, "Unexpected " + e.getClass().getName() + ": " + e.getMessage(), e);
@@ -95,5 +88,10 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
         if (this.taskListener != null) {
             this.taskListener.onFinished(result);
         }
+    }
+
+    public interface TaskListener {
+
+        void onFinished(File result);
     }
 }

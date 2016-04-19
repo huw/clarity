@@ -16,15 +16,22 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import nu.huw.clarity.db.DatabaseContract.*;
+import nu.huw.clarity.db.DatabaseContract.Attachments;
+import nu.huw.clarity.db.DatabaseContract.Base;
+import nu.huw.clarity.db.DatabaseContract.Contexts;
+import nu.huw.clarity.db.DatabaseContract.Entry;
+import nu.huw.clarity.db.DatabaseContract.Folders;
+import nu.huw.clarity.db.DatabaseContract.Perspectives;
+import nu.huw.clarity.db.DatabaseContract.Settings;
+import nu.huw.clarity.db.DatabaseContract.Tasks;
 
 /**
  * Converts a contents.xml into a usable object
  */
-public class ParseSyncIn {
+public class SyncDownParser {
 
-    private static final String TAG = ParseSyncIn.class.getSimpleName();
-    private static final String namespace = "http://www.omnigroup.com/namespace/OmniFocus/v1";
+    private static final String         TAG       = SyncDownParser.class.getSimpleName();
+    private static final String         namespace = "http://www.omnigroup.com/namespace/OmniFocus/v1";
 
     private static final DatabaseHelper mDBHelper = new DatabaseHelper();
 

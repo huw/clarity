@@ -18,9 +18,9 @@ import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import nu.huw.clarity.account.AccountHelper;
-import nu.huw.clarity.db.DatabaseHelper;
-import nu.huw.clarity.db.ParseSyncIn;
+import nu.huw.clarity.account.AccountManagerHelper;
+import nu.huw.clarity.db.RecursiveColumnUpdater;
+import nu.huw.clarity.db.SyncDownParser;
 
 /**
  * This class handles all of the synchronisation methods.
@@ -45,14 +45,12 @@ public class Synchroniser {
 
         HttpClient client = new HttpClient();
 
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                AccountHelper.getUsername(),
-                AccountHelper.getPassword()
+        UsernamePasswordCredentials credentials =
+                new UsernamePasswordCredentials(AccountManagerHelper.getUsername(), AccountManagerHelper.getPassword()
         );
-        AuthScope newHostScope = new AuthScope(
-                AccountHelper.getServerDomain(),
-                AccountHelper.getServerPort(),
-                AuthScope.ANY_REALM
+        AuthScope newHostScope =
+                new AuthScope(AccountManagerHelper.getServerDomain(), AccountManagerHelper.getServerPort(),
+                              AuthScope.ANY_REALM
         );
 
         client.getState().setCredentials(newHostScope, credentials);
@@ -93,7 +91,7 @@ public class Synchroniser {
                             ZipEntry contentsXml = zipFile.getEntry("contents.xml");
                             InputStream input = zipFile.getInputStream(contentsXml);
 
-                            ParseSyncIn.parse(input);
+                            SyncDownParser.parse(input);
 
                         } catch (IOException e) {
                             Log.e(TAG, "Error reading downloaded zip file", e);
@@ -140,21 +138,15 @@ public class Synchroniser {
         return downloadList;
     }
 
-    private interface TaskListener {
-        void onFinished(File file);
-    }
-
     /**
-     * These are all run in a background thread so that we don't
-     * block the UI thread. Respect it.
+     * These are all run in a background thread so that we don't block the UI thread. Respect it.
      */
     private static void runEachFile(final List<DownloadFileTask> downloadList, final TaskListener listener) {
 
         new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
+            @Override protected Void doInBackground(Void... params) {
 
-                for (DownloadFileTask download: downloadList) {
+                for (DownloadFileTask download : downloadList) {
                     try {
 
                         // Holding the thread until the download is done is perfect
@@ -164,7 +156,6 @@ public class Synchroniser {
                         File file = download.get();
 
                         listener.onFinished(file);
-
                     } catch (InterruptedException | ExecutionException e) {
                         Log.e(TAG, "Unexpected error while getting result of DownloadFileTask", e);
                     }
@@ -173,13 +164,17 @@ public class Synchroniser {
                 return null;
             }
 
-            @Override
-            protected void onPostExecute(Void result) {
+            @Override protected void onPostExecute(Void result) {
+
                 super.onPostExecute(result);
 
-                DatabaseHelper dbHelper = new DatabaseHelper();
-                dbHelper.updateTree();
+                new RecursiveColumnUpdater().updateTree();
             }
         }.execute();
+    }
+
+    private interface TaskListener {
+
+        void onFinished(File file);
     }
 }

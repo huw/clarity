@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import nu.huw.clarity.account.AccountHelper;
+import nu.huw.clarity.account.AccountManagerHelper;
 
 /**
  * Gets a list of files that should be downloaded in this sync. At the moment,
@@ -32,17 +32,6 @@ import nu.huw.clarity.account.AccountHelper;
 public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> {
 
     private static final String TAG = GetFilesToDownloadTask.class.getSimpleName();
-
-    /**
-     * Java callbacks are called listeners, and they allow you to extend a class
-     * which implements this function, which you can then call for sure by
-     * referencing your listener interface. Pretty simple. If you don't want a
-     * listener, we support that too :)
-     */
-    public interface TaskListener {
-        void onFinished(List<String> result);
-    }
-
     private TaskListener mTaskListener;
 
     public GetFilesToDownloadTask(TaskListener listener) {
@@ -54,15 +43,15 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
     }
 
     /**
-     * Validation for files. Given a WebDAV response, it can determine whether
-     * the file should be downloaded (and also if it isn't a file).
+     * Validation for files. Given a WebDAV response, it can determine whether the file should be downloaded (and also
+     * if it isn't a file).
      *
      * TODO: Add more logic
      */
     private static boolean shouldDownloadFile(MultiStatusResponse response) {
 
-        DavPropertySet properties = response.getProperties(200);
-        DavProperty contentType = properties.get(DavPropertyName.GETCONTENTTYPE);
+        DavPropertySet properties  = response.getProperties(200);
+        DavProperty    contentType = properties.get(DavPropertyName.GETCONTENTTYPE);
 
         if (contentType != null) {
 
@@ -83,23 +72,20 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
      * of the files in /OmniFocus.ofocus/ that need to be downloaded.
      * We only add a file if the validation function gives us a yes.
      */
-    @Override
-    protected List<String> doInBackground(Void... params) {
+    @Override protected List<String> doInBackground(Void... params) {
 
         try {
             List<String> filesToDownload = new ArrayList<>();
-            HttpClient client = Synchroniser.getHttpClient();
+            HttpClient   client          = Synchroniser.getHttpClient();
 
             // Just to be clear, a DavMethod is an extension of an HttpMethod, and is used
             // to send requests to servers. Like you'd execute a GetMethod to get a file
             // from a server, you execute a DavMethod to do non-http things like listing
             // files in a folder or telling the server to copy/move a file.
 
-            DavMethod listAllFiles = new PropFindMethod(
-                    AccountHelper.getOfocusURI(),
-                    DavConstants.PROPFIND_ALL_PROP,
-                    DavConstants.DEPTH_1
-            );
+            DavMethod listAllFiles =
+                    new PropFindMethod(AccountManagerHelper.getOfocusURI(), DavConstants.PROPFIND_ALL_PROP,
+                                       DavConstants.DEPTH_1);
             client.executeMethod(listAllFiles);
             listAllFiles.releaseConnection();
 
@@ -108,34 +94,25 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
             // account settings.
 
             int statusCode = listAllFiles.getStatusCode();
-            if (
-                    (301 <= statusCode && statusCode <= 304) ||
-                    (307 <= statusCode && statusCode <= 308)
-            ) {
+            if ((301 <= statusCode && statusCode <= 304) || (307 <= statusCode && statusCode <= 308)) {
                 try {
 
                     // Get the data about the new host, and update it using
-                    // a convenience method from AccountHelper
+                    // a convenience method from AccountManagerHelper
 
-                    URI newHost = new URI(listAllFiles
-                            .getResponseHeader(DeltaVConstants.HEADER_LOCATION)
-                            .getValue()
-                    );
+                    URI newHost = new URI(listAllFiles.getResponseHeader(DeltaVConstants.HEADER_LOCATION).getValue());
 
-                    AccountHelper.setUserData("SERVER_DOMAIN", newHost.getHost());
-                    AccountHelper.setUserData("SERVER_PORT", String.valueOf(newHost.getPort()));
+                    AccountManagerHelper.setUserData("SERVER_DOMAIN", newHost.getHost());
+                    AccountManagerHelper.setUserData("SERVER_PORT", String.valueOf(newHost.getPort()));
 
                     // Start the sync loop again
                     Synchroniser.synchronise();
-
                 } catch (URISyntaxException e) {
                     Log.e(TAG, "Omni Sync Server returned invalid redirection URI", e);
                 }
             } else {
 
-                MultiStatusResponse[] responses = listAllFiles
-                        .getResponseBodyAsMultiStatus()
-                        .getResponses();
+                MultiStatusResponse[] responses = listAllFiles.getResponseBodyAsMultiStatus().getResponses();
 
                 for (MultiStatusResponse response : responses) {
                     if (shouldDownloadFile(response)) {
@@ -144,9 +121,7 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
                         // need the name of the file (without the path)
                         // later on, we convert it to the raw name.
 
-                        filesToDownload.add(
-                                new File(response.getHref()).getName()
-                        );
+                        filesToDownload.add(new File(response.getHref()).getName());
                     }
                 }
 
@@ -155,7 +130,6 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
                 Collections.sort(filesToDownload);
                 return filesToDownload;
             }
-
         } catch (IOException | DavException e) {
             Log.e(TAG, "Problem creating/sending request", e);
         }
@@ -168,12 +142,22 @@ public class GetFilesToDownloadTask extends AsyncTask<Void, Void, List<String>> 
     /**
      * Call the callback function, and pass our result to it to be handled.
      */
-    @Override
-    protected void onPostExecute(List<String> result) {
+    @Override protected void onPostExecute(List<String> result) {
+
         super.onPostExecute(result);
 
         if (this.mTaskListener != null) {
             this.mTaskListener.onFinished(result);
         }
+    }
+
+    /**
+     * Java callbacks are called listeners, and they allow you to extend a class which implements this function, which
+     * you can then call for sure by referencing your listener interface. Pretty simple. If you don't want a listener,
+     * we support that too :)
+     */
+    public interface TaskListener {
+
+        void onFinished(List<String> result);
     }
 }

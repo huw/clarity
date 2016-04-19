@@ -41,8 +41,10 @@ public class DatabaseCursorLoader extends AsyncTaskLoader<Cursor> {
      */
     @Override
     protected void onStartLoading() {
-        if (takeContentChanged())
+
+        if (takeContentChanged()) {
             forceLoad();
+        }
     }
 
     @Override
