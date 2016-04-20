@@ -62,15 +62,17 @@ public class DatabaseContract {
                 new SQLKeyValue("activeEffective", "1");
         // Is it active/inactive because a parent is active?
         public static final SQLKeyValue   COLUMN_COUNT_AVAILABLE  =
-                new SQLKeyValue("countAvailable");
+                new SQLKeyValue("countAvailable", "0");
         public static final SQLKeyValue   COLUMN_COUNT_CHILDREN   =
-                new SQLKeyValue("countChildren");
+                new SQLKeyValue("countChildren", "0");
         public static final SQLKeyValue   COLUMN_COUNT_COMPLETED  =
-                new SQLKeyValue("countCompleted");
-        public static final SQLKeyValue   COLUMN_COUNT_DUE_SOON   = new SQLKeyValue("countDueSoon");
-        public static final SQLKeyValue   COLUMN_COUNT_OVERDUE    = new SQLKeyValue("countOverdue");
+                new SQLKeyValue("countCompleted", "0");
+        public static final SQLKeyValue   COLUMN_COUNT_DUE_SOON   =
+                new SQLKeyValue("countDueSoon", "0");
+        public static final SQLKeyValue   COLUMN_COUNT_OVERDUE    =
+                new SQLKeyValue("countOverdue", "0");
         public static final SQLKeyValue   COLUMN_COUNT_REMAINING  =
-                new SQLKeyValue("countRemaining");
+                new SQLKeyValue("countRemaining", "0");
         public static final SQLKeyValue   COLUMN_HAS_CHILDREN     =
                 new SQLKeyValue("hasChildren", "0");
         public static final SQLKeyValue   COLUMN_NAME             = new SQLKeyValue("name");

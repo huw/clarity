@@ -233,6 +233,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * Shorthand for getting ints. Null checking included.
+     */
+    public int getInt(Cursor cursor, String columnName) {
+
+        int index = cursor.getColumnIndex(columnName);
+        if (index != -1 && cursor.getColumnCount() != 0) {
+            return cursor.getInt(index);
+        }
+        return 0;
+    }
+
+    /**
      * Shorthands for querying without the stuff with the normal methods want.
      */
     public Cursor query(SQLiteDatabase db, String tableName, String[] columns, String selection) {
