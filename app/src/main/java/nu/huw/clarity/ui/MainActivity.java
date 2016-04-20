@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
+import nu.huw.clarity.sync.Synchroniser;
 import nu.huw.clarity.ui.fragments.EntryListFragment;
 
 public class MainActivity extends AppCompatActivity
@@ -41,12 +42,21 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
 
-            EntryListFragment listFragment = new EntryListFragment();
-
-            getFragmentManager().beginTransaction().add(R.id.fragment_container, listFragment)
-                                .commit();
+            openFragments();
         }
     }
 
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Synchroniser.synchronise();
+    }
+
     @Override public void onListInteraction() {}
+
+    public void openFragments() {
+
+        EntryListFragment listFragment = new EntryListFragment();
+
+        getFragmentManager().beginTransaction().add(R.id.fragment_container, listFragment).commit();
+    }
 }
