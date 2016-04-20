@@ -245,6 +245,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * Shorthand for getting a boolean. Null = false.
+     */
+    public boolean getBoolean(Cursor cursor, String columnName) {
+
+        String string = getString(cursor, columnName);
+        return string != null && string.equals("1");
+    }
+
+    /**
      * Shorthands for querying without the stuff with the normal methods want.
      */
     public Cursor query(SQLiteDatabase db, String tableName, String[] columns, String selection) {

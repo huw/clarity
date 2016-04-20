@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity
         if (!AccountManagerHelper.doesAccountExist()) {
 
             // If there are no syncing accounts, sign in
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivityForResult(new Intent(this, LoginActivity.class), 1);
         } else {
 
             if (savedInstanceState != null) {
@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         Synchroniser.synchronise();
+
+        openFragments();
     }
 
     @Override public void onListInteraction() {}
