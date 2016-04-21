@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
+import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.sync.Synchroniser;
 import nu.huw.clarity.ui.fragments.EntryListFragment;
 
@@ -56,6 +57,10 @@ public class MainActivity extends AppCompatActivity
     @Override public void onListInteraction() {}
 
     public void openFragments() {
+
+        DatabaseHelper dbHelper = new DatabaseHelper();
+        dbHelper.onUpgrade(dbHelper.getWritableDatabase(), 0, 1);
+        Synchroniser.synchronise();
 
         EntryListFragment listFragment = new EntryListFragment();
 

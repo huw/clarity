@@ -31,10 +31,9 @@ public class EntryListFragment extends Fragment implements LoaderManager.LoaderC
     private String[] COLUMNS        =
             {DatabaseContract.Tasks.COLUMN_ID.name, // Must always get the ID column!
              DatabaseContract.Tasks.COLUMN_NAME.name, DatabaseContract.Tasks.COLUMN_DATE_DUE.name};
-    private String   SELECTION      =
-            "(" + DatabaseContract.Tasks.COLUMN_DUE_SOON.name + "='1' OR " +
-            DatabaseContract.Tasks.COLUMN_FLAGGED + "='1') AND " +
-            DatabaseContract.Tasks.COLUMN_DATE_COMPLETED + " IS NULL";
+    private String   SELECTION      = "(" + DatabaseContract.Tasks.COLUMN_DUE_SOON.name + "=1 OR " +
+                                      DatabaseContract.Tasks.COLUMN_FLAGGED + "=1) AND " +
+                                      DatabaseContract.Tasks.COLUMN_DATE_COMPLETED + " IS NULL";
     private String[] SELECTION_ARGS = {};
 
     /**

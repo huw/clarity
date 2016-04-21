@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.util.Date;
 
+import nu.huw.clarity.db.DatabaseContract.Contexts;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
 
 /**
@@ -20,11 +21,13 @@ import nu.huw.clarity.db.DatabaseContract.Tasks;
 public class RecursiveColumnUpdater {
 
     private static final String TAG = RecursiveColumnUpdater.class.getSimpleName();
+    ContentValues mBlockedValue = new ContentValues();
     private DatabaseHelper mDBHelper;
 
     public RecursiveColumnUpdater() {
 
         mDBHelper = new DatabaseHelper();
+        mBlockedValue.put(Tasks.COLUMN_BLOCKED.name, true);
     }
 
     /**
@@ -48,11 +51,13 @@ public class RecursiveColumnUpdater {
 
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
 
-        String[] columns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_DATE_DEFER.name,
-                                        Tasks.COLUMN_DATE_DUE.name, Tasks.COLUMN_FLAGGED.name,
-                                        Tasks.COLUMN_PROJECT_STATUS.name, Tasks.COLUMN_TYPE.name};
-        Cursor projects =
-                mDBHelper.query(db, Tasks.TABLE_NAME, columns, Tasks.COLUMN_PROJECT.name + "='1'");
+        String[] projectColumns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_DATE_DEFER.name,
+                                               Tasks.COLUMN_DATE_DUE.name,
+                                               Tasks.COLUMN_FLAGGED.name,
+                                               Tasks.COLUMN_PROJECT_STATUS.name,
+                                               Tasks.COLUMN_TYPE.name};
+        Cursor projects = mDBHelper
+                .query(db, Tasks.TABLE_NAME, projectColumns, Tasks.COLUMN_PROJECT.name + "='1'");
 
         // The Cursor object is used to lazy-load SQLite databases, which is important when we're
         // dealing with lots and lots of data (not so much applicable in this case, but you never
@@ -63,7 +68,8 @@ public class RecursiveColumnUpdater {
         // call `moveToNext()`, and if it returns `true`, then this task has a child we can
         // iterate over.
         //
-        // On this first call to `updateChildren()`, we set off the huge recursive update. See
+        // On this first call to `updateProjectChildren()`, we set off the huge recursive update.
+        // See
         // the method itself for more details.
 
         while (projects.moveToNext()) {
@@ -75,10 +81,33 @@ public class RecursiveColumnUpdater {
             String status    = mDBHelper.getString(projects, Tasks.COLUMN_PROJECT_STATUS.name);
             String type      = mDBHelper.getString(projects, Tasks.COLUMN_TYPE.name);
 
-            updateChildren(db, id, id, deferDate, dueDate, flagged, status, type, false, false);
+            updateProjectChildren(db, id, id, deferDate, dueDate, flagged, status, type, false,
+                                  false);
         }
 
         projects.close();
+
+        // Now the same, but for Contexts. Keep in mind that the recursive call in contexts is a
+        // little different, see below.
+
+        String[] contextColumns = new String[]{Contexts.COLUMN_ID.name, Contexts.COLUMN_ACTIVE.name,
+                                               Contexts.COLUMN_ACTIVE_EFFECTIVE.name,
+                                               Contexts.COLUMN_ON_HOLD.name};
+        Cursor contexts = mDBHelper.query(db, Contexts.TABLE_NAME, contextColumns,
+                                          Contexts.COLUMN_PARENT_ID + " IS NULL");
+
+        while (contexts.moveToNext()) {
+
+            String  id     = mDBHelper.getString(contexts, Contexts.COLUMN_ID.name);
+            boolean active = mDBHelper.getBoolean(contexts, Contexts.COLUMN_ACTIVE.name);
+            boolean activeEffective =
+                    mDBHelper.getBoolean(contexts, Contexts.COLUMN_ACTIVE_EFFECTIVE.name);
+            boolean onHold = mDBHelper.getBoolean(contexts, Contexts.COLUMN_ON_HOLD.name);
+
+            updateContextChildren(db, id, active, activeEffective, onHold);
+        }
+
+        contexts.close();
         Log.i(TAG, "Database tree fully updated");
 
         db.close();
@@ -96,9 +125,10 @@ public class RecursiveColumnUpdater {
      * Then, finally, we recursively call the function again on each of these children, until we've
      * eventually descended the tree.
      */
-    private void updateChildren(SQLiteDatabase db, String id, String projectID, String dateDefer,
-                                String dateDue, String flagged, String status, String type,
-                                boolean blocked, boolean blockedByDefer) {
+    private void updateProjectChildren(SQLiteDatabase db, String id, String projectID,
+                                       String dateDefer, String dateDue, String flagged,
+                                       String status, String type, boolean blocked,
+                                       boolean blockedByDefer) {
 
         String[] columns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_DATE_DEFER.name,
                                         Tasks.COLUMN_DATE_DUE.name, Tasks.COLUMN_FLAGGED.name,
@@ -130,15 +160,19 @@ public class RecursiveColumnUpdater {
         // Batch set values for this item's children. Useful for cascading values (particularly
         // when the cascade isn't conditional).
 
+        blocked = blocked || status.equals("inactive");
+
         if (blocked) {
-            childValues.put(Tasks.COLUMN_BLOCKED.name, true);
+            childValues.putAll(mBlockedValue);
         }
         if (blockedByDefer) {
             childValues.put(Tasks.COLUMN_BLOCKED_BY_DEFER.name, true);
         }
+        if (flagged.equals("1")) {
+            childValues.put(Tasks.COLUMN_FLAGGED_EFFECTIVE.name, flagged);
+        }
         childValues.put(Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name, dateDefer);
         childValues.put(Tasks.COLUMN_DATE_DUE_EFFECTIVE.name, dateDue);
-        childValues.put(Tasks.COLUMN_FLAGGED_EFFECTIVE.name, flagged);
 
         if (childValues.size() > 0) {
             db.update(Tasks.TABLE_NAME, childValues, Tasks.COLUMN_PARENT_ID.name + "=?",
@@ -154,15 +188,12 @@ public class RecursiveColumnUpdater {
             // For this case, each level below will be able to access the due date, defer date &
             // flagged status of the level above, which it can then apply to its own children.
 
-            String  childID        = mDBHelper.getString(children, Tasks.COLUMN_ID.name);
-            String  childDateDefer = mDBHelper.getString(children, Tasks.COLUMN_DATE_DEFER.name);
-            String  childDateDue   = mDBHelper.getString(children, Tasks.COLUMN_DATE_DUE.name);
-            String  childFlagged   = mDBHelper.getString(children, Tasks.COLUMN_FLAGGED.name);
-            long    childRank      =
+            String childID        = mDBHelper.getString(children, Tasks.COLUMN_ID.name);
+            String childDateDefer = mDBHelper.getString(children, Tasks.COLUMN_DATE_DEFER.name);
+            String childDateDue   = mDBHelper.getString(children, Tasks.COLUMN_DATE_DUE.name);
+            String childFlagged   = mDBHelper.getString(children, Tasks.COLUMN_FLAGGED.name);
+            long childRank =
                     Long.valueOf(mDBHelper.getString(children, Tasks.COLUMN_RANK.name));
-            boolean childBlocked   = mDBHelper.getBoolean(children, Tasks.COLUMN_BLOCKED.name);
-            boolean childBlockedByDefer =
-                    mDBHelper.getBoolean(children, Tasks.COLUMN_BLOCKED_BY_DEFER.name);
 
             if (childDateDefer != null) {
                 dateDefer = childDateDefer;
@@ -174,8 +205,8 @@ public class RecursiveColumnUpdater {
                 flagged = childFlagged;
             }
 
-            updateChildren(db, childID, projectID, dateDefer, dateDue, flagged, status, type,
-                           childBlocked, childBlockedByDefer);
+            updateProjectChildren(db, childID, projectID, dateDefer, dateDue, flagged, status, type,
+                                  blocked, blockedByDefer);
 
             // All of the code past the recursive call will happen on the way back out, or up the
             // tree. Once each call returns, this code runs on the level above where the code was
@@ -188,7 +219,7 @@ public class RecursiveColumnUpdater {
             // Add count for self (where applicable)
             boolean completed =
                     mDBHelper.getString(children, Tasks.COLUMN_DATE_COMPLETED.name) != null;
-            childBlockedByDefer =
+            boolean childBlockedByDefer =
                     mDBHelper.getBoolean(children, Tasks.COLUMN_BLOCKED_BY_DEFER.name);
 
             countChildren += 1;
@@ -210,7 +241,8 @@ public class RecursiveColumnUpdater {
             // completed, it's not the next task.
             //
             // This code isn't filling upward or downward, but it is reliant on knowing whether
-            // the child is blocked by a defer or not, which is calculated in `updateChildren()`.
+            // the child is blocked by a defer or not, which is calculated in
+            // `updateProjectChildren()`.
 
             if (!completed && !childBlockedByDefer && type.equals("sequential") &&
                 childRank < nextRank) {
@@ -235,16 +267,13 @@ public class RecursiveColumnUpdater {
             // Set the 'blocked' flag for all entries which list this as a parent, where they
             // aren't the next task.
 
-            ContentValues blockedValue = new ContentValues();
-            blockedValue.put(Tasks.COLUMN_BLOCKED.name, true);
-
-            db.update(Tasks.TABLE_NAME, blockedValue,
+            db.update(Tasks.TABLE_NAME, mBlockedValue,
                       Tasks.COLUMN_PARENT_ID.name + "=? AND " + Tasks.COLUMN_ID.name + "!=?",
                       new String[]{id, nextID});
         }
 
         if (status.equals("dropped")) {
-            values.put(Tasks.COLUMN_BLOCKED.name, true);
+            values.putAll(mBlockedValue);
         }
 
         // Child counts
@@ -282,7 +311,8 @@ public class RecursiveColumnUpdater {
         ContentValues values = new ContentValues();
 
         Cursor dates = mDBHelper.query(db, Tasks.TABLE_NAME,
-                                       new String[]{Tasks.COLUMN_DATE_DEFER.name,
+                                       new String[]{Tasks.COLUMN_DATE_COMPLETED.name,
+                                                    Tasks.COLUMN_DATE_DEFER.name,
                                                     Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name,
                                                     Tasks.COLUMN_DATE_DUE.name,
                                                     Tasks.COLUMN_DATE_DUE_EFFECTIVE.name},
@@ -293,11 +323,13 @@ public class RecursiveColumnUpdater {
         String deferDate = mDBHelper.getString(dates, Tasks.COLUMN_DATE_DEFER.name);
         String effectiveDeferDate =
                 mDBHelper.getString(dates, Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name);
-        String dueDate          = mDBHelper.getString(dates, Tasks.COLUMN_DATE_DUE.name);
-        String effectiveDueDate = mDBHelper.getString(dates, Tasks.COLUMN_DATE_DUE_EFFECTIVE.name);
-        Date   today            = new Date();
+        String  dueDate          = mDBHelper.getString(dates, Tasks.COLUMN_DATE_DUE.name);
+        String  effectiveDueDate = mDBHelper.getString(dates, Tasks.COLUMN_DATE_DUE_EFFECTIVE.name);
+        boolean completed        =
+                mDBHelper.getString(dates, Tasks.COLUMN_DATE_COMPLETED.name) != null;
+        Date    today            = new Date();
 
-        if (dueDate != null || effectiveDueDate != null) {
+        if (!completed && (dueDate != null || effectiveDueDate != null)) {
             Date due = new Date();
 
             // If we don't have a normal due date, then we default back on the effective due date.
@@ -334,5 +366,128 @@ public class RecursiveColumnUpdater {
         }
 
         return values;
+    }
+
+    /**
+     * Recursively update the children of a context. Let's just be clear: There are two types of
+     * child for a context.
+     *
+     * Type 1: A context that is a direct descendant of this context. This can be recursively
+     * contacted through this function. A.K.A 'context child'.
+     * Type 2: A task which lists this context as its context. A.K.A 'task child'.
+     *
+     * To access a task child of a context child, you need to access it recursively first,
+     * through the context child.
+     */
+    private void updateContextChildren(SQLiteDatabase db, String id, boolean active,
+                                       boolean activeEffective, boolean onHold) {
+
+        String[] columns = new String[]{Contexts.COLUMN_ID.name, Contexts.COLUMN_ACTIVE.name,
+                                        Contexts.COLUMN_ON_HOLD.name,
+                                        Contexts.COLUMN_COUNT_CHILDREN.name,
+                                        Contexts.COLUMN_COUNT_COMPLETED.name,
+                                        Contexts.COLUMN_COUNT_DUE_SOON.name,
+                                        Contexts.COLUMN_COUNT_OVERDUE.name,
+                                        Contexts.COLUMN_COUNT_REMAINING.name};
+        Cursor children = mDBHelper
+                .query(db, Contexts.TABLE_NAME, columns, Contexts.COLUMN_PARENT_ID.name + "=?",
+                       new String[]{id});
+
+        // If the context is on hold, only its direct (task) children are affected. This _may_ be a
+        // bug, but I feel as if this kind of configuration is so rarely used that it won't matter
+        // which way I err. Plus, it'll make everyone else happier by keeping this section fast.
+        // Also, if the task is directly or indirectly inactive, then the same happens, only this
+        // affects all descendants.
+
+        if (onHold || !active || !activeEffective) {
+            db.update(Tasks.TABLE_NAME, mBlockedValue, Tasks.COLUMN_CONTEXT + "=?",
+                      new String[]{id});
+        }
+
+        // Update the context children with `activeEffective`, so that this property cascades.
+
+        if (!activeEffective) {
+            ContentValues childValues = new ContentValues();
+            childValues.put(Contexts.COLUMN_ACTIVE_EFFECTIVE.name, false);
+            db.update(Contexts.TABLE_NAME, childValues, Contexts.COLUMN_PARENT_ID.name + "=?",
+                      new String[]{id});
+        }
+
+        // Get counts of task children
+
+        int countChildren, countCompleted, countDueSoon, countOverdue, countRemaining;
+
+        Cursor countChildrenCursor = mDBHelper
+                .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=?", new String[]{id});
+        Cursor countRemainingCursor =
+                mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
+                                                            Tasks.COLUMN_DATE_COMPLETED +
+                                                            " IS NULL", new String[]{id});
+        Cursor countDueSoonCursor =
+                mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
+                                                            Tasks.COLUMN_DUE_SOON + "=1",
+                                new String[]{id});
+        Cursor countOverdueCursor =
+                mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
+                                                            Tasks.COLUMN_OVERDUE + "=1",
+                                new String[]{id});
+
+        countChildren = countChildrenCursor.getCount();
+        countRemaining = countRemainingCursor.getCount();
+        countCompleted = countChildren - countRemaining;
+        countDueSoon = countDueSoonCursor.getCount();
+        countOverdue = countOverdueCursor.getCount();
+
+        countChildrenCursor.close();
+        countRemainingCursor.close();
+        countDueSoonCursor.close();
+        countOverdueCursor.close();
+
+        // Iterate through the context children to recursively update them.
+
+        while (children.moveToNext()) {
+
+            String  childID     = mDBHelper.getString(children, Contexts.COLUMN_ID.name);
+            boolean childActive = mDBHelper.getBoolean(children, Contexts.COLUMN_ACTIVE.name);
+            boolean childOnHold = mDBHelper.getBoolean(children, Contexts.COLUMN_ON_HOLD.name);
+
+            if (!childActive) {
+                activeEffective = false;
+            }
+
+            updateContextChildren(db, childID, childActive, activeEffective, childOnHold);
+
+            countChildren += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_CHILDREN.name);
+            countCompleted += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_COMPLETED.name);
+            countDueSoon += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_DUE_SOON.name);
+            countOverdue += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_OVERDUE.name);
+            countRemaining += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_REMAINING.name);
+        }
+
+        children.close();
+
+        ContentValues values = new ContentValues();
+
+        if (countChildren > 0) {
+            values.put(Tasks.COLUMN_COUNT_CHILDREN.name, countChildren);
+            values.put(Tasks.COLUMN_HAS_CHILDREN.name, true);
+        }
+        if (countCompleted > 0) {
+            values.put(Tasks.COLUMN_COUNT_COMPLETED.name, countCompleted);
+        }
+        if (countDueSoon > 0) {
+            values.put(Tasks.COLUMN_COUNT_DUE_SOON.name, countDueSoon);
+        }
+        if (countOverdue > 0) {
+            values.put(Tasks.COLUMN_COUNT_OVERDUE.name, countOverdue);
+        }
+        if (countRemaining > 0) {
+            values.put(Tasks.COLUMN_COUNT_REMAINING.name, countRemaining);
+        }
+
+        if (values.size() > 0) {
+            db.update(Contexts.TABLE_NAME, values, Contexts.COLUMN_ID.name + "=?",
+                      new String[]{id});
+        }
     }
 }
