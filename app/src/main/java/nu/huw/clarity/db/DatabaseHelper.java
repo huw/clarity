@@ -48,6 +48,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (keyValue.name.equals("id")) {
                 SQL_CREATE_ATTACHMENTS += " PRIMARY KEY";
             }
+            if (keyValue.type != null) {
+                SQL_CREATE_ATTACHMENTS += " " + keyValue.type;
+            }
             if (keyValue.val != null) {
                 SQL_CREATE_ATTACHMENTS += " DEFAULT " + keyValue.val;
             }
@@ -61,6 +64,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQL_CREATE_CONTEXTS += keyValue;
             if (keyValue.name.equals("id")) {
                 SQL_CREATE_CONTEXTS += " PRIMARY KEY";
+            }
+            if (keyValue.type != null) {
+                SQL_CREATE_CONTEXTS += " " + keyValue.type;
             }
             if (keyValue.val != null) {
                 SQL_CREATE_CONTEXTS += " DEFAULT " + keyValue.val;
@@ -76,6 +82,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (keyValue.name.equals("id")) {
                 SQL_CREATE_FOLDERS += " PRIMARY KEY";
             }
+            if (keyValue.type != null) {
+                SQL_CREATE_FOLDERS += " " + keyValue.type;
+            }
             if (keyValue.val != null) {
                 SQL_CREATE_FOLDERS += " DEFAULT " + keyValue.val;
             }
@@ -88,6 +97,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQL_CREATE_PERSPECTIVES += keyValue;
             if (keyValue.name.equals("id")) {
                 SQL_CREATE_PERSPECTIVES += " PRIMARY KEY";
+            }
+            if (keyValue.type != null) {
+                SQL_CREATE_PERSPECTIVES += " " + keyValue.type;
             }
             if (keyValue.val != null) {
                 SQL_CREATE_PERSPECTIVES += " DEFAULT " + keyValue.val;
@@ -103,6 +115,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (keyValue.name.equals("id")) {
                 SQL_CREATE_SETTINGS += " PRIMARY KEY";
             }
+            if (keyValue.type != null) {
+                SQL_CREATE_SETTINGS += " " + keyValue.type;
+            }
             if (keyValue.val != null) {
                 SQL_CREATE_SETTINGS += " DEFAULT " + keyValue.val;
             }
@@ -116,6 +131,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQL_CREATE_TASKS += keyValue;
             if (keyValue.name.equals("id")) {
                 SQL_CREATE_TASKS += " PRIMARY KEY";
+            }
+            if (keyValue.type != null) {
+                SQL_CREATE_TASKS += " " + keyValue.type;
             }
             if (keyValue.val != null) {
                 SQL_CREATE_TASKS += " DEFAULT " + keyValue.val;

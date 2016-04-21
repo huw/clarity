@@ -19,17 +19,20 @@ public class DatabaseContract {
 
         public String name;
         public String val;
+        public String type;
 
-        public SQLKeyValue(String name, String defaultValue) {
+        public SQLKeyValue(String name, String defaultValue, String type) {
 
             this.name = name;
             this.val = defaultValue;
+            this.type = type;
         }
 
         public SQLKeyValue(String name) {
 
             this.name = name;
             this.val = null;
+            this.type = null;
         }
 
         @Override public String toString() {
@@ -56,28 +59,30 @@ public class DatabaseContract {
 
     public static abstract class Entry extends Base {
 
-        public static final SQLKeyValue   COLUMN_ACTIVE           = new SQLKeyValue("active", "1");
+        public static final SQLKeyValue   COLUMN_ACTIVE           =
+                new SQLKeyValue("active", "1", "BOOLEAN");
         // Local activity setting, independent of activeEffective
         public static final SQLKeyValue   COLUMN_ACTIVE_EFFECTIVE =
-                new SQLKeyValue("activeEffective", "1");
+                new SQLKeyValue("activeEffective", "1", "BOOLEAN");
         // Is it active/inactive because a parent is active?
         public static final SQLKeyValue   COLUMN_COUNT_AVAILABLE  =
-                new SQLKeyValue("countAvailable", "0");
+                new SQLKeyValue("countAvailable", "0", "INT");
         public static final SQLKeyValue   COLUMN_COUNT_CHILDREN   =
-                new SQLKeyValue("countChildren", "0");
+                new SQLKeyValue("countChildren", "0", "INT");
         public static final SQLKeyValue   COLUMN_COUNT_COMPLETED  =
-                new SQLKeyValue("countCompleted", "0");
+                new SQLKeyValue("countCompleted", "0", "INT");
         public static final SQLKeyValue   COLUMN_COUNT_DUE_SOON   =
-                new SQLKeyValue("countDueSoon", "0");
+                new SQLKeyValue("countDueSoon", "0", "INT");
         public static final SQLKeyValue   COLUMN_COUNT_OVERDUE    =
-                new SQLKeyValue("countOverdue", "0");
+                new SQLKeyValue("countOverdue", "0", "INT");
         public static final SQLKeyValue   COLUMN_COUNT_REMAINING  =
-                new SQLKeyValue("countRemaining", "0");
+                new SQLKeyValue("countRemaining", "0", "INT");
         public static final SQLKeyValue   COLUMN_HAS_CHILDREN     =
-                new SQLKeyValue("hasChildren", "0");
+                new SQLKeyValue("hasChildren", "0", "BOOLEAN");
         public static final SQLKeyValue   COLUMN_NAME             = new SQLKeyValue("name");
         public static final SQLKeyValue   COLUMN_PARENT_ID        = new SQLKeyValue("parentID");
-        public static final SQLKeyValue   COLUMN_RANK             = new SQLKeyValue("rank", "0");
+        public static final SQLKeyValue   COLUMN_RANK             =
+                new SQLKeyValue("rank", "0", "INT");
         // Big-endian number, converts to long, used for ordering
         public static final SQLKeyValue[] keys                    =
                 {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_ACTIVE,
@@ -110,7 +115,8 @@ public class DatabaseContract {
         public static final SQLKeyValue   COLUMN_LOCATION_NAME = new SQLKeyValue("locationName");
         // User-editable context location name
         public static final SQLKeyValue   COLUMN_LONGITUDE     = new SQLKeyValue("longitude");
-        public static final SQLKeyValue   COLUMN_ON_HOLD       = new SQLKeyValue("onHold", "0");
+        public static final SQLKeyValue   COLUMN_ON_HOLD       =
+                new SQLKeyValue("onHold", "0", "BOOLEAN");
         public static final SQLKeyValue   COLUMN_RADIUS        = new SQLKeyValue("radius");
         // Radius around co-ords for geofence
         public static final SQLKeyValue[] keys                 =
@@ -149,12 +155,13 @@ public class DatabaseContract {
 
         public static final String        TABLE_NAME                    = "Tasks";
         public static final SQLKeyValue   COLUMN_BLOCKED                =
-                new SQLKeyValue("blocked", "0");
+                new SQLKeyValue("blocked", "0", "BOOLEAN");
         // Is this in a sequential project and are there things in front of it?
         public static final SQLKeyValue   COLUMN_BLOCKED_BY_DEFER       =
-                new SQLKeyValue("blockedByDefer", "0");// Will always set 'blocked' to true
+                new SQLKeyValue("blockedByDefer", "0", "BOOLEAN");
+        // Will always set 'blocked' to true
         public static final SQLKeyValue   COLUMN_COMPLETE_WITH_CHILDREN =
-                new SQLKeyValue("completeWithChildren", "0");
+                new SQLKeyValue("completeWithChildren", "0", "BOOLEAN");
         public static final SQLKeyValue   COLUMN_CONTEXT                =
                 new SQLKeyValue("context");
         public static final SQLKeyValue   COLUMN_DATE_COMPLETED         =
@@ -168,43 +175,44 @@ public class DatabaseContract {
         public static final SQLKeyValue   COLUMN_DATE_DUE_EFFECTIVE     =
                 new SQLKeyValue("dateDueEffective");
         public static final SQLKeyValue   COLUMN_DUE_SOON               =
-                new SQLKeyValue("isDueSoon", "0");
+                new SQLKeyValue("isDueSoon", "0", "BOOLEAN");
         public static final SQLKeyValue   COLUMN_ESTIMATED_TIME         =
                 new SQLKeyValue("estimatedInMinutes");                    // Always a number
         public static final SQLKeyValue   COLUMN_FLAGGED                =
-                new SQLKeyValue("flagged", "0");
+                new SQLKeyValue("flagged", "0", "BOOLEAN");
         public static final SQLKeyValue   COLUMN_FLAGGED_EFFECTIVE      =
-                new SQLKeyValue("flaggedEffective", "0");
+                new SQLKeyValue("flaggedEffective", "0", "BOOLEAN");
         // Effectively flagged because a parent is flagged
         public static final SQLKeyValue   COLUMN_INBOX                  =
-                new SQLKeyValue("inInbox", "0");
+                new SQLKeyValue("inInbox", "0", "BOOLEAN");
         public static final SQLKeyValue   COLUMN_NEXT                   =
                 new SQLKeyValue("nextTask");// The first available child of this task/project
-        public static final SQLKeyValue   COLUMN_NOTE_PLAINTEXT        =
+        public static final SQLKeyValue   COLUMN_NOTE_PLAINTEXT         =
                 new SQLKeyValue("notePlaintext");                         // Note in plaintext
-        public static final SQLKeyValue   COLUMN_NOTE_XML              =
+        public static final SQLKeyValue   COLUMN_NOTE_XML               =
                 new SQLKeyValue("noteXML");// Note in weird Omni XML format
-        public static final SQLKeyValue   COLUMN_OVERDUE               =
-                new SQLKeyValue("isOverdue", "0");
-        public static final SQLKeyValue   COLUMN_PROJECT               =
-                new SQLKeyValue("isProject", "0");
-        public static final SQLKeyValue   COLUMN_PROJECT_ID            =
+        public static final SQLKeyValue   COLUMN_OVERDUE                =
+                new SQLKeyValue("isOverdue", "0", "BOOLEAN");
+        public static final SQLKeyValue   COLUMN_PROJECT                =
+                new SQLKeyValue("isProject", "0", "BOOLEAN");
+        public static final SQLKeyValue   COLUMN_PROJECT_ID             =
                 new SQLKeyValue("projectID");
-        public static final SQLKeyValue   COLUMN_PROJECT_LAST_REVIEW   =
+        public static final SQLKeyValue   COLUMN_PROJECT_LAST_REVIEW    =
                 new SQLKeyValue("projectReviewDateLast");
-        public static final SQLKeyValue   COLUMN_PROJECT_NEXT_REVIEW   =
+        public static final SQLKeyValue   COLUMN_PROJECT_NEXT_REVIEW    =
                 new SQLKeyValue("projectReviewDateNext");
-        public static final SQLKeyValue   COLUMN_PROJECT_REPEAT_REVIEW =
+        public static final SQLKeyValue   COLUMN_PROJECT_REPEAT_REVIEW  =
                 new SQLKeyValue("projectReviewInterval");
-        public static final SQLKeyValue   COLUMN_PROJECT_STATUS        =
-                new SQLKeyValue("projectStatus", "active");
+        public static final SQLKeyValue   COLUMN_PROJECT_STATUS         =
+                new SQLKeyValue("projectStatus", "active", "TEXT");
         public static final SQLKeyValue   COLUMN_REPETITION_METHOD      =
                 new SQLKeyValue("repetitionMethod");
         public static final SQLKeyValue   COLUMN_REPETITION_RULE        =
                 new SQLKeyValue("repetitionRule");
         public static final SQLKeyValue   COLUMN_TYPE                   =
-                new SQLKeyValue("type", "sequential");// sequential, parallel or single action
-        public static final SQLKeyValue[] keys                         =
+                new SQLKeyValue("type", "sequential", "TEXT");// sequential, parallel or single
+        // action
+        public static final SQLKeyValue[] keys                          =
                 {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_COUNT_AVAILABLE,
                  COLUMN_COUNT_CHILDREN, COLUMN_COUNT_COMPLETED, COLUMN_COUNT_DUE_SOON,
                  COLUMN_COUNT_OVERDUE, COLUMN_COUNT_REMAINING, COLUMN_HAS_CHILDREN, COLUMN_NAME,

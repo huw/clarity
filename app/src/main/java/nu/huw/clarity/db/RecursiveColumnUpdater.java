@@ -81,11 +81,30 @@ public class RecursiveColumnUpdater {
             String status    = mDBHelper.getString(projects, Tasks.COLUMN_PROJECT_STATUS.name);
             String type      = mDBHelper.getString(projects, Tasks.COLUMN_TYPE.name);
 
-            updateProjectChildren(db, id, id, deferDate, dueDate, flagged, status, type, false,
-                                  false);
+            updateProjectChildren(db, id, id, deferDate, dueDate, flagged, status, type);
         }
 
         projects.close();
+
+        // A quick loop to recursively fill down the `blocked` and `blockedByDefer` attributes.
+        // This is pretty much the only way, sadly.
+
+        projectColumns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_BLOCKED.name,
+                                      Tasks.COLUMN_BLOCKED_BY_DEFER.name,
+                                      Tasks.COLUMN_PROJECT_STATUS.name};
+        projects = mDBHelper
+                .query(db, Tasks.TABLE_NAME, projectColumns, Tasks.COLUMN_PROJECT.name + "='1'");
+
+        while (projects.moveToNext()) {
+
+            boolean blocked = mDBHelper.getBoolean(projects, Tasks.COLUMN_BLOCKED.name);
+            boolean blockedByDefer =
+                    mDBHelper.getBoolean(projects, Tasks.COLUMN_BLOCKED_BY_DEFER.name);
+            String id     = mDBHelper.getString(projects, Tasks.COLUMN_ID.name);
+            String status = mDBHelper.getString(projects, Tasks.COLUMN_PROJECT_STATUS.name);
+
+            updateTaskBlocked(db, id, blocked, blockedByDefer, status);
+        }
 
         // Now the same, but for Contexts. Keep in mind that the recursive call in contexts is a
         // little different, see below.
@@ -108,8 +127,103 @@ public class RecursiveColumnUpdater {
         }
 
         contexts.close();
-        Log.i(TAG, "Database tree fully updated");
 
+        // Now, again for projects, but we're just counting now. This loop isn't recursive by any
+        // means, which is good for system resources! More speed!
+
+        projectColumns = new String[]{Tasks.COLUMN_ID.name};
+        projects = mDBHelper
+                .query(db, Tasks.TABLE_NAME, projectColumns, Tasks.COLUMN_PROJECT.name + "='1'");
+
+        while (projects.moveToNext()) {
+
+            int countChildren, countAvailable, countCompleted, countDueSoon, countOverdue,
+                    countRemaining;
+
+            String id = mDBHelper.getString(projects, Tasks.COLUMN_ID.name);
+
+            // Originally, I'd implemented child counting as a recursive function: Each parent
+            // contained a few numbers of the totals of each type of child. But I realised
+            // afterward that the counts were only required for projects—which can't nest anyway.
+            // So we can save on a lot of time and energy by just using SQL to count for us!
+
+            Cursor countChildrenCursor = mDBHelper
+                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=?",
+                           new String[]{id});
+            Cursor countAvailableCursor = mDBHelper
+                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=? AND " +
+                                                       Tasks.COLUMN_DATE_COMPLETED +
+                                                       " IS NULL AND " +
+                                                       Tasks.COLUMN_BLOCKED + "=0 AND " +
+                                                       Tasks.COLUMN_BLOCKED_BY_DEFER.name +
+                                                       "=0 AND " +
+                                                       Tasks.COLUMN_HAS_CHILDREN.name + "=0",
+                           new String[]{id});
+            Cursor countRemainingCursor = mDBHelper
+                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=? AND " +
+                                                       Tasks.COLUMN_DATE_COMPLETED +
+                                                       " IS NULL", new String[]{id});
+            Cursor countDueSoonCursor = mDBHelper
+                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=? AND " +
+                                                       Tasks.COLUMN_DUE_SOON + "=1",
+                           new String[]{id});
+            Cursor countOverdueCursor = mDBHelper
+                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=? AND " +
+                                                       Tasks.COLUMN_OVERDUE + "=1",
+                           new String[]{id});
+
+            // Note that countCompleted + countRemaining = countChildren, so we can save on an
+            // extra SQL query each time.
+
+            countChildren = countChildrenCursor.getCount();
+            countAvailable = countAvailableCursor.getCount();
+            countRemaining = countRemainingCursor.getCount();
+            countCompleted = countChildren - countRemaining;
+            countDueSoon = countDueSoonCursor.getCount();
+            countOverdue = countOverdueCursor.getCount();
+
+            countChildrenCursor.close();
+            countAvailableCursor.close();
+            countRemainingCursor.close();
+            countDueSoonCursor.close();
+            countOverdueCursor.close();
+
+            ContentValues values = new ContentValues();
+
+            // There's no point wasting resources on a call which is going to zero out columns
+            // which are already set to zero. This is much more efficient if we only update the
+            // columns which have counts.
+
+            if (countChildren > 0) {
+                values.put(Tasks.COLUMN_COUNT_CHILDREN.name, countChildren);
+            }
+            if (countAvailable > 0) {
+                values.put(Tasks.COLUMN_COUNT_AVAILABLE.name, countAvailable);
+            }
+            if (countCompleted > 0) {
+                values.put(Tasks.COLUMN_COUNT_COMPLETED.name, countCompleted);
+            }
+            if (countDueSoon > 0) {
+                values.put(Tasks.COLUMN_COUNT_DUE_SOON.name, countDueSoon);
+            }
+            if (countOverdue > 0) {
+                values.put(Tasks.COLUMN_COUNT_OVERDUE.name, countOverdue);
+            }
+            if (countRemaining > 0) {
+                values.put(Tasks.COLUMN_COUNT_REMAINING.name, countRemaining);
+            }
+
+            // And if none of them have counts (an empty project, for some reason), don't update
+            // anything.
+
+            if (values.size() > 0) {
+                db.update(Tasks.TABLE_NAME, values, Tasks.COLUMN_ID.name + "=?", new String[]{id});
+            }
+        }
+
+        projects.close();
+
+        Log.i(TAG, "Database tree fully updated");
         db.close();
     }
 
@@ -127,29 +241,19 @@ public class RecursiveColumnUpdater {
      */
     private void updateProjectChildren(SQLiteDatabase db, String id, String projectID,
                                        String dateDefer, String dateDue, String flagged,
-                                       String status, String type, boolean blocked,
-                                       boolean blockedByDefer) {
+                                       String status, String type) {
 
         String[] columns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_DATE_DEFER.name,
                                         Tasks.COLUMN_DATE_DUE.name, Tasks.COLUMN_FLAGGED.name,
                                         Tasks.COLUMN_DATE_COMPLETED.name,
                                         Tasks.COLUMN_DUE_SOON.name, Tasks.COLUMN_OVERDUE.name,
-                                        Tasks.COLUMN_COUNT_AVAILABLE.name,
-                                        Tasks.COLUMN_COUNT_CHILDREN.name,
-                                        Tasks.COLUMN_COUNT_COMPLETED.name,
-                                        Tasks.COLUMN_COUNT_DUE_SOON.name,
-                                        Tasks.COLUMN_COUNT_OVERDUE.name,
-                                        Tasks.COLUMN_COUNT_REMAINING.name, Tasks.COLUMN_RANK.name,
-                                        Tasks.COLUMN_PROJECT_STATUS.name, Tasks.COLUMN_TYPE.name,
-                                        Tasks.COLUMN_BLOCKED.name,
+                                        Tasks.COLUMN_RANK.name, Tasks.COLUMN_PROJECT_STATUS.name,
+                                        Tasks.COLUMN_TYPE.name, Tasks.COLUMN_BLOCKED.name,
                                         Tasks.COLUMN_BLOCKED_BY_DEFER.name};
 
         Cursor children = mDBHelper
                 .query(db, Tasks.TABLE_NAME, columns, Tasks.COLUMN_PARENT_ID.name + "=?",
                        new String[]{id});
-
-        int countChildren, countCompleted, countDueSoon, countOverdue, countRemaining;
-        countChildren = countCompleted = countDueSoon = countOverdue = countRemaining = 0;
 
         long   nextRank = Long.MAX_VALUE;
         String nextID   = "";
@@ -160,26 +264,21 @@ public class RecursiveColumnUpdater {
         // Batch set values for this item's children. Useful for cascading values (particularly
         // when the cascade isn't conditional).
 
-        blocked = blocked || status.equals("inactive");
-
-        if (blocked) {
-            childValues.putAll(mBlockedValue);
-        }
-        if (blockedByDefer) {
-            childValues.put(Tasks.COLUMN_BLOCKED_BY_DEFER.name, true);
-        }
         if (flagged.equals("1")) {
             childValues.put(Tasks.COLUMN_FLAGGED_EFFECTIVE.name, flagged);
         }
         childValues.put(Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name, dateDefer);
         childValues.put(Tasks.COLUMN_DATE_DUE_EFFECTIVE.name, dateDue);
+        childValues.put(Tasks.COLUMN_PROJECT_ID.name, projectID);
 
-        if (childValues.size() > 0) {
-            db.update(Tasks.TABLE_NAME, childValues, Tasks.COLUMN_PARENT_ID.name + "=?",
-                      new String[]{id});
-        }
+        db.update(Tasks.TABLE_NAME, childValues, Tasks.COLUMN_PARENT_ID.name + "=?",
+                  new String[]{id});
+
+        boolean hasChildren = false;
 
         while (children.moveToNext()) {
+
+            hasChildren = true;
 
             // This section here applies before the recursive call. Basically, all of this code
             // will fill the tree _downward_, with each call pushing deeper into the stack but
@@ -192,21 +291,33 @@ public class RecursiveColumnUpdater {
             String childDateDefer = mDBHelper.getString(children, Tasks.COLUMN_DATE_DEFER.name);
             String childDateDue   = mDBHelper.getString(children, Tasks.COLUMN_DATE_DUE.name);
             String childFlagged   = mDBHelper.getString(children, Tasks.COLUMN_FLAGGED.name);
+            String childStatus    = mDBHelper.getString(children, Tasks.COLUMN_PROJECT_STATUS.name);
+            String childType      = mDBHelper.getString(children, Tasks.COLUMN_TYPE.name);
             long childRank =
                     Long.valueOf(mDBHelper.getString(children, Tasks.COLUMN_RANK.name));
 
+            String localDateDefer = dateDefer;
+            String localDateDue   = dateDue;
+            String localFlagged   = flagged;
+
             if (childDateDefer != null) {
-                dateDefer = childDateDefer;
+                localDateDefer = childDateDefer;
             }
             if (childDateDue != null) {
-                dateDue = childDateDue;
+                localDateDue = childDateDue;
             }
             if (childFlagged.equals("1")) {
-                flagged = childFlagged;
+                localFlagged = "1";
             }
 
-            updateProjectChildren(db, childID, projectID, dateDefer, dateDue, flagged, status, type,
-                                  blocked, blockedByDefer);
+            // Note: We don't pass child versions of `dateDefer`, `dateDue` and `dateFlagged`
+            // because they're appropriately altered in the lines directly above. We don't pass
+            // child versions of `blocked` and `blockedByDefer` because they're only going to
+            // have been set by the subroutines above this loop, so we can get the values from
+            // there without making more calls.
+
+            updateProjectChildren(db, childID, projectID, localDateDefer, localDateDue,
+                                  localFlagged, childStatus, childType);
 
             // All of the code past the recursive call will happen on the way back out, or up the
             // tree. Once each call returns, this code runs on the level above where the code was
@@ -221,19 +332,6 @@ public class RecursiveColumnUpdater {
                     mDBHelper.getString(children, Tasks.COLUMN_DATE_COMPLETED.name) != null;
             boolean childBlockedByDefer =
                     mDBHelper.getBoolean(children, Tasks.COLUMN_BLOCKED_BY_DEFER.name);
-
-            countChildren += 1;
-            countCompleted += completed ? 1 : 0;
-            countDueSoon += mDBHelper.getInt(children, Tasks.COLUMN_DUE_SOON.name);
-            countOverdue += mDBHelper.getInt(children, Tasks.COLUMN_OVERDUE.name);
-            countRemaining += completed ? 0 : 1;
-
-            // Add counts for children
-            countChildren += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_CHILDREN.name);
-            countCompleted += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_COMPLETED.name);
-            countDueSoon += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_DUE_SOON.name);
-            countOverdue += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_OVERDUE.name);
-            countRemaining += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_REMAINING.name);
 
             // Determine next task by comparing ranks. The lower rank, when converted to a signed
             // 'long', is higher up on the list and thus the next rank. This only applied to
@@ -253,8 +351,10 @@ public class RecursiveColumnUpdater {
 
         children.close();
 
-        // Parent project
-        values.put(Tasks.COLUMN_PROJECT_ID.name, projectID);
+        // Has children
+        if (hasChildren) {
+            values.put(Contexts.COLUMN_HAS_CHILDREN.name, true);
+        }
 
         // Next task
         if (!nextID.equals("")) {
@@ -274,24 +374,6 @@ public class RecursiveColumnUpdater {
 
         if (status.equals("dropped")) {
             values.putAll(mBlockedValue);
-        }
-
-        // Child counts
-        if (countChildren > 0) {
-            values.put(Tasks.COLUMN_COUNT_CHILDREN.name, countChildren);
-            values.put(Tasks.COLUMN_HAS_CHILDREN.name, true);
-        }
-        if (countCompleted > 0) {
-            values.put(Tasks.COLUMN_COUNT_COMPLETED.name, countCompleted);
-        }
-        if (countDueSoon > 0) {
-            values.put(Tasks.COLUMN_COUNT_DUE_SOON.name, countDueSoon);
-        }
-        if (countOverdue > 0) {
-            values.put(Tasks.COLUMN_COUNT_OVERDUE.name, countOverdue);
-        }
-        if (countRemaining > 0) {
-            values.put(Tasks.COLUMN_COUNT_REMAINING.name, countRemaining);
         }
 
         // Overdue & Due Soon
@@ -415,10 +497,20 @@ public class RecursiveColumnUpdater {
 
         // Get counts of task children
 
-        int countChildren, countCompleted, countDueSoon, countOverdue, countRemaining;
+        int countChildren, countAvailable, countCompleted, countDueSoon, countOverdue,
+                countRemaining;
 
         Cursor countChildrenCursor = mDBHelper
                 .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=?", new String[]{id});
+        Cursor countAvailableCursor =
+                mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
+                                                            Tasks.COLUMN_DATE_COMPLETED +
+                                                            " IS NULL AND " +
+                                                            Tasks.COLUMN_BLOCKED + "=0 AND " +
+                                                            Tasks.COLUMN_BLOCKED_BY_DEFER.name +
+                                                            "=0 AND " +
+                                                            Tasks.COLUMN_HAS_CHILDREN.name + "=0",
+                                new String[]{id});
         Cursor countRemainingCursor =
                 mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
                                                             Tasks.COLUMN_DATE_COMPLETED +
@@ -433,12 +525,14 @@ public class RecursiveColumnUpdater {
                                 new String[]{id});
 
         countChildren = countChildrenCursor.getCount();
+        countAvailable = countAvailableCursor.getCount();
         countRemaining = countRemainingCursor.getCount();
         countCompleted = countChildren - countRemaining;
         countDueSoon = countDueSoonCursor.getCount();
         countOverdue = countOverdueCursor.getCount();
 
         countChildrenCursor.close();
+        countAvailableCursor.close();
         countRemainingCursor.close();
         countDueSoonCursor.close();
         countOverdueCursor.close();
@@ -458,6 +552,7 @@ public class RecursiveColumnUpdater {
             updateContextChildren(db, childID, childActive, activeEffective, childOnHold);
 
             countChildren += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_CHILDREN.name);
+            countAvailable += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_AVAILABLE.name);
             countCompleted += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_COMPLETED.name);
             countDueSoon += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_DUE_SOON.name);
             countOverdue += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_OVERDUE.name);
@@ -469,25 +564,74 @@ public class RecursiveColumnUpdater {
         ContentValues values = new ContentValues();
 
         if (countChildren > 0) {
-            values.put(Tasks.COLUMN_COUNT_CHILDREN.name, countChildren);
-            values.put(Tasks.COLUMN_HAS_CHILDREN.name, true);
+            values.put(Contexts.COLUMN_COUNT_CHILDREN.name, countChildren);
+        }
+        if (countAvailable > 0) {
+            values.put(Contexts.COLUMN_COUNT_AVAILABLE.name, countAvailable);
         }
         if (countCompleted > 0) {
-            values.put(Tasks.COLUMN_COUNT_COMPLETED.name, countCompleted);
+            values.put(Contexts.COLUMN_COUNT_COMPLETED.name, countCompleted);
         }
         if (countDueSoon > 0) {
-            values.put(Tasks.COLUMN_COUNT_DUE_SOON.name, countDueSoon);
+            values.put(Contexts.COLUMN_COUNT_DUE_SOON.name, countDueSoon);
         }
         if (countOverdue > 0) {
-            values.put(Tasks.COLUMN_COUNT_OVERDUE.name, countOverdue);
+            values.put(Contexts.COLUMN_COUNT_OVERDUE.name, countOverdue);
         }
         if (countRemaining > 0) {
-            values.put(Tasks.COLUMN_COUNT_REMAINING.name, countRemaining);
+            values.put(Contexts.COLUMN_COUNT_REMAINING.name, countRemaining);
         }
 
         if (values.size() > 0) {
             db.update(Contexts.TABLE_NAME, values, Contexts.COLUMN_ID.name + "=?",
                       new String[]{id});
         }
+    }
+
+    /**
+     * Basically a re-do of the origin project recursive tree-caller, but this one has to come
+     * after it for various reasons (it relies on data being set which cannot be set until the
+     * loop has finished).
+     *
+     * If a task is blocked, it'll ensure that all of its children are also blocked. Patriotically.
+     */
+    private void updateTaskBlocked(SQLiteDatabase db, String id, boolean blocked,
+                                   boolean blockedByDefer, String status) {
+
+        blocked = blocked || status.equals("inactive");
+
+        ContentValues childValues = new ContentValues();
+
+        if (blocked) {
+            childValues.putAll(mBlockedValue);
+        }
+        if (blockedByDefer) {
+            childValues.put(Tasks.COLUMN_BLOCKED_BY_DEFER.name, true);
+        }
+
+        if (childValues.size() > 0) {
+            db.update(Tasks.TABLE_NAME, childValues, Tasks.COLUMN_PARENT_ID.name + "=?",
+                      new String[]{id});
+        }
+
+        String[] columns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_BLOCKED.name,
+                                        Tasks.COLUMN_BLOCKED_BY_DEFER.name,
+                                        Tasks.COLUMN_PROJECT_STATUS.name};
+        Cursor children = mDBHelper
+                .query(db, Tasks.TABLE_NAME, columns, Tasks.COLUMN_PARENT_ID.name + "=?",
+                       new String[]{id});
+
+        while (children.moveToNext()) {
+
+            boolean childBlocked = mDBHelper.getBoolean(children, Tasks.COLUMN_BLOCKED.name);
+            boolean childBlockedByDefer =
+                    mDBHelper.getBoolean(children, Tasks.COLUMN_BLOCKED_BY_DEFER.name);
+            String childID     = mDBHelper.getString(children, Tasks.COLUMN_ID.name);
+            String childStatus = mDBHelper.getString(children, Tasks.COLUMN_PROJECT_STATUS.name);
+
+            updateTaskBlocked(db, childID, childBlocked, childBlockedByDefer, childStatus);
+        }
+
+        children.close();
     }
 }
