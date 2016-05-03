@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.Date;
+
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
@@ -262,6 +264,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return 0;
     }
 
+    public long getLong(Cursor cursor, String columnName) {
+
+        int index = cursor.getColumnIndex(columnName);
+        if (index != -1 && cursor.getColumnCount() != 0) {
+            return cursor.getLong(index);
+        }
+        return 0;
+    }
+
     /**
      * Shorthand for getting a boolean. Null = false.
      */
@@ -269,6 +280,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String string = getString(cursor, columnName);
         return string != null && string.equals("1");
+    }
+
+    /**
+     * Get a date from a string.
+     */
+    public Date getDate(Cursor cursor, String columnName) {
+
+        int index = cursor.getColumnIndex(columnName);
+        if (index != -1 && cursor.getColumnCount() != 0) {
+            long milliseconds = cursor.getLong(index);
+
+            return new Date(milliseconds);
+        }
+        return null;
     }
 
     /**

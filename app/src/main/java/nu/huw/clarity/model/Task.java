@@ -26,7 +26,7 @@ public class Task extends Entry {
     public String  noteXML;
     public boolean overdue;
     public boolean project;
-    public boolean projectID;
+    public String  projectID;
     public Date    lastReview;
     public Date    nextReview;
     public Date    reviewInterval;

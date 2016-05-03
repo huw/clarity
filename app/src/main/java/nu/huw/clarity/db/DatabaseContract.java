@@ -41,7 +41,7 @@ public class DatabaseContract {
         }
     }
 
-    public abstract static class Table {
+    public static abstract class Table {
 
         SQLKeyValue[] keys;
         String        TABLE_NAME;
@@ -55,6 +55,8 @@ public class DatabaseContract {
         public static final SQLKeyValue   COLUMN_DATE_MODIFIED = new SQLKeyValue("dateModified");
         public static final SQLKeyValue[] keys                 =
                 {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED};
+        public static final String[]      columns              =
+                {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name};
     }
 
     public static abstract class Entry extends Base {
@@ -90,6 +92,13 @@ public class DatabaseContract {
                  COLUMN_COUNT_COMPLETED, COLUMN_COUNT_DUE_SOON, COLUMN_COUNT_OVERDUE,
                  COLUMN_COUNT_REMAINING, COLUMN_HAS_CHILDREN, COLUMN_NAME, COLUMN_PARENT_ID,
                  COLUMN_RANK};
+        public static final String[]      columns                 =
+                {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name,
+                 COLUMN_ACTIVE.name, COLUMN_ACTIVE_EFFECTIVE.name, COLUMN_COUNT_AVAILABLE.name,
+                 COLUMN_COUNT_CHILDREN.name, COLUMN_COUNT_COMPLETED.name,
+                 COLUMN_COUNT_DUE_SOON.name, COLUMN_COUNT_OVERDUE.name, COLUMN_COUNT_REMAINING.name,
+                 COLUMN_HAS_CHILDREN.name, COLUMN_NAME.name, COLUMN_PARENT_ID.name,
+                 COLUMN_RANK.name};
     }
 
     public static abstract class Attachments extends Base {
@@ -103,6 +112,10 @@ public class DatabaseContract {
         public static final SQLKeyValue[] keys               =
                 {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_NAME, COLUMN_PATH,
                  COLUMN_PARENT_ID, COLUMN_PNG_PREVIEW};
+        public static final String[]      columns            =
+                {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name,
+                 COLUMN_NAME.name, COLUMN_PATH.name, COLUMN_PARENT_ID.name,
+                 COLUMN_PNG_PREVIEW.name};
     }
 
     public static abstract class Contexts extends Entry {
@@ -126,6 +139,15 @@ public class DatabaseContract {
                  COLUMN_COUNT_REMAINING, COLUMN_HAS_CHILDREN, COLUMN_NAME, COLUMN_PARENT_ID,
                  COLUMN_RANK, COLUMN_ALTITUDE, COLUMN_LATITUDE, COLUMN_LOCATION_NAME,
                  COLUMN_LONGITUDE, COLUMN_ON_HOLD, COLUMN_RADIUS};
+        public static final String[]      columns              =
+                {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name,
+                 COLUMN_ACTIVE.name, COLUMN_ACTIVE_EFFECTIVE.name, COLUMN_COUNT_AVAILABLE.name,
+                 COLUMN_COUNT_CHILDREN.name, COLUMN_COUNT_COMPLETED.name,
+                 COLUMN_COUNT_DUE_SOON.name, COLUMN_COUNT_OVERDUE.name, COLUMN_COUNT_REMAINING.name,
+                 COLUMN_HAS_CHILDREN.name, COLUMN_NAME.name, COLUMN_PARENT_ID.name,
+                 COLUMN_RANK.name, COLUMN_ALTITUDE.name, COLUMN_LATITUDE.name,
+                 COLUMN_LOCATION_NAME.name, COLUMN_LONGITUDE.name, COLUMN_ON_HOLD.name,
+                 COLUMN_RADIUS.name};
     }
 
     public static abstract class Folders extends Entry {
@@ -140,6 +162,9 @@ public class DatabaseContract {
         // Contains a bunch of data about the perspective TODO: Expand
         public static final SQLKeyValue[] keys         =
                 {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_VALUE};
+        public static final String[]      columns      =
+                {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name,
+                 COLUMN_VALUE.name};
     }
 
     public static abstract class Settings extends Base {
@@ -149,15 +174,18 @@ public class DatabaseContract {
         // Keys and values for the setting and type TODO: Expand
         public static final SQLKeyValue[] keys         =
                 {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_VALUE};
+        public static final String[]      columns      =
+                {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name,
+                 COLUMN_VALUE.name};
     }
 
     public static abstract class Tasks extends Entry {
 
-        public static final String        TABLE_NAME                    = "Tasks";
-        public static final SQLKeyValue   COLUMN_BLOCKED                =
+        public static final String        TABLE_NAME              = "Tasks";
+        public static final SQLKeyValue   COLUMN_BLOCKED          =
                 new SQLKeyValue("blocked", "0", "BOOLEAN");
         // Is this in a sequential project and are there things in front of it?
-        public static final SQLKeyValue   COLUMN_BLOCKED_BY_DEFER       =
+        public static final SQLKeyValue   COLUMN_BLOCKED_BY_DEFER =
                 new SQLKeyValue("blockedByDefer", "0", "BOOLEAN");
         // Will always set 'blocked' to true
         public static final SQLKeyValue   COLUMN_COMPLETE_WITH_CHILDREN =
@@ -212,7 +240,7 @@ public class DatabaseContract {
         public static final SQLKeyValue   COLUMN_TYPE                   =
                 new SQLKeyValue("type", "sequential", "TEXT");// sequential, parallel or single
         // action
-        public static final SQLKeyValue[] keys                          =
+        public static final SQLKeyValue[] keys                    =
                 {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_COUNT_AVAILABLE,
                  COLUMN_COUNT_CHILDREN, COLUMN_COUNT_COMPLETED, COLUMN_COUNT_DUE_SOON,
                  COLUMN_COUNT_OVERDUE, COLUMN_COUNT_REMAINING, COLUMN_HAS_CHILDREN, COLUMN_NAME,
@@ -225,5 +253,21 @@ public class DatabaseContract {
                  COLUMN_PROJECT_LAST_REVIEW, COLUMN_PROJECT_NEXT_REVIEW,
                  COLUMN_PROJECT_REPEAT_REVIEW, COLUMN_PROJECT_STATUS, COLUMN_REPETITION_METHOD,
                  COLUMN_REPETITION_RULE, COLUMN_TYPE};
+        public static final String[]      columns                 =
+                {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name,
+                 COLUMN_COUNT_AVAILABLE.name, COLUMN_COUNT_CHILDREN.name,
+                 COLUMN_COUNT_COMPLETED.name, COLUMN_COUNT_DUE_SOON.name, COLUMN_COUNT_OVERDUE.name,
+                 COLUMN_COUNT_REMAINING.name, COLUMN_HAS_CHILDREN.name, COLUMN_NAME.name,
+                 COLUMN_PARENT_ID.name, COLUMN_RANK.name, COLUMN_BLOCKED.name,
+                 COLUMN_BLOCKED_BY_DEFER.name, COLUMN_COMPLETE_WITH_CHILDREN.name,
+                 COLUMN_CONTEXT.name, COLUMN_DATE_COMPLETED.name, COLUMN_DATE_DEFER.name,
+                 COLUMN_DATE_DEFER_EFFECTIVE.name, COLUMN_DATE_DUE.name,
+                 COLUMN_DATE_DUE_EFFECTIVE.name, COLUMN_DUE_SOON.name, COLUMN_ESTIMATED_TIME.name,
+                 COLUMN_FLAGGED.name, COLUMN_FLAGGED_EFFECTIVE.name, COLUMN_INBOX.name,
+                 COLUMN_NEXT.name, COLUMN_NOTE_PLAINTEXT.name, COLUMN_NOTE_XML.name,
+                 COLUMN_OVERDUE.name, COLUMN_PROJECT.name, COLUMN_PROJECT_ID.name,
+                 COLUMN_PROJECT_LAST_REVIEW.name, COLUMN_PROJECT_NEXT_REVIEW.name,
+                 COLUMN_PROJECT_REPEAT_REVIEW.name, COLUMN_PROJECT_STATUS.name,
+                 COLUMN_REPETITION_METHOD.name, COLUMN_REPETITION_RULE.name, COLUMN_TYPE.name};
     }
 }
