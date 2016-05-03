@@ -73,10 +73,14 @@ public class DataModelHelper {
      */
     public List<Context> getContexts(String parentID) {
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String selection = parentID.isEmpty() ? Contexts.COLUMN_PARENT_ID + " IS NULL" :
-                           Contexts.COLUMN_PARENT_ID + " = ?";
-        String[] selectionArgs = {parentID};
+        SQLiteDatabase db            = dbHelper.getWritableDatabase();
+        String         selection     = Contexts.COLUMN_PARENT_ID + " = ?";
+        String[]       selectionArgs = {parentID};
+
+        if (parentID.isEmpty()) {
+            selection = Contexts.COLUMN_PARENT_ID + " IS NULL";
+            selectionArgs = new String[]{};
+        }
 
         Cursor cursor =
                 dbHelper.query(db, Contexts.TABLE_NAME, Contexts.columns, selection, selectionArgs);
@@ -136,10 +140,14 @@ public class DataModelHelper {
 
     public List<Folder> getFolders(String parentID) {
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String selection = parentID.isEmpty() ? Folders.COLUMN_PARENT_ID + " IS NULL" :
-                           Folders.COLUMN_PARENT_ID + " = ?";
-        String[] selectionArgs = {parentID};
+        SQLiteDatabase db            = dbHelper.getWritableDatabase();
+        String         selection     = Folders.COLUMN_PARENT_ID + " = ?";
+        String[]       selectionArgs = {parentID};
+
+        if (parentID.isEmpty()) {
+            selection = Folders.COLUMN_PARENT_ID + " IS NULL";
+            selectionArgs = new String[]{};
+        }
 
         Cursor cursor =
                 dbHelper.query(db, Folders.TABLE_NAME, Folders.columns, selection, selectionArgs);
@@ -187,10 +195,14 @@ public class DataModelHelper {
 
     public List<Task> getTasks(String parentID) {
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String selection = parentID.isEmpty() ? Tasks.COLUMN_PARENT_ID + " IS NULL" :
-                           Tasks.COLUMN_PARENT_ID + " = ?";
-        String[] selectionArgs = {parentID};
+        SQLiteDatabase db            = dbHelper.getWritableDatabase();
+        String         selection     = Tasks.COLUMN_PARENT_ID + " = ?";
+        String[]       selectionArgs = {parentID};
+
+        if (parentID.isEmpty()) {
+            selection = Tasks.COLUMN_PARENT_ID + " IS NULL";
+            selectionArgs = new String[]{};
+        }
 
         Cursor cursor =
                 dbHelper.query(db, Tasks.TABLE_NAME, Tasks.columns, selection, selectionArgs);

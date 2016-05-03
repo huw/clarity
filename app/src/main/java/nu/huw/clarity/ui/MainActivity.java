@@ -3,16 +3,16 @@ package nu.huw.clarity.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
-import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.sync.Synchroniser;
-import nu.huw.clarity.ui.fragments.EntryListFragment;
+import nu.huw.clarity.ui.fragments.EntryFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements EntryListFragment.ListInteractionListener {
+        implements EntryFragment.OnListFragmentInteractionListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     /**
@@ -54,16 +54,10 @@ public class MainActivity extends AppCompatActivity
         openFragments();
     }
 
-    @Override public void onListInteraction() {}
-
     public void openFragments() {
 
-        DatabaseHelper dbHelper = new DatabaseHelper();
-        dbHelper.onUpgrade(dbHelper.getWritableDatabase(), 0, 1);
-        Synchroniser.synchronise();
-
-        EntryListFragment listFragment = new EntryListFragment();
-
-        getFragmentManager().beginTransaction().add(R.id.fragment_container, listFragment).commit();
+        Fragment fragment = new EntryFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment)
+                                   .commit();
     }
 }
