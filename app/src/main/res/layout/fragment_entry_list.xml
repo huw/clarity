@@ -7,6 +7,8 @@
     android:name="nu.huw.clarity.ui.fragments.EntryFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fadeScrollbars="true"
+    android:scrollbars="vertical"
     app:layoutManager="LinearLayoutManager"
     tools:context=".ui.fragments.ListFragment"
     tools:listitem="@layout/fragment_entry"/>
