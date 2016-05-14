@@ -3,8 +3,15 @@ package nu.huw.clarity.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.MenuItem;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
@@ -24,12 +31,40 @@ public class MainActivity extends AppCompatActivity
      * application's context, so I can access AccountManager stuff. This is called from any class
      * which needs to get a basic context for the app.
      */
-    public static Context context;
+    public static Context      context;
+    public        DrawerLayout drawerLayout;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Toolbar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        final ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        // Nav Drawer
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        NavigationView view = (NavigationView) findViewById(R.id.drawer);
+
+        if (view != null && drawerLayout != null) {
+
+            view.setNavigationItemSelectedListener(
+                    new NavigationView.OnNavigationItemSelectedListener() {
+                        @Override public boolean onNavigationItemSelected(MenuItem menuItem) {
+
+                            Log.d(TAG, menuItem.getTitle() + " pressed in navdrawer");
+                            return true;
+                        }
+                    });
+        }
 
         context = getApplicationContext();
 
@@ -52,6 +87,17 @@ public class MainActivity extends AppCompatActivity
         Synchroniser.synchronise();
 
         openFragments();
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void openFragments() {
