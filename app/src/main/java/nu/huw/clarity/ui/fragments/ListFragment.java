@@ -15,6 +15,7 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.db.DataModelHelper;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapters.TaskAdapter;
+import nu.huw.clarity.ui.misc.DividerItemDecoration;
 
 /**
  * A fragment representing a list of entries (tasks, contexts, etc). This is the thing which gets
@@ -62,6 +63,7 @@ public class ListFragment extends Fragment {
             Context      context      = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
             recyclerView.setAdapter(new TaskAdapter(tasks, mListener));
         }
         return view;
