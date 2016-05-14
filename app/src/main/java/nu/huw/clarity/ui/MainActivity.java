@@ -9,10 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.sync.Synchroniser;
-import nu.huw.clarity.ui.fragments.EntryFragment;
+import nu.huw.clarity.ui.fragments.ListFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements EntryFragment.OnListFragmentInteractionListener {
+        implements ListFragment.OnListFragmentInteractionListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     /**
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity
 
     public void openFragments() {
 
-        Fragment fragment = new EntryFragment();
+        Fragment fragment = new ListFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment)
                                    .commit();
     }

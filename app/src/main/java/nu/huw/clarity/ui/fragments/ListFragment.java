@@ -21,21 +21,22 @@ import nu.huw.clarity.ui.adapters.TaskAdapter;
  * swapped around by the main activity—it holds a <i>full</i> list. The Adapter, then, will
  * populate this list with the appropriate subviews (or really, subfragments).
  */
-public class EntryFragment extends Fragment {
+public class ListFragment extends Fragment {
 
+    private static final String TAG = ListFragment.class.getSimpleName();
     private OnListFragmentInteractionListener mListener;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the fragment (e.g. upon
      * screen orientation changes).
      */
-    public EntryFragment() {}
+    public ListFragment() {}
 
     // TODO: Customize parameter initialization
-    @SuppressWarnings("unused") public static EntryFragment newInstance() {
+    @SuppressWarnings("unused") public static ListFragment newInstance() {
 
-        EntryFragment fragment = new EntryFragment();
-        Bundle        args     = new Bundle();
+        ListFragment fragment = new ListFragment();
+        Bundle       args     = new Bundle();
         fragment.setArguments(args);
         return fragment;
     }

@@ -248,6 +248,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int index = cursor.getColumnIndex(columnName);
         if (index != -1 && cursor.getColumnCount() != 0) {
             return cursor.getString(index);
+        } else if (index == -1) {
+            throw new IndexOutOfBoundsException("No such column " + columnName);
         }
         return null;
     }
@@ -260,6 +262,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int index = cursor.getColumnIndex(columnName);
         if (index != -1 && cursor.getColumnCount() != 0) {
             return cursor.getInt(index);
+        } else if (index == -1) {
+            throw new IndexOutOfBoundsException("No such column " + columnName);
         }
         return 0;
     }
@@ -269,6 +273,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int index = cursor.getColumnIndex(columnName);
         if (index != -1 && cursor.getColumnCount() != 0) {
             return cursor.getLong(index);
+        } else if (index == -1) {
+            throw new IndexOutOfBoundsException("No such column " + columnName);
         }
         return 0;
     }
@@ -291,7 +297,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (index != -1 && cursor.getColumnCount() != 0) {
             long milliseconds = cursor.getLong(index);
 
-            return new Date(milliseconds);
+            if (milliseconds != 0) return new Date(milliseconds);
+        } else if (index == -1) {
+            throw new IndexOutOfBoundsException("No such column " + columnName);
         }
         return null;
     }

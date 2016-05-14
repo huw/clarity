@@ -1,16 +1,21 @@
 package nu.huw.clarity.ui.adapters;
 
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 
 import nu.huw.clarity.R;
+import nu.huw.clarity.db.DataModelHelper;
 import nu.huw.clarity.model.Task;
-import nu.huw.clarity.ui.fragments.EntryFragment.OnListFragmentInteractionListener;
+import nu.huw.clarity.ui.fragments.ListFragment.OnListFragmentInteractionListener;
 
 /**
  * This class handles the display of the data in the RecyclerView—it's passed a data set and
@@ -18,13 +23,17 @@ import nu.huw.clarity.ui.fragments.EntryFragment.OnListFragmentInteractionListen
  */
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
+    private static final String TAG = TaskAdapter.class.getSimpleName();
     private final OnListFragmentInteractionListener mListener;
     private final List<Task>                        mValues;
+    private final Map<String, String>               mContextNameMap;
 
     public TaskAdapter(List<Task> items, OnListFragmentInteractionListener listener) {
 
         mValues = items;
         mListener = listener;
+        DataModelHelper DMHelper = new DataModelHelper();
+        mContextNameMap = DMHelper.getContextNameMap();
     }
 
     /**
@@ -44,8 +53,28 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     @Override public void onBindViewHolder(final ViewHolder holder, int position) {
 
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).name);
+
+        String     date        = "";
+        DateFormat localFormat = SimpleDateFormat.getDateInstance();
+
+        // Navigate between date due and effective date due, and also set the date due view to
+        // italics if it's an effective due date.
+        if (holder.mItem.dateDue != null) {
+
+            date = "Due " + localFormat.format(holder.mItem.dateDue);
+        } else if (holder.mItem.dateDueEffective != null) {
+
+            date = "Due " + localFormat.format(holder.mItem.dateDueEffective);
+            holder.mDateView.setTypeface(null, Typeface.ITALIC);
+        }
+
+        String context = mContextNameMap.get(holder.mItem.context);
+
+        if (context == null) context = "";
+
+        holder.mNameView.setText(holder.mItem.name);
+        holder.mDateView.setText(date);
+        holder.mContextView.setText(context);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -70,21 +99,23 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public final View     mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
+        public final TextView mNameView;
+        public final TextView mContextView;
+        public final TextView mDateView;
         public       Task     mItem;
 
         public ViewHolder(View view) {
 
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mNameView = (TextView) view.findViewById(R.id.name);
+            mContextView = (TextView) view.findViewById(R.id.context);
+            mDateView = (TextView) view.findViewById(R.id.date);
         }
 
         @Override public String toString() {
 
-            return super.toString() + " '" + mContentView.getText() + "'";
+            return super.toString() + " '" + mNameView.getText() + "'";
         }
     }
 }
