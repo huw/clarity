@@ -10,13 +10,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.sync.Synchroniser;
 import nu.huw.clarity.ui.fragments.ListFragment;
+import nu.huw.clarity.ui.misc.ColorStateLists;
 
 public class MainActivity extends AppCompatActivity
         implements ListFragment.OnListFragmentInteractionListener {
@@ -31,13 +31,16 @@ public class MainActivity extends AppCompatActivity
      * application's context, so I can access AccountManager stuff. This is called from any class
      * which needs to get a basic context for the app.
      */
-    public static Context      context;
-    public        DrawerLayout drawerLayout;
+    public static Context        context;
+    public        DrawerLayout   drawerLayout;
+    private       NavigationView navigationView;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        context = getApplicationContext();
 
         // Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -51,22 +54,25 @@ public class MainActivity extends AppCompatActivity
 
         // Nav Drawer
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        navigationView = (NavigationView) findViewById(R.id.drawer);
 
-        NavigationView view = (NavigationView) findViewById(R.id.drawer);
+        if (navigationView != null && drawerLayout != null) {
 
-        if (view != null && drawerLayout != null) {
+            // Keep all icons as their original colours
+            navigationView.setItemIconTintList(null);
+            changeColors(R.id.nav_forecast);
 
-            view.setNavigationItemSelectedListener(
+            navigationView.setNavigationItemSelectedListener(
                     new NavigationView.OnNavigationItemSelectedListener() {
                         @Override public boolean onNavigationItemSelected(MenuItem menuItem) {
 
-                            Log.d(TAG, menuItem.getTitle() + " pressed in navdrawer");
+                            changeColors(menuItem.getItemId());
+
+                            drawerLayout.closeDrawer(GravityCompat.START);
                             return true;
                         }
                     });
         }
-
-        context = getApplicationContext();
 
         if (!AccountManagerHelper.doesAccountExist()) {
 
@@ -100,10 +106,49 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override public void onBackPressed() {
+
+        if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            this.drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     public void openFragments() {
 
         Fragment fragment = new ListFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment)
                                    .commit();
+    }
+
+    public void changeColors(int menuItem) {
+
+        switch (menuItem) {
+            case R.id.nav_forecast:
+                setTheme(R.style.AppTheme_Red);
+                navigationView.setItemTextColor(ColorStateLists.red);
+                break;
+            case R.id.nav_inbox:
+                setTheme(R.style.AppTheme_BlueGrey);
+                navigationView.setItemTextColor(ColorStateLists.blueGrey);
+                break;
+            case R.id.nav_projects:
+                setTheme(R.style.AppTheme_Blue);
+                navigationView.setItemTextColor(ColorStateLists.blue);
+                break;
+            case R.id.nav_contexts:
+                setTheme(R.style.AppTheme);
+                navigationView.setItemTextColor(ColorStateLists.purple);
+                break;
+            case R.id.nav_flagged:
+                setTheme(R.style.AppTheme_Orange);
+                navigationView.setItemTextColor(ColorStateLists.orange);
+                break;
+            case R.id.nav_nearby:
+                setTheme(R.style.AppTheme_Green);
+                navigationView.setItemTextColor(ColorStateLists.green);
+                break;
+        }
     }
 }

@@ -4,4 +4,16 @@
     <color name="primary_dark">#4a1f63</color>
     <color name="divider_light">#1f000000</color>
     <color name="divider_dark">#1fffffff</color>
+
+    <!-- Alternate Colours -->
+    <color name="primary_red">#F44336</color>
+    <color name="primary_red_dark">#C2352B</color>
+    <color name="primary_blue_grey">#607D8B</color>
+    <color name="primary_blue_grey_dark">#3E5059</color>
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_blue_dark">#1B75BF</color>
+    <color name="primary_orange">#FF9100</color>
+    <color name="primary_orange_dark">#E64A19</color>
+    <color name="primary_green">#4CAF50</color>
+    <color name="primary_green_dark">#367D38</color>
 </resources>

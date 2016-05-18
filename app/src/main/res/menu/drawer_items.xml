@@ -4,21 +4,27 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_forecast"
+            android:icon="@drawable/ic_forecast_red_24dp"
             android:title="@string/forecast"/>
         <item
             android:id="@+id/nav_inbox"
+            android:icon="@drawable/ic_inbox_bluegrey_24dp"
             android:title="@string/inbox"/>
         <item
             android:id="@+id/nav_projects"
+            android:icon="@drawable/ic_projects_blue_24dp"
             android:title="@string/projects"/>
         <item
             android:id="@+id/nav_contexts"
+            android:icon="@drawable/ic_contexts_purple_24dp"
             android:title="@string/contexts"/>
         <item
             android:id="@+id/nav_flagged"
+            android:icon="@drawable/ic_flaged_orange_24dp"
             android:title="@string/flagged"/>
         <item
             android:id="@+id/nav_nearby"
+            android:icon="@drawable/ic_nearby_green_24dp"
             android:title="@string/nearby"/>
     </group>
 

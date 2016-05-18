@@ -8,6 +8,37 @@
         <item name="buttonStyle">@style/ColouredButton</item>
     </style>
 
+    <!-- Alternate hues -->
+    <style name="AppTheme.Red" parent="AppTheme">
+        <item name="colorPrimary">@color/primary_red</item>
+        <item name="colorPrimaryDark">@color/primary_red_dark</item>
+        <item name="colorAccent">@color/primary_red</item>
+    </style>
+
+    <style name="AppTheme.BlueGrey" parent="AppTheme">
+        <item name="colorPrimary">@color/primary_blue_grey</item>
+        <item name="colorPrimaryDark">@color/primary_blue_grey_dark</item>
+        <item name="colorAccent">@color/primary_blue_grey</item>
+    </style>
+
+    <style name="AppTheme.Blue" parent="AppTheme">
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorPrimaryDark">@color/primary_blue_dark</item>
+        <item name="colorAccent">@color/primary_blue</item>
+    </style>
+
+    <style name="AppTheme.Orange" parent="AppTheme">
+        <item name="colorPrimary">@color/primary_orange</item>
+        <item name="colorPrimaryDark">@color/primary_orange_dark</item>
+        <item name="colorAccent">@color/primary_orange</item>
+    </style>
+
+    <style name="AppTheme.Green" parent="AppTheme">
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimaryDark">@color/primary_green_dark</item>
+        <item name="colorAccent">@color/primary_green</item>
+    </style>
+
     <!-- On pre-lollipop versions of android, the coloured button doesn't
     automatically change its text colours. -->
     <style name="ColouredButton" parent="Widget.AppCompat.Button.Colored">
