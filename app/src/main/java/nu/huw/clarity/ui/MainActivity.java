@@ -1,5 +1,7 @@
 package nu.huw.clarity.ui;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.MenuItem;
 
 import nu.huw.clarity.R;
@@ -34,6 +37,17 @@ public class MainActivity extends AppCompatActivity
     public static Context        context;
     public        DrawerLayout   drawerLayout;
     private       NavigationView navigationView;
+    private       Toolbar        toolbar;
+
+    public int getStatusBarHeight() {
+
+        int result     = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
 
@@ -43,7 +57,7 @@ public class MainActivity extends AppCompatActivity
         context = getApplicationContext();
 
         // Toolbar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
 
@@ -124,6 +138,10 @@ public class MainActivity extends AppCompatActivity
 
     public void changeColors(int menuItem) {
 
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+        int colorFrom = typedValue.data;
+
         switch (menuItem) {
             case R.id.nav_forecast:
                 setTheme(R.style.AppTheme_Red);
@@ -150,5 +168,25 @@ public class MainActivity extends AppCompatActivity
                 navigationView.setItemTextColor(ColorStateLists.green);
                 break;
         }
+
+        getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+        int colorTo = typedValue.data;
+
+        ValueAnimator toolbarAnimation =
+                ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+        toolbarAnimation.setDuration(300);
+
+        toolbarAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override public void onAnimationUpdate(ValueAnimator animator) {
+
+                toolbar.setBackgroundColor((int) animator.getAnimatedValue());
+                drawerLayout.setStatusBarBackgroundColor((int) animator.getAnimatedValue());
+                drawerLayout.invalidate();
+            }
+        });
+
+        navigationView.invalidate();
+
+        toolbarAnimation.start();
     }
 }

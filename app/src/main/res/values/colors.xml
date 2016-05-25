@@ -4,6 +4,8 @@
     <color name="primary_dark">#4a1f63</color>
     <color name="divider_light">#1f000000</color>
     <color name="divider_dark">#1fffffff</color>
+    <color name="highlight">#f6f6f6</color>
+    <color name="navigation_background">#ffffff</color>
 
     <!-- Alternate Colours -->
     <color name="primary_red">#F44336</color>

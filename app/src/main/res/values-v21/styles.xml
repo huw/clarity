@@ -3,10 +3,11 @@
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorAccent">@color/primary</item>
+        <item name="android:colorEdgeEffect">@android:color/tertiary_text_light</item>
         <item name="android:buttonStyle">@style/ColouredButton</item>
-        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <!-- This isn't strictly necessary on lollipop and above, but I'm making

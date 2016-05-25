@@ -18,31 +18,31 @@ public class ColorStateLists {
     private static int[]          redArray      =
             new int[]{ContextCompat.getColor(MainActivity.context, R.color.primary_red),
                       ContextCompat.getColor(MainActivity.context,
-                                             android.R.color.tertiary_text_light)};
+                                             android.R.color.primary_text_light)};
     public static  ColorStateList red           = new ColorStateList(states, redArray);
     private static int[]          blueGreyArray =
             new int[]{ContextCompat.getColor(MainActivity.context, R.color.primary_blue_grey),
                       ContextCompat.getColor(MainActivity.context,
-                                             android.R.color.tertiary_text_light)};
+                                             android.R.color.primary_text_light)};
     public static  ColorStateList blueGrey      = new ColorStateList(states, blueGreyArray);
     private static int[]          blueArray     =
             new int[]{ContextCompat.getColor(MainActivity.context, R.color.primary_blue),
                       ContextCompat.getColor(MainActivity.context,
-                                             android.R.color.tertiary_text_light)};
+                                             android.R.color.primary_text_light)};
     public static  ColorStateList blue          = new ColorStateList(states, blueArray);
     private static int[]          purpleArray   =
             new int[]{ContextCompat.getColor(MainActivity.context, R.color.primary),
                       ContextCompat.getColor(MainActivity.context,
-                                             android.R.color.tertiary_text_light)};
+                                             android.R.color.primary_text_light)};
     public static  ColorStateList purple        = new ColorStateList(states, purpleArray);
     private static int[]          orangeArray   =
             new int[]{ContextCompat.getColor(MainActivity.context, R.color.primary_orange),
                       ContextCompat.getColor(MainActivity.context,
-                                             android.R.color.tertiary_text_light)};
+                                             android.R.color.primary_text_light)};
     public static  ColorStateList orange        = new ColorStateList(states, orangeArray);
     private static int[]          greenArray    =
             new int[]{ContextCompat.getColor(MainActivity.context, R.color.primary_green),
                       ContextCompat.getColor(MainActivity.context,
-                                             android.R.color.tertiary_text_light)};
+                                             android.R.color.primary_text_light)};
     public static  ColorStateList green         = new ColorStateList(states, greenArray);
 }
