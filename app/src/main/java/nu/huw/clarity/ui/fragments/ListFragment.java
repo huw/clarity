@@ -13,8 +13,7 @@ import java.util.List;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DataModelHelper;
-import nu.huw.clarity.model.Task;
-import nu.huw.clarity.ui.adapters.TaskAdapter;
+import nu.huw.clarity.ui.adapters.ListAdapter;
 import nu.huw.clarity.ui.misc.DividerItemDecoration;
 
 /**
@@ -26,6 +25,7 @@ public class ListFragment extends Fragment {
 
     private static final String TAG = ListFragment.class.getSimpleName();
     private OnListFragmentInteractionListener mListener;
+    private RecyclerView.Adapter              mAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the fragment (e.g. upon
@@ -34,10 +34,11 @@ public class ListFragment extends Fragment {
     public ListFragment() {}
 
     // TODO: Customize parameter initialization
-    @SuppressWarnings("unused") public static ListFragment newInstance() {
+    public static ListFragment newInstance(int menuID) {
 
         ListFragment fragment = new ListFragment();
         Bundle       args     = new Bundle();
+        args.putInt("menuID", menuID);
         fragment.setArguments(args);
         return fragment;
     }
@@ -47,6 +48,32 @@ public class ListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
+            int menuID = getArguments().getInt("menuID");
+
+            DataModelHelper dmHelper = new DataModelHelper();
+            List            items;
+
+            switch (menuID) {
+                case R.id.nav_inbox:
+                    items = dmHelper.getTasksInInbox();
+                    mAdapter = new ListAdapter(items, mListener);
+                    break;
+                case R.id.nav_projects:
+                    items = dmHelper.getTopLevelProjects();
+                    mAdapter = new ListAdapter(items, mListener);
+                    break;
+                case R.id.nav_contexts:
+                    items = dmHelper.getTopLevelContexts();
+                    mAdapter = new ListAdapter(items, mListener);
+                    break;
+                case R.id.nav_flagged:
+                    items = dmHelper.getFlagged();
+                    mAdapter = new ListAdapter(items, mListener);
+                    break;
+                default:
+                    items = dmHelper.getTasks();
+                    mAdapter = new ListAdapter(items, mListener);
+            }
         }
     }
 
@@ -57,14 +84,12 @@ public class ListFragment extends Fragment {
 
         // Set the adapter
         if (view instanceof RecyclerView) {
-            DataModelHelper dmHelper = new DataModelHelper();
-            List<Task>      tasks    = dmHelper.getTasks();
 
             Context      context      = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
-            recyclerView.setAdapter(new TaskAdapter(tasks, mListener));
+            recyclerView.setAdapter(mAdapter);
         }
         return view;
     }

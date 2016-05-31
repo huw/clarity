@@ -3,18 +3,11 @@
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
-        <item name="android:colorAccent">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
         <item name="android:colorEdgeEffect">@android:color/tertiary_text_light</item>
         <item name="android:buttonStyle">@style/ColouredButton</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowTranslucentStatus">true</item>
-    </style>
-
-    <!-- This isn't strictly necessary on lollipop and above, but I'm making
-    the call to be consistent here -->
-    <style name="ColouredButton" parent="Widget.AppCompat.Button.Colored">
-        <item name="android:colorButtonNormal">@color/primary</item>
-        <item name="android:textColor">@android:color/white</item>
     </style>
 
 </resources>

@@ -74,19 +74,12 @@ public class DataModelHelper {
     }
 
     /**
-     * Given a context parent, get all direct children of that context.
+     * Gets all contexts given a selection string and argument. Usually should be accessed by
+     * other methods.
      */
-    public List<Context> getContexts(String parentID) {
+    public List<Context> getContexts(String selection, String[] selectionArgs) {
 
-        SQLiteDatabase db            = dbHelper.getWritableDatabase();
-        String         selection     = Contexts.COLUMN_PARENT_ID + " = ?";
-        String[]       selectionArgs = {parentID};
-
-        if (parentID.isEmpty()) {
-            selection = Contexts.COLUMN_PARENT_ID + " IS NULL";
-            selectionArgs = null;
-        }
-
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         Cursor cursor =
                 dbHelper.query(db, Contexts.TABLE_NAME, Contexts.columns, selection, selectionArgs);
 
@@ -101,11 +94,26 @@ public class DataModelHelper {
     }
 
     /**
-     * Shorthand for empty argument, will get all top-level contexts
+     * Shorthand for empty argument, will get all contexts
      */
     public List<Context> getContexts() {
 
-        return getContexts("");
+        return getContexts(null, null);
+    }
+
+    /**
+     * Given a context ID, get all child contexts
+     */
+    public List<Context> getContexts(String parentID) {
+
+        return getContexts(Contexts.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
+    }
+
+    public List<Context> getTopLevelContexts() {
+
+        String selection = Contexts.COLUMN_PARENT_ID + " IS NULL AND " + Contexts.COLUMN_ACTIVE +
+                           " = 1 AND " + Contexts.COLUMN_ACTIVE_EFFECTIVE + " = 1";
+        return getContexts(selection, null);
     }
 
     private Context getContextFromCursor(Cursor cursor) {
@@ -142,17 +150,9 @@ public class DataModelHelper {
         return context;
     }
 
-    public List<Folder> getFolders(String parentID) {
+    public List<Folder> getFolders(String selection, String[] selectionArgs) {
 
-        SQLiteDatabase db            = dbHelper.getWritableDatabase();
-        String         selection     = Folders.COLUMN_PARENT_ID + " = ?";
-        String[]       selectionArgs = {parentID};
-
-        if (parentID.isEmpty()) {
-            selection = Folders.COLUMN_PARENT_ID + " IS NULL";
-            selectionArgs = null;
-        }
-
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         Cursor cursor =
                 dbHelper.query(db, Folders.TABLE_NAME, Folders.columns, selection, selectionArgs);
 
@@ -166,9 +166,14 @@ public class DataModelHelper {
         return result;
     }
 
+    public List<Folder> getFolders(String parentID) {
+
+        return getFolders(Folders.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
+    }
+
     public List<Folder> getFolders() {
 
-        return getFolders("");
+        return getFolders(null, null);
     }
 
     private Folder getFolderFromCursor(Cursor cursor) {
@@ -197,17 +202,9 @@ public class DataModelHelper {
         return folder;
     }
 
-    public List<Task> getTasks(String parentID) {
+    public List<Task> getTasks(String selection, String[] selectionArgs) {
 
-        SQLiteDatabase db            = dbHelper.getWritableDatabase();
-        String         selection     = Tasks.COLUMN_PARENT_ID + " = ?";
-        String[]       selectionArgs = {parentID};
-
-        if (parentID.isEmpty()) {
-            selection = null;
-            selectionArgs = null;
-        }
-
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         Cursor cursor =
                 dbHelper.query(db, Tasks.TABLE_NAME, Tasks.columns, selection, selectionArgs);
 
@@ -221,9 +218,39 @@ public class DataModelHelper {
         return result;
     }
 
+    public List<Task> getTasks(String parentID) {
+
+        return getTasks(Tasks.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
+    }
+
     public List<Task> getTasks() {
 
-        return getTasks("");
+        return getTasks(null, null);
+    }
+
+    public List<Task> getTasksInInbox() {
+
+        return getTasks(Tasks.COLUMN_INBOX + " = 1 AND " + Tasks.COLUMN_DATE_COMPLETED + " IS NULL",
+                        null);
+    }
+
+    public List<Task> getTopLevelProjects() {
+
+        String selection = Tasks.COLUMN_PROJECT + " = 1 AND " + Tasks.COLUMN_DATE_COMPLETED + " " +
+                           "IS NULL AND " + Tasks.COLUMN_PARENT_ID + " IS NULL AND " +
+                           Tasks.COLUMN_PROJECT_STATUS + " = 'active' ORDER BY " +
+                           Tasks.COLUMN_RANK;
+        return getTasks(selection, null);
+    }
+
+    public List<Task> getFlagged() {
+
+        String selection =
+                "(" + Tasks.COLUMN_FLAGGED + " = 1 OR " + Tasks.COLUMN_FLAGGED_EFFECTIVE +
+                " = 1) AND " + Tasks.COLUMN_DATE_COMPLETED + " IS " + "NULL AND " +
+                Tasks.COLUMN_BLOCKED + " = 0 AND " + Tasks.COLUMN_BLOCKED_BY_DEFER.name + " = 0 " +
+                "AND " + Tasks.COLUMN_INBOX + " = 0";
+        return getTasks(selection, null);
     }
 
     private Task getTaskFromCursor(Cursor cursor) {

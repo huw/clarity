@@ -21,14 +21,14 @@ import nu.huw.clarity.ui.fragments.ListFragment.OnListFragmentInteractionListene
  * This class handles the display of the data in the RecyclerView—it's passed a data set and
  * deals with the way that the set's items are distributed amongst the appropriate child views.
  */
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
+public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
-    private static final String TAG = TaskAdapter.class.getSimpleName();
+    private static final String TAG = ListAdapter.class.getSimpleName();
     private final OnListFragmentInteractionListener mListener;
     private final List<Task>                        mValues;
     private final Map<String, String>               mContextNameMap;
 
-    public TaskAdapter(List<Task> items, OnListFragmentInteractionListener listener) {
+    public ListAdapter(List<Task> items, OnListFragmentInteractionListener listener) {
 
         mValues = items;
         mListener = listener;
