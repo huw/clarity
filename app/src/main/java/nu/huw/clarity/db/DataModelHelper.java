@@ -26,7 +26,20 @@ import nu.huw.clarity.model.Task;
  */
 public class DataModelHelper {
 
-    private static final String TAG = DataModelHelper.class.getSimpleName();
+    private static final String TAG           = DataModelHelper.class.getSimpleName();
+    // Entry selections
+    private static       String AND           = " AND ";
+    private static       String ORDER_BY_RANK = " ORDER BY " + Entry.COLUMN_RANK;
+    private static       String TOP_LEVEL     = Entry.COLUMN_PARENT_ID + " IS NULL";
+    private static       String ACTIVE        = Entry.COLUMN_ACTIVE +
+                                                " = 1 AND " + Entry.COLUMN_ACTIVE_EFFECTIVE +
+                                                " = 1";
+    // Task selections
+    private static       String REMAINING     = Tasks.COLUMN_DATE_COMPLETED + " IS NULL";
+    private static       String IN_INBOX      = Tasks.COLUMN_INBOX + " = 1";
+    private static       String IS_PROJECT    = Tasks.COLUMN_PROJECT + " = 1";
+    private static       String AVAILABLE     = REMAINING + AND + Tasks.COLUMN_BLOCKED + " = 0" +
+                                                AND + Tasks.COLUMN_BLOCKED_BY_DEFER.name + " = 0";
     private DatabaseHelper dbHelper;
 
     public DataModelHelper() {
@@ -111,8 +124,7 @@ public class DataModelHelper {
 
     public List<Context> getTopLevelContexts() {
 
-        String selection = Contexts.COLUMN_PARENT_ID + " IS NULL AND " + Contexts.COLUMN_ACTIVE +
-                           " = 1 AND " + Contexts.COLUMN_ACTIVE_EFFECTIVE + " = 1";
+        String selection = TOP_LEVEL + AND + ACTIVE;
         return getContexts(selection, null);
     }
 
@@ -230,16 +242,13 @@ public class DataModelHelper {
 
     public List<Task> getTasksInInbox() {
 
-        return getTasks(Tasks.COLUMN_INBOX + " = 1 AND " + Tasks.COLUMN_DATE_COMPLETED + " IS NULL",
-                        null);
+        return getTasks(IN_INBOX + AND + REMAINING + ORDER_BY_RANK, null);
     }
 
     public List<Task> getTopLevelProjects() {
 
-        String selection = Tasks.COLUMN_PROJECT + " = 1 AND " + Tasks.COLUMN_DATE_COMPLETED + " " +
-                           "IS NULL AND " + Tasks.COLUMN_PARENT_ID + " IS NULL AND " +
-                           Tasks.COLUMN_PROJECT_STATUS + " = 'active' ORDER BY " +
-                           Tasks.COLUMN_RANK;
+        String selection = IS_PROJECT + AND + REMAINING + AND + TOP_LEVEL + AND +
+                           Tasks.COLUMN_PROJECT_STATUS + " = 'active'" + ORDER_BY_RANK;
         return getTasks(selection, null);
     }
 
@@ -247,9 +256,8 @@ public class DataModelHelper {
 
         String selection =
                 "(" + Tasks.COLUMN_FLAGGED + " = 1 OR " + Tasks.COLUMN_FLAGGED_EFFECTIVE +
-                " = 1) AND " + Tasks.COLUMN_DATE_COMPLETED + " IS " + "NULL AND " +
-                Tasks.COLUMN_BLOCKED + " = 0 AND " + Tasks.COLUMN_BLOCKED_BY_DEFER.name + " = 0 " +
-                "AND " + Tasks.COLUMN_INBOX + " = 0";
+                " = 1)" + AND + AVAILABLE + AND + Tasks.COLUMN_INBOX + " = 0" +
+                ORDER_BY_RANK;
         return getTasks(selection, null);
     }
 
