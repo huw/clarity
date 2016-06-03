@@ -11,4 +11,4 @@
     android:scrollbars="vertical"
     app:layoutManager="LinearLayoutManager"
     tools:context=".ui.fragments.ListFragment"
-    tools:listitem="@layout/fragment_entry"/>
+    tools:listitem="@layout/fragment_task"/>

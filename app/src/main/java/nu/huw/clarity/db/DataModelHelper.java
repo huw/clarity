@@ -1,21 +1,25 @@
 package nu.huw.clarity.db;
 
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
-import nu.huw.clarity.db.DatabaseContract.Entry;
+import nu.huw.clarity.db.DatabaseContract.Entries;
 import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
 import nu.huw.clarity.model.Attachment;
 import nu.huw.clarity.model.Context;
+import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Task;
 
@@ -27,24 +31,29 @@ import nu.huw.clarity.model.Task;
 public class DataModelHelper {
 
     private static final String TAG           = DataModelHelper.class.getSimpleName();
-    // Entry selections
+    // Entries selections
     private static       String AND           = " AND ";
-    private static       String ORDER_BY_RANK = " ORDER BY " + Entry.COLUMN_RANK;
-    private static       String TOP_LEVEL     = Entry.COLUMN_PARENT_ID + " IS NULL";
-    private static       String ACTIVE        = Entry.COLUMN_ACTIVE +
-                                                " = 1 AND " + Entry.COLUMN_ACTIVE_EFFECTIVE +
-                                                " = 1";
+    private static       String ORDER_BY_RANK = " ORDER BY " + DatabaseContract.Entries.COLUMN_RANK;
+    private static       String TOP_LEVEL     = Entries.COLUMN_PARENT_ID + " IS NULL";
+    private static       String ACTIVE        =
+            DatabaseContract.Entries.COLUMN_ACTIVE + " = 1 AND " + Entries.COLUMN_ACTIVE_EFFECTIVE +
+            " = 1";
     // Task selections
     private static       String REMAINING     = Tasks.COLUMN_DATE_COMPLETED + " IS NULL";
     private static       String IN_INBOX      = Tasks.COLUMN_INBOX + " = 1";
     private static       String IS_PROJECT    = Tasks.COLUMN_PROJECT + " = 1";
     private static       String AVAILABLE     = REMAINING + AND + Tasks.COLUMN_BLOCKED + " = 0" +
                                                 AND + Tasks.COLUMN_BLOCKED_BY_DEFER.name + " = 0";
-    private DatabaseHelper dbHelper;
+    private static       String NO_CONTEXT    = Tasks.COLUMN_CONTEXT + " IS NULL";
+    private static       String DUE_SOON      = Tasks.COLUMN_DUE_SOON + " = 1";
+    private static       String OVERDUE       = Tasks.COLUMN_OVERDUE + " = 1";
+    private DatabaseHelper          dbHelper;
+    private android.content.Context mContext;
 
-    public DataModelHelper() {
+    public DataModelHelper(android.content.Context context) {
 
         dbHelper = new DatabaseHelper();
+        mContext = context;
     }
 
     /**
@@ -52,7 +61,7 @@ public class DataModelHelper {
      */
     public Attachment getAttachment(String id) {
 
-        SQLiteDatabase db            = dbHelper.getWritableDatabase();
+        SQLiteDatabase db            = dbHelper.getReadableDatabase();
         String         selection     = Attachments.COLUMN_ID + " = ?";
         String[]       selectionArgs = {id};
 
@@ -90,13 +99,13 @@ public class DataModelHelper {
      * Gets all contexts given a selection string and argument. Usually should be accessed by
      * other methods.
      */
-    public List<Context> getContexts(String selection, String[] selectionArgs) {
+    public List<Entry> getContexts(String selection, String[] selectionArgs) {
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor =
                 dbHelper.query(db, Contexts.TABLE_NAME, Contexts.columns, selection, selectionArgs);
 
-        List<Context> result = new ArrayList<>();
+        List<Entry> result = new ArrayList<>();
         while (cursor.moveToNext()) {
             result.add(getContextFromCursor(cursor));
         }
@@ -109,7 +118,7 @@ public class DataModelHelper {
     /**
      * Shorthand for empty argument, will get all contexts
      */
-    public List<Context> getContexts() {
+    public List<Entry> getContexts() {
 
         return getContexts(null, null);
     }
@@ -117,15 +126,37 @@ public class DataModelHelper {
     /**
      * Given a context ID, get all child contexts
      */
-    public List<Context> getContexts(String parentID) {
+    public List<Entry> getContexts(String parentID) {
 
         return getContexts(Contexts.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
     }
 
-    public List<Context> getTopLevelContexts() {
+    public List<Entry> getTopLevelContexts() {
+
+        List<Entry> result = new ArrayList<>();
 
         String selection = TOP_LEVEL + AND + ACTIVE;
-        return getContexts(selection, null);
+        result.add(getNoContext());
+        result.addAll(getContexts(selection, null));
+
+        return result;
+    }
+
+    public Context getNoContext() {
+
+        SQLiteDatabase db        = dbHelper.getReadableDatabase();
+        Context        noContext = new Context();
+
+        noContext.name = mContext.getString(R.string.no_context);
+        noContext.countAvailable = (int) DatabaseUtils
+                .queryNumEntries(db, Tasks.TABLE_NAME, NO_CONTEXT + AND + AVAILABLE);
+        noContext.countDueSoon = (int) DatabaseUtils
+                .queryNumEntries(db, Tasks.TABLE_NAME, NO_CONTEXT + AND + DUE_SOON);
+        noContext.countOverdue = (int) DatabaseUtils
+                .queryNumEntries(db, Tasks.TABLE_NAME, NO_CONTEXT + AND + OVERDUE);
+
+        db.close();
+        return noContext;
     }
 
     private Context getContextFromCursor(Cursor cursor) {
@@ -137,19 +168,28 @@ public class DataModelHelper {
         context.added = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED.name);
         context.modified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
 
-        // Entry methods
-        context.active = dbHelper.getBoolean(cursor, Entry.COLUMN_ACTIVE.name);
-        context.activeEffective = dbHelper.getBoolean(cursor, Entry.COLUMN_ACTIVE_EFFECTIVE.name);
-        context.countAvailable = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_AVAILABLE.name);
-        context.countChildren = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_CHILDREN.name);
-        context.countCompleted = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_COMPLETED.name);
-        context.countDueSoon = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_DUE_SOON.name);
-        context.countOverdue = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_OVERDUE.name);
-        context.countRemaining = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_REMAINING.name);
-        context.hasChildren = dbHelper.getBoolean(cursor, Entry.COLUMN_HAS_CHILDREN.name);
-        context.name = dbHelper.getString(cursor, Entry.COLUMN_NAME.name);
-        context.parentID = dbHelper.getString(cursor, Entry.COLUMN_PARENT_ID.name);
-        context.rank = dbHelper.getLong(cursor, Entry.COLUMN_RANK.name);
+        // Entries methods
+        context.active = dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_ACTIVE.name);
+        context.activeEffective =
+                dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_ACTIVE_EFFECTIVE.name);
+        context.countAvailable =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_AVAILABLE.name);
+        context.countChildren =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_CHILDREN.name);
+        context.countCompleted =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_COMPLETED.name);
+        context.countDueSoon =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_DUE_SOON.name);
+        context.countOverdue =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_OVERDUE.name);
+        context.countRemaining =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_REMAINING.name);
+        context.hasChildren =
+                dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_HAS_CHILDREN.name);
+        context.name = dbHelper.getString(cursor, DatabaseContract.Entries.COLUMN_NAME.name);
+        context.parentID =
+                dbHelper.getString(cursor, DatabaseContract.Entries.COLUMN_PARENT_ID.name);
+        context.rank = dbHelper.getLong(cursor, DatabaseContract.Entries.COLUMN_RANK.name);
 
         // Context methods
         context.altitude = dbHelper.getLong(cursor, Contexts.COLUMN_ALTITUDE.name);
@@ -162,13 +202,13 @@ public class DataModelHelper {
         return context;
     }
 
-    public List<Folder> getFolders(String selection, String[] selectionArgs) {
+    public List<Entry> getFolders(String selection, String[] selectionArgs) {
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor =
                 dbHelper.query(db, Folders.TABLE_NAME, Folders.columns, selection, selectionArgs);
 
-        List<Folder> result = new ArrayList<>();
+        List<Entry> result = new ArrayList<>();
         while (cursor.moveToNext()) {
             result.add(getFolderFromCursor(cursor));
         }
@@ -178,14 +218,19 @@ public class DataModelHelper {
         return result;
     }
 
-    public List<Folder> getFolders(String parentID) {
+    public List<Entry> getFolders(String parentID) {
 
         return getFolders(Folders.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
     }
 
-    public List<Folder> getFolders() {
+    public List<Entry> getFolders() {
 
         return getFolders(null, null);
+    }
+
+    public List<Entry> getTopLevelFolders() {
+
+        return getFolders(TOP_LEVEL + ORDER_BY_RANK, null);
     }
 
     private Folder getFolderFromCursor(Cursor cursor) {
@@ -197,30 +242,33 @@ public class DataModelHelper {
         folder.added = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED.name);
         folder.modified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
 
-        // Entry methods
-        folder.active = dbHelper.getBoolean(cursor, Entry.COLUMN_ACTIVE.name);
-        folder.activeEffective = dbHelper.getBoolean(cursor, Entry.COLUMN_ACTIVE_EFFECTIVE.name);
-        folder.countAvailable = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_AVAILABLE.name);
-        folder.countChildren = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_CHILDREN.name);
-        folder.countCompleted = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_COMPLETED.name);
-        folder.countDueSoon = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_DUE_SOON.name);
-        folder.countOverdue = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_OVERDUE.name);
-        folder.countRemaining = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_REMAINING.name);
-        folder.hasChildren = dbHelper.getBoolean(cursor, Entry.COLUMN_HAS_CHILDREN.name);
-        folder.name = dbHelper.getString(cursor, Entry.COLUMN_NAME.name);
-        folder.parentID = dbHelper.getString(cursor, Entry.COLUMN_PARENT_ID.name);
-        folder.rank = dbHelper.getLong(cursor, Entry.COLUMN_RANK.name);
+        // Entries methods
+        folder.active = dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_ACTIVE.name);
+        folder.activeEffective =
+                dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_ACTIVE_EFFECTIVE.name);
+        folder.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE.name);
+        folder.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN.name);
+        folder.countCompleted =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_COMPLETED.name);
+        folder.countDueSoon =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_DUE_SOON.name);
+        folder.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE.name);
+        folder.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING.name);
+        folder.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN.name);
+        folder.name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
+        folder.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID.name);
+        folder.rank = dbHelper.getLong(cursor, DatabaseContract.Entries.COLUMN_RANK.name);
 
         return folder;
     }
 
-    public List<Task> getTasks(String selection, String[] selectionArgs) {
+    public List<Entry> getTasks(String selection, String[] selectionArgs) {
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor =
                 dbHelper.query(db, Tasks.TABLE_NAME, Tasks.columns, selection, selectionArgs);
 
-        List<Task> result = new ArrayList<>();
+        List<Entry> result = new ArrayList<>();
         while (cursor.moveToNext()) {
             result.add(getTaskFromCursor(cursor));
         }
@@ -230,29 +278,38 @@ public class DataModelHelper {
         return result;
     }
 
-    public List<Task> getTasks(String parentID) {
+    public List<Entry> getTasks(String parentID) {
 
         return getTasks(Tasks.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
     }
 
-    public List<Task> getTasks() {
+    public List<Entry> getTasks() {
 
         return getTasks(null, null);
     }
 
-    public List<Task> getTasksInInbox() {
+    public List<Entry> getTasksInInbox() {
 
         return getTasks(IN_INBOX + AND + REMAINING + ORDER_BY_RANK, null);
     }
 
-    public List<Task> getTopLevelProjects() {
+    public List<Entry> getTopLevelProjects() {
+
+        // (and folders)
+
+        List<Entry> topLevel = new ArrayList<>();
 
         String selection = IS_PROJECT + AND + REMAINING + AND + TOP_LEVEL + AND +
                            Tasks.COLUMN_PROJECT_STATUS + " = 'active'" + ORDER_BY_RANK;
-        return getTasks(selection, null);
+        topLevel.addAll(getTasks(selection, null));
+        topLevel.addAll(getTopLevelFolders());
+
+        Collections.sort(topLevel);
+
+        return topLevel;
     }
 
-    public List<Task> getFlagged() {
+    public List<Entry> getFlagged() {
 
         String selection =
                 "(" + Tasks.COLUMN_FLAGGED + " = 1 OR " + Tasks.COLUMN_FLAGGED_EFFECTIVE +
@@ -270,17 +327,23 @@ public class DataModelHelper {
         task.added = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED.name);
         task.modified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
 
-        // Entry methods
-        task.countAvailable = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_AVAILABLE.name);
-        task.countChildren = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_CHILDREN.name);
-        task.countCompleted = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_COMPLETED.name);
-        task.countDueSoon = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_DUE_SOON.name);
-        task.countOverdue = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_OVERDUE.name);
-        task.countRemaining = dbHelper.getInt(cursor, Entry.COLUMN_COUNT_REMAINING.name);
-        task.hasChildren = dbHelper.getBoolean(cursor, Entry.COLUMN_HAS_CHILDREN.name);
-        task.name = dbHelper.getString(cursor, Entry.COLUMN_NAME.name);
-        task.parentID = dbHelper.getString(cursor, Entry.COLUMN_PARENT_ID.name);
-        task.rank = dbHelper.getLong(cursor, Entry.COLUMN_RANK.name);
+        // Entries methods
+        task.countAvailable =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_AVAILABLE.name);
+        task.countChildren =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_CHILDREN.name);
+        task.countCompleted =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_COMPLETED.name);
+        task.countDueSoon =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_DUE_SOON.name);
+        task.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE.name);
+        task.countRemaining =
+                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_REMAINING.name);
+        task.hasChildren =
+                dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_HAS_CHILDREN.name);
+        task.name = dbHelper.getString(cursor, DatabaseContract.Entries.COLUMN_NAME.name);
+        task.parentID = dbHelper.getString(cursor, DatabaseContract.Entries.COLUMN_PARENT_ID.name);
+        task.rank = dbHelper.getLong(cursor, DatabaseContract.Entries.COLUMN_RANK.name);
 
         // Task methods
         task.blocked = dbHelper.getBoolean(cursor, Tasks.COLUMN_BLOCKED.name);
@@ -317,7 +380,7 @@ public class DataModelHelper {
 
     public Map<String, String> getContextNameMap() {
 
-        SQLiteDatabase db      = dbHelper.getWritableDatabase();
+        SQLiteDatabase db      = dbHelper.getReadableDatabase();
         String[]       columns = {Contexts.COLUMN_ID.name, Contexts.COLUMN_NAME.name};
 
         Cursor cursor = dbHelper.query(db, Contexts.TABLE_NAME, columns, null, null);
@@ -325,7 +388,7 @@ public class DataModelHelper {
         Map<String, String> result = new HashMap<>();
         while (cursor.moveToNext()) {
             String id   = dbHelper.getString(cursor, Base.COLUMN_ID.name);
-            String name = dbHelper.getString(cursor, Entry.COLUMN_NAME.name);
+            String name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
             result.put(id, name);
         }
 

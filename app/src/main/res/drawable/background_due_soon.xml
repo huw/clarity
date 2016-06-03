@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <solid android:color="@color/background_due_soon"/>
+
+    <padding
+        android:left="@dimen/due_border_radius"
+        android:right="@dimen/due_border_radius"/>
+
+    <corners android:radius="@dimen/due_padding"/>
+</shape>

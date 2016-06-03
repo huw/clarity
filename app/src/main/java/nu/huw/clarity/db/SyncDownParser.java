@@ -19,7 +19,6 @@ import java.util.TimeZone;
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
-import nu.huw.clarity.db.DatabaseContract.Entry;
 import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseContract.Perspectives;
 import nu.huw.clarity.db.DatabaseContract.Settings;
@@ -201,7 +200,7 @@ public class SyncDownParser {
 
             case "folder":
             case "task":
-                name = Entry.COLUMN_PARENT_ID.name;
+                name = DatabaseContract.Entries.COLUMN_PARENT_ID.name;
                 value = parser.getAttributeValue(null, "idref");
                 break;
 
@@ -225,19 +224,19 @@ public class SyncDownParser {
              */
             case "name":
                 parser.next();
-                name = Entry.COLUMN_NAME.name;
+                name = DatabaseContract.Entries.COLUMN_NAME.name;
                 value = parser.getText();
                 break;
 
             case "rank":
                 parser.next();
-                name = Entry.COLUMN_RANK.name;
+                name = DatabaseContract.Entries.COLUMN_RANK.name;
                 value = parser.getText();
                 break;
 
             case "hidden":
                 parser.next();
-                name = Entry.COLUMN_ACTIVE.name;
+                name = DatabaseContract.Entries.COLUMN_ACTIVE.name;
                 value = parser.getText().equals("true") ? "0" : "1"; // Invert and convert
                 break;
 

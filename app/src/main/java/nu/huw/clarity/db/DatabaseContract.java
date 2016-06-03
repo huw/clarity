@@ -59,7 +59,7 @@ public class DatabaseContract {
                 {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name};
     }
 
-    public static abstract class Entry extends Base {
+    public static abstract class Entries extends Base {
 
         public static final SQLKeyValue   COLUMN_ACTIVE           =
                 new SQLKeyValue("active", "1", "BOOLEAN");
@@ -118,7 +118,7 @@ public class DatabaseContract {
                  COLUMN_PNG_PREVIEW.name};
     }
 
-    public static abstract class Contexts extends Entry {
+    public static abstract class Contexts extends Entries {
 
         public static final String        TABLE_NAME           = "Contexts";
         public static final SQLKeyValue   COLUMN_ALTITUDE      = new SQLKeyValue("altitude");
@@ -150,7 +150,7 @@ public class DatabaseContract {
                  COLUMN_RADIUS.name};
     }
 
-    public static abstract class Folders extends Entry {
+    public static abstract class Folders extends Entries {
 
         public static final String TABLE_NAME = "Folders";
     }
@@ -179,7 +179,7 @@ public class DatabaseContract {
                  COLUMN_VALUE.name};
     }
 
-    public static abstract class Tasks extends Entry {
+    public static abstract class Tasks extends Entries {
 
         public static final String        TABLE_NAME              = "Tasks";
         public static final SQLKeyValue   COLUMN_BLOCKED          =

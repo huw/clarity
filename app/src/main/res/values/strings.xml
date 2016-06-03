@@ -32,4 +32,13 @@
     <string name="contexts">Contexts</string>
     <string name="flagged">Flagged</string>
     <string name="nearby">Nearby</string>
+
+    <!-- List Items -->
+    <string name="no_available">no items available</string>
+    <string name="available">%d available</string>
+    <string name="no_remaining">no items remaining</string>
+    <string name="remaining">%d remaining</string>
+    <string name="due_soon">%d due soon</string>
+    <string name="overdue">%d overdue</string>
+    <string name="no_context">No Context</string>
 </resources>

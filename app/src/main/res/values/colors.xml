@@ -5,7 +5,13 @@
     <color name="divider_light">#1f000000</color>
     <color name="divider_dark">#1fffffff</color>
     <color name="highlight">#f6f6f6</color>
-    <color name="navigation_background">#ffffff</color>
+    <color name="background_navigation">#ffffff</color>
+
+    <!-- UI Element Colours -->
+    <color name="background_due_soon">#FFF9C4</color>
+    <color name="background_overdue">#FFCDD2</color>
+    <color name="foreground_due_soon">#F57F17</color>
+    <color name="foreground_overdue">#B71C1C</color>
 
     <!-- Alternate Colours -->
     <color name="primary_red">#F44336</color>

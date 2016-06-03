@@ -5,9 +5,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import nu.huw.clarity.db.DatabaseContract.Contexts;
+import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
 
 /**
@@ -44,8 +49,6 @@ public class RecursiveColumnUpdater {
      * 3. Push & Pop
      * 4. Fill up child counts
      * 5. Calculate due dates & overdues
-     *
-     * TODO: Available counts, Next Task, HasChildren (and also, dropped projects)
      */
     public void updateTree() {
 
@@ -131,9 +134,11 @@ public class RecursiveColumnUpdater {
         // Now, again for projects, but we're just counting now. This loop isn't recursive by any
         // means, which is good for system resources! More speed!
 
-        projectColumns = new String[]{Tasks.COLUMN_ID.name};
+        projectColumns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_PARENT_ID.name};
         projects = mDBHelper
                 .query(db, Tasks.TABLE_NAME, projectColumns, Tasks.COLUMN_PROJECT.name + "='1'");
+
+        HashMap<String, Integer[]> folderCounts = new HashMap<>();
 
         while (projects.moveToNext()) {
 
@@ -219,9 +224,87 @@ public class RecursiveColumnUpdater {
             if (values.size() > 0) {
                 db.update(Tasks.TABLE_NAME, values, Tasks.COLUMN_ID.name + "=?", new String[]{id});
             }
+
+            String parentID = mDBHelper.getString(projects, Tasks.COLUMN_PARENT_ID.name);
+            if (parentID != null) {
+
+                Integer[] childCounts =
+                        {countChildren, countAvailable, countCompleted, countDueSoon, countOverdue,
+                         countRemaining};
+
+                if (folderCounts.containsKey(parentID)) {
+                    for (int j = 0; j < childCounts.length; j++) {
+                        Log.d(TAG, Arrays.toString(folderCounts.get(parentID)));
+                        folderCounts.get(parentID)[j] =
+                                folderCounts.get(parentID)[j] + childCounts[j];
+                    }
+                } else {
+                    folderCounts.put(parentID, childCounts);
+                }
+            }
         }
 
         projects.close();
+
+        // Finally, kick off the folder updater. This sorts out the child counts of folders,
+        // which need to show their numbers.
+
+        // We need a LinkedList because we're adding and removing objects. This is really hacky
+        // because I did it at like half past midnight and I really wanted to sleep. So I kinda
+        // understand how it works, but at the same time, I don't. It _is_ pretty fast though,
+        // somehow.
+
+        List<Object> array = new LinkedList<Object>(Arrays.asList(folderCounts.keySet().toArray()));
+        while (!array.isEmpty()) {
+            String id = (String) array.get(0);
+
+            // This bit just gets the ID of the folder's parent
+            Cursor cursor = mDBHelper
+                    .query(db, Folders.TABLE_NAME, new String[]{Folders.COLUMN_PARENT_ID.name},
+                           Folders.COLUMN_ID + " = ?", new String[]{id});
+            cursor.moveToFirst();
+            String parentID = mDBHelper.getString(cursor, Folders.COLUMN_PARENT_ID.name);
+
+            Integer[] childCounts = folderCounts.get(id);
+
+            // Add up the child counts for the folder
+
+            if (folderCounts.containsKey(parentID)) {
+                for (int j = 0; j < childCounts.length; j++) {
+                    folderCounts.get(parentID)[j] = folderCounts.get(parentID)[j] + childCounts[j];
+                }
+            } else {
+
+                // If this folder isn't in our HashMap yet, add it. But also add an extra
+                // iteration to this loop.
+
+                if (parentID != null) {
+                    folderCounts.put(parentID, childCounts);
+                    array.add(parentID);
+                }
+            }
+
+            // Could probably be better handled than this, but it works.
+            array.remove(0);
+        }
+
+        // Simply add each Folder's new counts to the database.
+
+        for (String id : folderCounts.keySet()) {
+            Integer[]     childCounts = folderCounts.get(id);
+            ContentValues values      = new ContentValues();
+
+            Log.d(TAG, id + ": " + Arrays.toString(childCounts));
+
+            values.put(Tasks.COLUMN_COUNT_CHILDREN.name, childCounts[0]);
+            values.put(Tasks.COLUMN_COUNT_AVAILABLE.name, childCounts[1]);
+            values.put(Tasks.COLUMN_COUNT_COMPLETED.name, childCounts[2]);
+            values.put(Tasks.COLUMN_COUNT_DUE_SOON.name, childCounts[3]);
+            values.put(Tasks.COLUMN_COUNT_OVERDUE.name, childCounts[4]);
+            values.put(Tasks.COLUMN_COUNT_REMAINING.name, childCounts[5]);
+
+            db.update(Folders.TABLE_NAME, values, Folders.COLUMN_ID + " = ?", new String[]{id});
+        }
 
         Log.i(TAG, "Database tree fully updated");
         db.close();
@@ -466,6 +549,7 @@ public class RecursiveColumnUpdater {
 
         String[] columns = new String[]{Contexts.COLUMN_ID.name, Contexts.COLUMN_ACTIVE.name,
                                         Contexts.COLUMN_ON_HOLD.name,
+                                        Contexts.COLUMN_COUNT_AVAILABLE.name,
                                         Contexts.COLUMN_COUNT_CHILDREN.name,
                                         Contexts.COLUMN_COUNT_COMPLETED.name,
                                         Contexts.COLUMN_COUNT_DUE_SOON.name,

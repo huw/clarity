@@ -13,6 +13,7 @@ import java.util.List;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DataModelHelper;
+import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.ui.adapters.ListAdapter;
 import nu.huw.clarity.ui.misc.DividerItemDecoration;
 
@@ -50,30 +51,27 @@ public class ListFragment extends Fragment {
         if (getArguments() != null) {
             int menuID = getArguments().getInt("menuID");
 
-            DataModelHelper dmHelper = new DataModelHelper();
-            List            items;
+            DataModelHelper dmHelper = new DataModelHelper(getContext());
+            List<Entry>     items;
 
             switch (menuID) {
                 case R.id.nav_inbox:
                     items = dmHelper.getTasksInInbox();
-                    mAdapter = new ListAdapter(items, mListener);
                     break;
                 case R.id.nav_projects:
                     items = dmHelper.getTopLevelProjects();
-                    mAdapter = new ListAdapter(items, mListener);
                     break;
                 case R.id.nav_contexts:
                     items = dmHelper.getTopLevelContexts();
-                    mAdapter = new ListAdapter(items, mListener);
                     break;
                 case R.id.nav_flagged:
                     items = dmHelper.getFlagged();
-                    mAdapter = new ListAdapter(items, mListener);
                     break;
                 default:
                     items = dmHelper.getTasks();
-                    mAdapter = new ListAdapter(items, mListener);
             }
+
+            mAdapter = new ListAdapter(this.getContext(), items, mListener);
         }
     }
 
