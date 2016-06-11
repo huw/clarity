@@ -6,12 +6,12 @@ import android.view.View;
 import android.widget.TextView;
 
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.model.Task;
 
 /**
  * A view holder for a folder, using R.layout.fragment_folder
  */
-public class FolderViewHolder extends ListAdapter.ViewHolder {
+public class ProjectViewHolder extends ListAdapter.ViewHolder {
 
     public final TextView nameView;
     public final TextView remainingView;
@@ -19,9 +19,9 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
     public final TextView overdueView;
     public final TextView dueSoonDivider;
     public final TextView overdueDivider;
-    public       Folder   folder;
+    public       Task     project;
 
-    public FolderViewHolder(View view) {
+    public ProjectViewHolder(View view) {
 
         super(view);
         nameView = (TextView) view.findViewById(R.id.name);
@@ -32,12 +32,12 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
         overdueDivider = (TextView) view.findViewById(R.id.divider_overdue);
     }
 
-    public void bind(Folder folder, Context androidContext) {
+    public void bind(Task project, Context androidContext) {
 
-        this.folder = folder;
-        int remaining = this.folder.countRemaining;
-        int dueSoon   = this.folder.countDueSoon;
-        int overdue   = this.folder.countOverdue;
+        this.project = project;
+        int remaining = this.project.countRemaining;
+        int dueSoon   = this.project.countDueSoon;
+        int overdue   = this.project.countOverdue;
 
         Resources res = androidContext.getResources();
 
@@ -64,7 +64,7 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
             overdueDivider.setVisibility(View.GONE);
         }
 
-        nameView.setText(this.folder.name);
+        nameView.setText(this.project.name);
         remainingView.setText(remainingString);
     }
 }
