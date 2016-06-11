@@ -41,4 +41,8 @@
     <string name="due_soon">%d due soon</string>
     <string name="overdue">%d overdue</string>
     <string name="no_context">No Context</string>
+
+    <!-- Empty States -->
+    <string name="empty_title">There\'s nothing here</string>
+    <string name="empty_congratulations">Congratulations!</string>
 </resources>

@@ -7,7 +7,16 @@
     <color name="highlight">#f6f6f6</color>
     <color name="background_navigation">#ffffff</color>
 
-    <!-- UI Element Colours -->
+    <!-- Material Greyscale Colours -->
+    <color name="primary_text_light">#DE000000</color>
+    <color name="secondary_text_light">#8A000000</color>
+    <color name="disabled_text_light">#61000000</color>
+
+    <color name="primary_text_dark">#FFFFFFFF</color>
+    <color name="secondary_text_dark">#46FFFFFF</color>
+    <color name="disabled_text_dark">#80FFFFFF</color>
+
+    <!-- Due Badge Colours -->
     <color name="background_due_soon">#FFF9C4</color>
     <color name="background_overdue">#FFCDD2</color>
     <color name="foreground_due_soon">#F57F17</color>
