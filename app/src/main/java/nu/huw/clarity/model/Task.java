@@ -36,4 +36,9 @@ public class Task extends Entry {
     public String  type;
 
     public Task() {}
+
+    public boolean isAvailable() {
+
+        return !blocked && !blockedByDefer && dateCompleted == null;
+    }
 }

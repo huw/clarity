@@ -53,10 +53,17 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
 
         // Change colours and backgrounds if it's due soon or overdue.
 
-        int color      = android.R.color.secondary_text_light;
+        int color      = R.color.secondary_text_light;
         int background = 0;
 
-        if (this.task.dueSoon) {
+        if (!this.task.isAvailable()) {
+
+            // If the task isn't available, then show the user by changing its colours.
+
+            color = R.color.disabled_text_light;
+            nameView.setTextColor(ContextCompat.getColor(androidContext, color));
+            contextView.setTextColor(ContextCompat.getColor(androidContext, color));
+        } else if (this.task.dueSoon) {
             color = R.color.foreground_due_soon;
             background = R.drawable.background_due_soon;
         } else if (this.task.overdue) {
