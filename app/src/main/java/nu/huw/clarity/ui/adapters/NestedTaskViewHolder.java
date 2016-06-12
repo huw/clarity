@@ -35,8 +35,6 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
         this.task = task;
         int remaining = this.task.countRemaining;
-        int dueSoon   = this.task.countDueSoon;
-        int overdue   = this.task.countOverdue;
 
         Resources res = androidContext.getResources();
 
@@ -78,6 +76,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
         }
 
         nameView.setText(this.task.name);
+        dateView.setText(date);
         remainingView.setText(remainingString);
     }
 }
