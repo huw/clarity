@@ -147,10 +147,7 @@ public class RecursiveColumnUpdater {
 
             String id = mDBHelper.getString(projects, Tasks.COLUMN_ID.name);
 
-            // Originally, I'd implemented child counting as a recursive function: Each parent
-            // contained a few numbers of the totals of each type of child. But I realised
-            // afterward that the counts were only required for projects—which can't nest anyway.
-            // So we can save on a lot of time and energy by just using SQL to count for us!
+            updateProjectCounts(db, id);
 
             Cursor countChildrenCursor = mDBHelper
                     .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=?",
@@ -234,7 +231,6 @@ public class RecursiveColumnUpdater {
 
                 if (folderCounts.containsKey(parentID)) {
                     for (int j = 0; j < childCounts.length; j++) {
-                        Log.d(TAG, Arrays.toString(folderCounts.get(parentID)));
                         folderCounts.get(parentID)[j] =
                                 folderCounts.get(parentID)[j] + childCounts[j];
                     }
@@ -293,8 +289,6 @@ public class RecursiveColumnUpdater {
         for (String id : folderCounts.keySet()) {
             Integer[]     childCounts = folderCounts.get(id);
             ContentValues values      = new ContentValues();
-
-            Log.d(TAG, id + ": " + Arrays.toString(childCounts));
 
             values.put(Tasks.COLUMN_COUNT_CHILDREN.name, childCounts[0]);
             values.put(Tasks.COLUMN_COUNT_AVAILABLE.name, childCounts[1]);
@@ -461,6 +455,110 @@ public class RecursiveColumnUpdater {
 
         // Overdue & Due Soon
         values.putAll(determineDues(db, id));
+
+        // Update
+        if (values.size() > 0) {
+            db.update(Tasks.TABLE_NAME, values, Tasks.COLUMN_ID.name + "=?", new String[]{id});
+        }
+    }
+
+    private void updateProjectCounts(SQLiteDatabase db, String id) {
+
+        String[] columns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_DATE_DEFER.name,
+                                        Tasks.COLUMN_DATE_DUE.name, Tasks.COLUMN_FLAGGED.name,
+                                        Tasks.COLUMN_DATE_COMPLETED.name,
+                                        Tasks.COLUMN_DUE_SOON.name, Tasks.COLUMN_OVERDUE.name,
+                                        Tasks.COLUMN_COUNT_AVAILABLE.name,
+                                        Tasks.COLUMN_COUNT_CHILDREN.name,
+                                        Tasks.COLUMN_COUNT_COMPLETED.name,
+                                        Tasks.COLUMN_COUNT_DUE_SOON.name,
+                                        Tasks.COLUMN_COUNT_OVERDUE.name,
+                                        Tasks.COLUMN_COUNT_REMAINING.name, Tasks.COLUMN_RANK.name,
+                                        Tasks.COLUMN_PROJECT_STATUS.name, Tasks.COLUMN_TYPE.name,
+                                        Tasks.COLUMN_BLOCKED.name,
+                                        Tasks.COLUMN_BLOCKED_BY_DEFER.name};
+
+        Cursor children = mDBHelper
+                .query(db, Tasks.TABLE_NAME, columns, Tasks.COLUMN_PARENT_ID.name + "=?",
+                       new String[]{id});
+
+        int countChildren, countCompleted, countDueSoon, countOverdue, countRemaining,
+                countAvailable;
+        countChildren =
+                countCompleted = countDueSoon = countOverdue = countRemaining = countAvailable = 0;
+
+        ContentValues values = new ContentValues();
+
+        while (children.moveToNext()) {
+
+            String childID = mDBHelper.getString(children, Tasks.COLUMN_ID.name);
+
+            // Descend the call stack until we hit the bottom, then build our way back up.
+
+            // Please, if you're reading this from the future, forgive me for the terrible code.
+            // It's lonely and dark in here and I really have no idea what I'm doing or how I'm
+            // supposed to handle this properly. Databases are confusing and weird and I'd rather
+            // build my own sync service that uses some kind of hierarchical JSON but I don't
+            // have much choice.
+
+            updateProjectCounts(db, childID);
+
+            // All of the code past the recursive call will happen on the way back out, or up the
+            // tree. Once each call returns, this code runs on the level above where the code was
+            // just calling to.
+            //
+            // Here, the level above is able to access the counts for children _of each of its
+            // children_. It gets really meta and confusing. Took me like 3-4 hours to work out
+            // (but, to be fair, this was more bug-fixing than algorithms).
+
+            // Add count for self (where applicable)
+            boolean completed =
+                    mDBHelper.getString(children, Tasks.COLUMN_DATE_COMPLETED.name) != null;
+
+            countChildren += 1;
+            countCompleted += completed ? 1 : 0;
+            countDueSoon += mDBHelper.getInt(children, Tasks.COLUMN_DUE_SOON.name);
+            countOverdue += mDBHelper.getInt(children, Tasks.COLUMN_OVERDUE.name);
+            countRemaining += completed ? 0 : 1;
+
+            boolean blocked = mDBHelper.getBoolean(children, Tasks.COLUMN_BLOCKED.name);
+            boolean blockedByDefer =
+                    mDBHelper.getBoolean(children, Tasks.COLUMN_BLOCKED_BY_DEFER.name);
+
+            if (!completed && !blocked && !blockedByDefer) {
+                countAvailable += 1;
+            }
+
+            // Add counts for children
+            countChildren += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_CHILDREN.name);
+            countCompleted += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_COMPLETED.name);
+            countDueSoon += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_DUE_SOON.name);
+            countOverdue += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_OVERDUE.name);
+            countRemaining += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_REMAINING.name);
+            countAvailable += mDBHelper.getInt(children, Tasks.COLUMN_COUNT_AVAILABLE.name);
+        }
+
+        children.close();
+
+        // Child counts
+        if (countChildren > 0) {
+            values.put(Tasks.COLUMN_COUNT_CHILDREN.name, countChildren);
+        }
+        if (countCompleted > 0) {
+            values.put(Tasks.COLUMN_COUNT_COMPLETED.name, countCompleted);
+        }
+        if (countDueSoon > 0) {
+            values.put(Tasks.COLUMN_COUNT_DUE_SOON.name, countDueSoon);
+        }
+        if (countOverdue > 0) {
+            values.put(Tasks.COLUMN_COUNT_OVERDUE.name, countOverdue);
+        }
+        if (countRemaining > 0) {
+            values.put(Tasks.COLUMN_COUNT_REMAINING.name, countRemaining);
+        }
+        if (countAvailable > 0) {
+            values.put(Tasks.COLUMN_COUNT_AVAILABLE.name, countAvailable);
+        }
 
         // Update
         if (values.size() > 0) {

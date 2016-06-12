@@ -16,11 +16,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
+import nu.huw.clarity.db.RecursiveColumnUpdater;
 import nu.huw.clarity.sync.Synchroniser;
 import nu.huw.clarity.ui.fragments.ListFragment;
 import nu.huw.clarity.ui.misc.ColorStateLists;
@@ -106,6 +108,12 @@ public class MainActivity extends AppCompatActivity
                                    .commit();
     }
 
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+        return true;
+    }
+
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         Synchroniser.synchronise();
@@ -116,6 +124,12 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+            case R.id.synchronise:
+                Synchroniser.synchronise();
+                return true;
+            case R.id.reload_db:
+                new RecursiveColumnUpdater().updateTree();
                 return true;
         }
 
