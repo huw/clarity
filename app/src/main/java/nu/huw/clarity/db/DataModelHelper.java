@@ -132,9 +132,18 @@ public class DataModelHelper {
                            new String[]{parentID});
     }
 
+    public Entry getHeaderContext(String parentID) {
+
+        Entry context = getContexts(Contexts.COLUMN_ID + " = ?", new String[]{parentID}).get(0);
+        context.headerRow = true;
+        return context;
+    }
+
     public List<Entry> getContextChildren(String parentID) {
 
         List<Entry> result = new ArrayList<>();
+
+        result.add(getHeaderContext(parentID));
 
         result.addAll(getContexts(parentID));
         result.addAll(getTasksWithContext(parentID));
@@ -308,6 +317,23 @@ public class DataModelHelper {
         return getTasks(IN_INBOX + AND + REMAINING + ORDER_BY_RANK, null);
     }
 
+    public Entry getHeaderTask(String parentID) {
+
+        String      selection = Tasks.COLUMN_ID + " = ?";
+        String[]    args      = new String[]{parentID};
+        List<Entry> tasks     = getTasks(selection, args);
+
+        Entry entry;
+        if (!tasks.isEmpty()) {
+            entry = tasks.get(0);
+        } else {
+            entry = getFolders(selection, args).get(0);
+        }
+
+        entry.headerRow = true;
+        return entry;
+    }
+
     public List<Entry> getChildren(String parentID) {
 
         List<Entry> entries = new ArrayList<>();
@@ -316,6 +342,8 @@ public class DataModelHelper {
         entries.addAll(getFolders(parentID));
 
         Collections.sort(entries);
+
+        entries.add(0, getHeaderTask(parentID));
 
         return entries;
     }

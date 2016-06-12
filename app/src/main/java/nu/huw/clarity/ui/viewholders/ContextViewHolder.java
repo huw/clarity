@@ -1,11 +1,14 @@
-package nu.huw.clarity.ui.adapters;
+package nu.huw.clarity.ui.viewholders;
 
 import android.content.res.Resources;
+import android.graphics.Typeface;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
+import nu.huw.clarity.ui.adapters.ListAdapter;
 
 /**
  * A view holder for a context, using R.layout.fragment_context
@@ -68,6 +71,21 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
         } else {
             overdueView.setVisibility(View.GONE);
             overdueDivider.setVisibility(View.GONE);
+        }
+
+        // If inactive, then fade this out
+
+        if (!context.id.equals("NO_CONTEXT") && (!context.active || !context.activeEffective) &&
+            !context.headerRow) {
+
+            nameView.setTextColor(
+                    ContextCompat.getColor(androidContext, R.color.disabled_text_light));
+        }
+
+        // If the item is a header row, bold it
+
+        if (context.headerRow) {
+            nameView.setTypeface(null, Typeface.BOLD);
         }
 
         nameView.setText(this.context.name);

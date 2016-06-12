@@ -20,12 +20,13 @@ public class Entry extends Base implements Comparable<Entry> {
     public String  name;
     public String  parentID;
     public long    rank;
+    public boolean headerRow;
 
     public Entry() {}
 
     @Override public int compareTo(@NonNull Entry entry) {
 
-        if (rank < entry.rank) {
+        if (headerRow || rank < entry.rank) {
             return -1;
         } else if (rank > entry.rank) {
             return 1;

@@ -1,17 +1,19 @@
-package nu.huw.clarity.ui.adapters;
+package nu.huw.clarity.ui.viewholders;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.view.View;
 import android.widget.TextView;
 
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Task;
+import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.ui.adapters.ListAdapter;
 
 /**
  * A view holder for a folder, using R.layout.fragment_folder
  */
-public class ProjectViewHolder extends ListAdapter.ViewHolder {
+public class FolderViewHolder extends ListAdapter.ViewHolder {
 
     public final TextView nameView;
     public final TextView remainingView;
@@ -19,9 +21,9 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
     public final TextView overdueView;
     public final TextView dueSoonDivider;
     public final TextView overdueDivider;
-    public       Task     project;
+    public       Folder   folder;
 
-    public ProjectViewHolder(View view) {
+    public FolderViewHolder(View view) {
 
         super(view);
         nameView = (TextView) view.findViewById(R.id.name);
@@ -32,14 +34,16 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
         overdueDivider = (TextView) view.findViewById(R.id.divider_overdue);
     }
 
-    public void bind(Task project, Context androidContext) {
+    public void bind(Folder folder, Context androidContext) {
 
-        this.project = project;
-        int remaining = this.project.countRemaining;
-        int dueSoon   = this.project.countDueSoon;
-        int overdue   = this.project.countOverdue;
+        this.folder = folder;
+        int remaining = this.folder.countRemaining;
+        int dueSoon   = this.folder.countDueSoon;
+        int overdue   = this.folder.countOverdue;
 
         Resources res = androidContext.getResources();
+
+        // Remaining item count
 
         String remainingString;
         if (remaining > 0) {
@@ -47,6 +51,8 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
         } else {
             remainingString = res.getString(R.string.no_remaining);
         }
+
+        // Due soon / overdue badges
 
         if (dueSoon > 0) {
             String dueSoonString = res.getString(R.string.due_soon, dueSoon);
@@ -64,7 +70,13 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
             overdueDivider.setVisibility(View.GONE);
         }
 
-        nameView.setText(this.project.name);
+        // Bold header rows
+
+        if (folder.headerRow) {
+            nameView.setTypeface(null, Typeface.BOLD);
+        }
+
+        nameView.setText(this.folder.name);
         remainingView.setText(remainingString);
     }
 }

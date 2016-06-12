@@ -13,6 +13,11 @@ import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.fragments.ListFragment.OnListFragmentInteractionListener;
+import nu.huw.clarity.ui.viewholders.ContextViewHolder;
+import nu.huw.clarity.ui.viewholders.FolderViewHolder;
+import nu.huw.clarity.ui.viewholders.NestedTaskViewHolder;
+import nu.huw.clarity.ui.viewholders.ProjectViewHolder;
+import nu.huw.clarity.ui.viewholders.TaskViewHolder;
 
 /**
  * This class handles the display of the data in the RecyclerView—it's passed a data set and

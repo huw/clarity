@@ -23,13 +23,15 @@ import android.view.View;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.RecursiveColumnUpdater;
+import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.sync.Synchroniser;
-import nu.huw.clarity.ui.adapters.ContextViewHolder;
 import nu.huw.clarity.ui.adapters.ListAdapter;
-import nu.huw.clarity.ui.adapters.NestedTaskViewHolder;
-import nu.huw.clarity.ui.adapters.ProjectViewHolder;
 import nu.huw.clarity.ui.fragments.ListFragment;
 import nu.huw.clarity.ui.misc.ColorStateLists;
+import nu.huw.clarity.ui.viewholders.ContextViewHolder;
+import nu.huw.clarity.ui.viewholders.FolderViewHolder;
+import nu.huw.clarity.ui.viewholders.NestedTaskViewHolder;
+import nu.huw.clarity.ui.viewholders.ProjectViewHolder;
 
 public class MainActivity extends AppCompatActivity
         implements ListFragment.OnListFragmentInteractionListener {
@@ -151,21 +153,34 @@ public class MainActivity extends AppCompatActivity
 
     @Override public void onListFragmentInteraction(ListAdapter.ViewHolder holder) {
 
+        Entry item;
+        int   menuID;
+
         if (holder instanceof ProjectViewHolder) {
 
-            String holderID = ((ProjectViewHolder) holder).project.id;
-            newFragment = ListFragment.newInstance(R.id.nav_projects, holderID);
+            item = ((ProjectViewHolder) holder).project;
+            menuID = R.id.nav_projects;
         } else if (holder instanceof NestedTaskViewHolder) {
 
-            String holderID = ((NestedTaskViewHolder) holder).task.id;
-            newFragment = ListFragment.newInstance(R.id.nav_projects, holderID);
+            item = ((NestedTaskViewHolder) holder).task;
+            menuID = R.id.nav_projects;
         } else if (holder instanceof ContextViewHolder) {
 
-            String holderID = ((ContextViewHolder) holder).context.id;
-            newFragment = ListFragment.newInstance(R.id.nav_contexts, holderID);
+            item = ((ContextViewHolder) holder).context;
+            menuID = R.id.nav_contexts;
+        } else if (holder instanceof FolderViewHolder) {
+
+            item = ((FolderViewHolder) holder).folder;
+            menuID = R.id.nav_projects;
         } else {
             return;
         }
+
+        if (item.headerRow) {
+            return;
+        }
+
+        newFragment = ListFragment.newInstance(menuID, item.id);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
