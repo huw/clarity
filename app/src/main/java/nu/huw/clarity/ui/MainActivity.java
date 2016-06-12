@@ -24,6 +24,10 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.RecursiveColumnUpdater;
 import nu.huw.clarity.sync.Synchroniser;
+import nu.huw.clarity.ui.adapters.ContextViewHolder;
+import nu.huw.clarity.ui.adapters.ListAdapter;
+import nu.huw.clarity.ui.adapters.NestedTaskViewHolder;
+import nu.huw.clarity.ui.adapters.ProjectViewHolder;
 import nu.huw.clarity.ui.fragments.ListFragment;
 import nu.huw.clarity.ui.misc.ColorStateLists;
 
@@ -145,6 +149,33 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override public void onListFragmentInteraction(ListAdapter.ViewHolder holder) {
+
+        if (holder instanceof ProjectViewHolder) {
+
+            String holderID = ((ProjectViewHolder) holder).project.id;
+            newFragment = ListFragment.newInstance(R.id.nav_projects, holderID);
+        } else if (holder instanceof NestedTaskViewHolder) {
+
+            String holderID = ((NestedTaskViewHolder) holder).task.id;
+            newFragment = ListFragment.newInstance(R.id.nav_projects, holderID);
+        } else if (holder instanceof ContextViewHolder) {
+
+            String holderID = ((ContextViewHolder) holder).context.id;
+            newFragment = ListFragment.newInstance(R.id.nav_contexts, holderID);
+        } else {
+            return;
+        }
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
+        ft.replace(R.id.fragment_container, newFragment);
+        ft.addToBackStack(null);
+        ft.commit();
+
+        currentFragment = newFragment;
+    }
+
     private void changeColors(int menuItem) {
 
         // Get the current header colour
@@ -251,10 +282,12 @@ public class MainActivity extends AppCompatActivity
 
             newFragment = ListFragment.newInstance(menuItem.getItemId());
             isChangingFragment = true;
+            currentFragment = new Fragment();
 
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-            ft.remove(currentFragment);
+            ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in,
+                                   R.anim.fade_out);
+            ft.replace(R.id.fragment_container, currentFragment);
             ft.commit();
 
             showProgress(true);
@@ -270,8 +303,9 @@ public class MainActivity extends AppCompatActivity
 
             if (isChangingFragment) {
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-                ft.add(R.id.fragment_container, newFragment);
+                ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in,
+                                       R.anim.fade_out);
+                ft.replace(R.id.fragment_container, newFragment);
                 ft.commit();
 
                 showProgress(false);

@@ -35,7 +35,6 @@ public class ListFragment extends Fragment {
      */
     public ListFragment() {}
 
-    // TODO: Customize parameter initialization
     public static ListFragment newInstance(int menuID) {
 
         ListFragment fragment = new ListFragment();
@@ -45,12 +44,23 @@ public class ListFragment extends Fragment {
         return fragment;
     }
 
+    public static ListFragment newInstance(int menuID, String parentID) {
+
+        ListFragment fragment = new ListFragment();
+        Bundle       args     = new Bundle();
+        args.putInt("menuID", menuID);
+        args.putString("parentID", parentID);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            int menuID = getArguments().getInt("menuID");
+            int    menuID   = getArguments().getInt("menuID");
+            String parentID = getArguments().getString("parentID");
 
             DataModelHelper dmHelper = new DataModelHelper(getContext());
             List<Entry>     items;
@@ -60,10 +70,20 @@ public class ListFragment extends Fragment {
                     items = dmHelper.getTasksInInbox();
                     break;
                 case R.id.nav_projects:
-                    items = dmHelper.getTopLevelProjects();
+                    if (parentID == null) {
+                        items = dmHelper.getTopLevelProjects();
+                    } else {
+                        items = dmHelper.getChildren(parentID);
+                    }
                     break;
                 case R.id.nav_contexts:
-                    items = dmHelper.getTopLevelContexts();
+                    if (parentID == null) {
+                        items = dmHelper.getTopLevelContexts();
+                    } else if (parentID.equals("NO_CONTEXT")) {
+                        items = dmHelper.getTasksWithNoContext();
+                    } else {
+                        items = dmHelper.getContextChildren(parentID);
+                    }
                     break;
                 case R.id.nav_flagged:
                     items = dmHelper.getFlagged();
@@ -123,14 +143,9 @@ public class ListFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
 
-        // TODO: Update argument type and name
-        //void onListFragmentInteraction();
+        void onListFragmentInteraction(ListAdapter.ViewHolder holder);
     }
 }

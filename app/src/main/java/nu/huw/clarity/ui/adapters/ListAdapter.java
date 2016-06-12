@@ -25,7 +25,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private final List<Entry>                       mValues;
     private final android.content.Context           mContext;
 
-    public ListAdapter(android.content.Context context, List items,
+    public ListAdapter(android.content.Context context, List<Entry> items,
                        OnListFragmentInteractionListener listener) {
 
         mContext = context;
@@ -123,7 +123,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    //mListener.onListFragmentInteraction(holder.mItem);
+                    mListener.onListFragmentInteraction(holder);
                 }
             }
         });

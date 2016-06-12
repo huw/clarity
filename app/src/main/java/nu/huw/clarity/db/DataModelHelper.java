@@ -128,7 +128,18 @@ public class DataModelHelper {
      */
     public List<Entry> getContexts(String parentID) {
 
-        return getContexts(Contexts.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
+        return getContexts(ACTIVE + AND + Contexts.COLUMN_PARENT_ID + " = ?",
+                           new String[]{parentID});
+    }
+
+    public List<Entry> getContextChildren(String parentID) {
+
+        List<Entry> result = new ArrayList<>();
+
+        result.addAll(getContexts(parentID));
+        result.addAll(getTasksWithContext(parentID));
+
+        return result;
     }
 
     public List<Entry> getTopLevelContexts() {
@@ -154,6 +165,7 @@ public class DataModelHelper {
                 .queryNumEntries(db, Tasks.TABLE_NAME, NO_CONTEXT + AND + DUE_SOON);
         noContext.countOverdue = (int) DatabaseUtils
                 .queryNumEntries(db, Tasks.TABLE_NAME, NO_CONTEXT + AND + OVERDUE);
+        noContext.id = "NO_CONTEXT";
 
         db.close();
         return noContext;
@@ -280,17 +292,32 @@ public class DataModelHelper {
 
     public List<Entry> getTasks(String parentID) {
 
-        return getTasks(Tasks.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
+        String selection = REMAINING + AND + Entries.COLUMN_PARENT_ID + " = ?" + ORDER_BY_RANK;
+        return getTasks(selection, new String[]{parentID});
     }
 
     public List<Entry> getTasks() {
 
-        return getTasks(null, null);
+        String selection = REMAINING + AND + Tasks.COLUMN_DATE_DUE + " IS NOT NULL ORDER BY " +
+                           Tasks.COLUMN_DATE_DUE;
+        return getTasks(selection, null);
     }
 
     public List<Entry> getTasksInInbox() {
 
         return getTasks(IN_INBOX + AND + REMAINING + ORDER_BY_RANK, null);
+    }
+
+    public List<Entry> getChildren(String parentID) {
+
+        List<Entry> entries = new ArrayList<>();
+
+        entries.addAll(getTasks(parentID));
+        entries.addAll(getFolders(parentID));
+
+        Collections.sort(entries);
+
+        return entries;
     }
 
     public List<Entry> getTopLevelProjects() {
@@ -315,6 +342,18 @@ public class DataModelHelper {
                 "(" + Tasks.COLUMN_FLAGGED + " = 1 OR " + Tasks.COLUMN_FLAGGED_EFFECTIVE +
                 " = 1)" + AND + AVAILABLE + AND + Tasks.COLUMN_INBOX + " = 0" +
                 ORDER_BY_RANK;
+        return getTasks(selection, null);
+    }
+
+    public List<Entry> getTasksWithContext(String contextID) {
+
+        String selection = REMAINING + AND + Tasks.COLUMN_CONTEXT + " = ?" + ORDER_BY_RANK;
+        return getTasks(selection, new String[]{contextID});
+    }
+
+    public List<Entry> getTasksWithNoContext() {
+
+        String selection = REMAINING + AND + Tasks.COLUMN_CONTEXT + " IS NULL" + ORDER_BY_RANK;
         return getTasks(selection, null);
     }
 

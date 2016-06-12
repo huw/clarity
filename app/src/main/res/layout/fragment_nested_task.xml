@@ -4,52 +4,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/list_item_height"
-    android:layout_marginEnd="@dimen/horizontal_margin"
-    android:layout_marginStart="@dimen/horizontal_margin"
-    android:orientation="horizontal">
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingEnd="@dimen/horizontal_margin"
+    android:paddingStart="@dimen/horizontal_margin">
 
-    <RelativeLayout
+    <TextView
+        android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true">
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/primary_text_light"
+        android:textSize="@dimen/subhead_size"
+        android:textStyle="bold"
+        tools:text="Clarity (For OmniFocus)"/>
 
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@color/primary_text_light"
-            android:textSize="@dimen/subhead_size"
-            android:textStyle="bold"
-            tools:text="Clarity (For OmniFocus)"/>
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/name"
+        android:gravity="end"
+        android:textColor="@color/secondary_text_light"
+        android:textSize="@dimen/body1_size"
+        tools:text="Due 17 March 2016"/>
 
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/name"
-            android:gravity="end"
-            android:textColor="@color/secondary_text_light"
-            android:textSize="@dimen/body1_size"
-            tools:text="Due 17 March 2016"/>
-
-        <TextView
-            android:id="@+id/remaining"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/name"
-            android:layout_toLeftOf="@id/date"
-            android:layout_toStartOf="@id/date"
-            android:ellipsize="end"
-            android:gravity="start"
-            android:maxLines="1"
-            android:textColor="@color/disabled_text_light"
-            android:textSize="@dimen/body1_size"
-            tools:text="87 remaining"/>
-
-    </RelativeLayout>
+    <TextView
+        android:id="@+id/remaining"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/name"
+        android:layout_toLeftOf="@id/date"
+        android:layout_toStartOf="@id/date"
+        android:ellipsize="end"
+        android:gravity="start"
+        android:maxLines="1"
+        android:textColor="@color/disabled_text_light"
+        android:textSize="@dimen/body1_size"
+        tools:text="87 remaining"/>
 
 </RelativeLayout>
