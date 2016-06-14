@@ -40,8 +40,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@id/remaining"
-        android:layout_marginLeft="@dimen/dot_divider_margin"
-        android:layout_marginRight="@dimen/dot_divider_margin"
         android:layout_toEndOf="@id/remaining"
         android:layout_toRightOf="@id/remaining"/>
 
@@ -65,8 +63,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@id/due_soon"
-        android:layout_marginLeft="@dimen/dot_divider_margin"
-        android:layout_marginRight="@dimen/dot_divider_margin"
         android:layout_toEndOf="@id/due_soon"
         android:layout_toRightOf="@id/due_soon"/>
 

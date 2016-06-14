@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
 import java.util.List;
 
@@ -102,12 +101,16 @@ public class ListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_entry_list, container, false);
 
         // Set the adapter
-        RecyclerView   recyclerView   = (RecyclerView) view.findViewById(R.id.list);
-        RelativeLayout relativeLayout = (RelativeLayout) view.findViewById(R.id.empty_state);
+        RecyclerView recyclerView  = (RecyclerView) view.findViewById(R.id.list);
+        View         emptyImage    = view.findViewById(R.id.empty_image);
+        View         emptyHeadline = view.findViewById(R.id.empty_headline);
+        View         emptySubhead  = view.findViewById(R.id.empty_subhead);
 
         if (mAdapter.getItemCount() > 0) {
 
-            relativeLayout.setVisibility(View.GONE);
+            emptyImage.setVisibility(View.GONE);
+            emptyHeadline.setVisibility(View.GONE);
+            emptySubhead.setVisibility(View.GONE);
 
             Context      context      = view.getContext();
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
