@@ -15,7 +15,8 @@
 
         <activity
             android:name=".ui.MainActivity"
-            android:label="@string/app_name_short">
+            android:label="@string/app_name_short"
+            android:theme="@style/AppTheme.Red">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

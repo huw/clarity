@@ -38,7 +38,6 @@
     <string name="nearby">Nearby</string>
 
     <!-- List Items -->
-    <string name="dot_divider">•</string>
     <string name="no_available">no items available</string>
     <string name="available">%d available</string>
     <string name="no_remaining">no items remaining</string>
