@@ -33,7 +33,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
     public void bind(Task task, Context androidContext) {
 
-        int remaining = this.entry.countRemaining;
+        int remaining = task.countRemaining;
 
         Resources res = androidContext.getResources();
 
@@ -90,7 +90,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
             nameView.setTypeface(null, Typeface.BOLD);
         }
 
-        nameView.setText(this.entry.name);
+        nameView.setText(task.name);
         dateView.setText(date);
         remainingView.setText(remainingString);
 

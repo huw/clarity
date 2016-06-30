@@ -51,5 +51,9 @@
     <string name="empty_congratulations">Congratulations!</string>
 
     <!-- Detail View -->
-    <string name="prompt_task">Task</string>
+    <string name="task">Task</string>
+    <string name="context">Context</string>
+    <string name="project">Project</string>
+    <string name="folder">Folder</string>
+    <string name="prompt_name">Name</string>
 </resources>

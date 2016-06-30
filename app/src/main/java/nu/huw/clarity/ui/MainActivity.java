@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity
     private       Fragment       newFragment;
     private       Fragment       currentFragment;
     private       boolean        isChangingFragment;
-    private int menuID = R.id.nav_forecast;
+    private int currentTheme = R.style.AppTheme_Red;
 
     private void setupToolbar(Toolbar toolbar) {
 
@@ -154,25 +154,23 @@ public class MainActivity extends AppCompatActivity
     @Override public void onListFragmentInteraction(ListAdapter.ViewHolder holder) {
 
         Entry item = holder.entry;
+        int   menuID;
 
         if (holder instanceof TaskViewHolder || item.headerRow) {
 
             Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra("ENTRY", holder.entry);
-            intent.putExtra("MENU_ID", menuID);
+            intent.putExtra("THEME_ID", currentTheme);
             startActivity(intent);
             return;
-        } else if (holder instanceof ProjectViewHolder) {
 
+        } else if (holder instanceof ProjectViewHolder) {
             menuID = R.id.nav_projects;
         } else if (holder instanceof NestedTaskViewHolder) {
-
             menuID = R.id.nav_projects;
         } else if (holder instanceof ContextViewHolder) {
-
             menuID = R.id.nav_contexts;
         } else if (holder instanceof FolderViewHolder) {
-
             menuID = R.id.nav_projects;
         } else {
             return;
@@ -248,27 +246,27 @@ public class MainActivity extends AppCompatActivity
 
         switch (menuItem) {
             case R.id.nav_forecast:
-                setTheme(R.style.AppTheme_Red);
+                currentTheme = R.style.AppTheme_Red;
                 drawer.setItemTextColor(ColorStateLists.red);
                 break;
             case R.id.nav_inbox:
-                setTheme(R.style.AppTheme_BlueGrey);
+                currentTheme = R.style.AppTheme_BlueGrey;
                 drawer.setItemTextColor(ColorStateLists.blueGrey);
                 break;
             case R.id.nav_projects:
-                setTheme(R.style.AppTheme_Blue);
+                currentTheme = R.style.AppTheme_Blue;
                 drawer.setItemTextColor(ColorStateLists.blue);
                 break;
             case R.id.nav_contexts:
-                setTheme(R.style.AppTheme);
+                currentTheme = R.style.AppTheme;
                 drawer.setItemTextColor(ColorStateLists.purple);
                 break;
             case R.id.nav_flagged:
-                setTheme(R.style.AppTheme_Orange);
+                currentTheme = R.style.AppTheme_Orange;
                 drawer.setItemTextColor(ColorStateLists.orange);
                 break;
             case R.id.nav_nearby:
-                setTheme(R.style.AppTheme_Green);
+                currentTheme = R.style.AppTheme_Green;
                 drawer.setItemTextColor(ColorStateLists.green);
                 break;
         }
@@ -276,6 +274,7 @@ public class MainActivity extends AppCompatActivity
         // Now to figure out the colour we're transitioning to, we get the _new_ primary theme
         // colour, which has been changed, and save it into a new value.
 
+        setTheme(currentTheme);
         getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
         int colorTo = typedValue.data;
 
