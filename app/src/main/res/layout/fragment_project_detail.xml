@@ -1,0 +1,28 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="nu.huw.clarity.ui.DetailFragment"
+    >
+
+    <include layout="@layout/detail_project_type"/>
+
+    <include layout="@layout/detail_status"/>
+
+    <include layout="@layout/detail_project_complete"/>
+
+    <include layout="@layout/detail_context"/>
+
+    <include layout="@layout/detail_flag"/>
+
+    <include layout="@layout/detail_duration"/>
+
+    <include layout="@layout/detail_defer"/>
+
+    <include layout="@layout/detail_due"/>
+
+    <include layout="@layout/detail_repeat"/>
+
+</LinearLayout>

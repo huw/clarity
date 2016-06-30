@@ -56,4 +56,30 @@
     <string name="project">Project</string>
     <string name="folder">Folder</string>
     <string name="prompt_name">Name</string>
+    <string name="flag">Flag</string>
+    <string name="duration">Estimated Duration</string>
+    <string name="defer">Defer Until</string>
+    <string name="due">Due</string>
+    <string name="repeat">Repeat</string>
+    <string name="status">Status</string>
+    <string name="project_type">Type</string>
+    <string name="project_complete">Complete when completing last action</string>
+
+    <string name="detail_go_project">Go to Project</string>
+    <string name="detail_go_context">Go to Context</string>
+
+    <string name="none">None</string>
+    <string name="repeating">Repeating</string>
+    <string name="minutes">min</string>
+
+    <!-- Status -->
+    <string name="status_active">Active</string>
+    <string name="status_on_hold">On Hold</string>
+    <string name="status_dropped">Dropped</string>
+
+    <!-- Project Type -->
+    <string name="project_parallel">Parallel</string>
+    <string name="project_sequential">Sequential</string>
+    <string name="project_single_actions">Single Actions</string>
+
 </resources>

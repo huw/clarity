@@ -5,13 +5,13 @@
       tools:context=".MainActivity">
     <item
         android:id="@+id/synchronise"
-        android:icon="@drawable/ic_refresh_black_24dp"
+        android:icon="@drawable/ic_refresh_white"
         android:title="@string/menu_sync"
         app:showAsAction="always"/>
 
     <item
         android:id="@+id/reload_db"
-        android:icon="@drawable/ic_dns_black_24dp"
+        android:icon="@drawable/ic_server_white"
         android:title="@string/menu_database"
         app:showAsAction="always"/>
 </menu>

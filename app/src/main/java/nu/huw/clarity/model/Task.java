@@ -25,6 +25,7 @@ public class Task extends Entry {
     public boolean blockedByDefer;
     public boolean completeWithChildren;
     public String  context;
+    public String  contextName;
     public Date    dateCompleted;
     public Date    dateDefer;
     public Date    dateDeferEffective;
@@ -41,6 +42,7 @@ public class Task extends Entry {
     public boolean overdue;
     public boolean project;
     public String  projectID;
+    public String  projectName;
     public Date    lastReview;
     public Date    nextReview;
     public Date    reviewInterval;
@@ -58,6 +60,7 @@ public class Task extends Entry {
         blockedByDefer = in.readInt() != 0;
         completeWithChildren = in.readInt() != 0;
         context = in.readString();
+        contextName = in.readString();
         dateCompleted = getDateOrNull(in.readLong());
         dateDefer = getDateOrNull(in.readLong());
         dateDeferEffective = getDateOrNull(in.readLong());
@@ -74,6 +77,7 @@ public class Task extends Entry {
         overdue = in.readInt() != 0;
         project = in.readInt() != 0;
         projectID = in.readString();
+        projectName = in.readString();
         lastReview = getDateOrNull(in.readLong());
         nextReview = getDateOrNull(in.readLong());
         reviewInterval = getDateOrNull(in.readLong());
@@ -95,6 +99,7 @@ public class Task extends Entry {
         out.writeInt(blockedByDefer ? 1 : 0);
         out.writeInt(completeWithChildren ? 1 : 0);
         out.writeString(context);
+        out.writeString(contextName);
         out.writeLong(getTimeOrNull(dateCompleted));
         out.writeLong(getTimeOrNull(dateDefer));
         out.writeLong(getTimeOrNull(dateDeferEffective));
@@ -111,6 +116,7 @@ public class Task extends Entry {
         out.writeInt(overdue ? 1 : 0);
         out.writeInt(project ? 1 : 0);
         out.writeString(projectID);
+        out.writeString(projectName);
         out.writeLong(getTimeOrNull(lastReview));
         out.writeLong(getTimeOrNull(nextReview));
         out.writeLong(getTimeOrNull(reviewInterval));

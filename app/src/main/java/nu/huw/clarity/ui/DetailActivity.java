@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,7 +20,8 @@ import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Task;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity
+        implements DetailFragment.OnDetailInteractionListener {
 
     private Entry entry;
 
@@ -82,6 +85,14 @@ public class DetailActivity extends AppCompatActivity {
 
             nameView.setHint(hintID);
             tiLayout.setHint(getResources().getString(hintID));
+
+            Fragment detailFragment = DetailFragment.newInstance(entry);
+
+            if (detailFragment != null) {
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.detail_fragment_container, detailFragment);
+                ft.commit();
+            }
         }
     }
 
@@ -94,5 +105,9 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override public void onDetailInteraction() {
+
     }
 }

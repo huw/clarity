@@ -8,10 +8,8 @@ import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Map;
 
 import nu.huw.clarity.R;
-import nu.huw.clarity.db.DataModelHelper;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapters.ListAdapter;
 
@@ -71,14 +69,6 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
         dateView.setTextColor(ContextCompat.getColor(androidContext, color));
         dateView.setBackgroundResource(background);
 
-        // Get context name & set
-
-        DataModelHelper     dmHelper       = new DataModelHelper(androidContext);
-        Map<String, String> contextNameMap = dmHelper.getContextNameMap();
-        String              context        = contextNameMap.get(task.context);
-
-        if (context == null) context = "";
-
         // Bold header row
 
         if (task.headerRow) {
@@ -87,7 +77,7 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
 
         nameView.setText(task.name);
         dateView.setText(date);
-        contextView.setText(context);
+        contextView.setText(task.contextName);
 
         this.entry = task;
     }

@@ -6,9 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract.Attachments;
@@ -93,6 +91,25 @@ public class DataModelHelper {
         attachment.modified = dbHelper.getDate(cursor, Attachments.COLUMN_DATE_MODIFIED.name);
 
         return attachment;
+    }
+
+    /**
+     * Just gets the name of a context, given its ID
+     */
+    public String getContextName(String id) {
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor =
+                dbHelper.query(db, Contexts.TABLE_NAME, new String[]{Contexts.COLUMN_NAME.name},
+                               Contexts.COLUMN_ID + " = ?", new String[]{id});
+
+        cursor.moveToFirst();
+        String name = dbHelper.getString(cursor, Contexts.COLUMN_NAME.name);
+
+        cursor.close();
+        db.close();
+
+        return name;
     }
 
     /**
@@ -283,6 +300,24 @@ public class DataModelHelper {
         return folder;
     }
 
+    /**
+     * Get project name, given id
+     */
+    public String getProjectName(String id) {
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.query(db, Tasks.TABLE_NAME, new String[]{Tasks.COLUMN_NAME.name},
+                                       Tasks.COLUMN_ID + " = ?", new String[]{id});
+
+        cursor.moveToFirst();
+        String name = dbHelper.getString(cursor, Tasks.COLUMN_NAME.name);
+
+        cursor.close();
+        db.close();
+
+        return name;
+    }
+
     public List<Entry> getTasks(String selection, String[] selectionArgs) {
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -442,25 +477,14 @@ public class DataModelHelper {
         task.repetitionRule = dbHelper.getString(cursor, Tasks.COLUMN_REPETITION_RULE.name);
         task.type = dbHelper.getString(cursor, Tasks.COLUMN_TYPE.name);
 
-        return task;
-    }
-
-    public Map<String, String> getContextNameMap() {
-
-        SQLiteDatabase db      = dbHelper.getReadableDatabase();
-        String[]       columns = {Contexts.COLUMN_ID.name, Contexts.COLUMN_NAME.name};
-
-        Cursor cursor = dbHelper.query(db, Contexts.TABLE_NAME, columns, null, null);
-
-        Map<String, String> result = new HashMap<>();
-        while (cursor.moveToNext()) {
-            String id   = dbHelper.getString(cursor, Base.COLUMN_ID.name);
-            String name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
-            result.put(id, name);
+        // Project/Context names
+        if (task.context != null) {
+            task.contextName = getContextName(task.context);
+        }
+        if (task.projectID != null) {
+            task.projectName = getProjectName(task.projectID);
         }
 
-        cursor.close();
-        db.close();
-        return result;
+        return task;
     }
 }

@@ -57,12 +57,12 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <RelativeLayout
+    <ScrollView
+        android:id="@+id/detail_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/barlayout_detail"
         android:background="@android:color/background_light"
-        >
-    </RelativeLayout>
+        />
 
 </RelativeLayout>
