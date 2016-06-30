@@ -7,6 +7,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +19,6 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import nu.huw.clarity.R;
@@ -36,19 +36,19 @@ public class LoginActivity extends AppCompatActivity
     /**
      * References for the UI.
      */
-    private EditText        mUsernameView;
-    private EditText        mPasswordView;
-    private TextInputLayout mUsernameIL;
-    private TextInputLayout mPasswordIL;
-    private View            mProgressView;
-    private View            mLoginFormView;
+    private TextInputEditText mUsernameView;
+    private TextInputEditText mPasswordView;
+    private TextInputLayout   mUsernameIL;
+    private TextInputLayout   mPasswordIL;
+    private View              mProgressView;
+    private View              mLoginFormView;
     /**
      * Other
      */
-    private AccountManager  mAccountManager;
-    private String          mUsername;
-    private String          mPassword;
-    private boolean         mRetryOnErrorDismiss;
+    private AccountManager    mAccountManager;
+    private String            mUsername;
+    private String            mPassword;
+    private boolean           mRetryOnErrorDismiss;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
 
@@ -58,8 +58,8 @@ public class LoginActivity extends AppCompatActivity
         mAccountManager = AccountManager.get(getBaseContext());
 
         // Set up the login form.
-        mUsernameView = (EditText) findViewById(R.id.username);
-        mPasswordView = (EditText) findViewById(R.id.password);
+        mUsernameView = (TextInputEditText) findViewById(R.id.username);
+        mPasswordView = (TextInputEditText) findViewById(R.id.password);
 
         mUsernameIL = (TextInputLayout) findViewById(R.id.username_il);
         mPasswordIL = (TextInputLayout) findViewById(R.id.password_il);
@@ -79,12 +79,14 @@ public class LoginActivity extends AppCompatActivity
         });
 
         Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
-        mSignInButton.setOnClickListener(new OnClickListener() {
-            @Override public void onClick(View view) {
+        if (mSignInButton != null) {
+            mSignInButton.setOnClickListener(new OnClickListener() {
+                @Override public void onClick(View view) {
 
-                attemptLogin();
-            }
-        });
+                    attemptLogin();
+                }
+            });
+        }
 
         mProgressView = findViewById(R.id.login_progress);
         mLoginFormView = findViewById(R.id.login_form);

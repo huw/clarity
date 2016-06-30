@@ -49,4 +49,7 @@
     <!-- Empty States -->
     <string name="empty_title">There\'s nothing here</string>
     <string name="empty_congratulations">Congratulations!</string>
+
+    <!-- Detail View -->
+    <string name="prompt_task">Task</string>
 </resources>

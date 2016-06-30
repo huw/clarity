@@ -32,6 +32,7 @@ import nu.huw.clarity.ui.viewholders.ContextViewHolder;
 import nu.huw.clarity.ui.viewholders.FolderViewHolder;
 import nu.huw.clarity.ui.viewholders.NestedTaskViewHolder;
 import nu.huw.clarity.ui.viewholders.ProjectViewHolder;
+import nu.huw.clarity.ui.viewholders.TaskViewHolder;
 
 public class MainActivity extends AppCompatActivity
         implements ListFragment.OnListFragmentInteractionListener {
@@ -47,12 +48,13 @@ public class MainActivity extends AppCompatActivity
      * which needs to get a basic context for the app.
      */
     public static Context        context;
-    private       DrawerLayout   drawerLayout;
-    private       NavigationView navigationView;
-    private       Toolbar        toolbar;
+    private       Toolbar        mToolbar;
+    private       DrawerLayout   mDrawerLayout;
+    private       NavigationView mDrawer;
     private       Fragment       newFragment;
     private       Fragment       currentFragment;
     private       boolean        isChangingFragment;
+    private int menuID = R.id.nav_forecast;
 
     private void setupToolbar(Toolbar toolbar) {
 
@@ -60,7 +62,6 @@ public class MainActivity extends AppCompatActivity
         final ActionBar actionBar = getSupportActionBar();
 
         if (actionBar != null) {
-            this.toolbar = toolbar;
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -69,9 +70,6 @@ public class MainActivity extends AppCompatActivity
     private void setupNavDrawer(DrawerLayout drawerLayout, NavigationView navigationView) {
 
         if (navigationView != null && drawerLayout != null) {
-
-            this.drawerLayout = drawerLayout;
-            this.navigationView = navigationView;
 
             // Keep all icons as their original colours
             navigationView.setItemIconTintList(null);
@@ -95,7 +93,7 @@ public class MainActivity extends AppCompatActivity
         context = getApplicationContext();
 
         // Toolbar & Nav Drawer Setup
-        setupToolbar((Toolbar) findViewById(R.id.toolbar));
+        setupToolbar((Toolbar) findViewById(R.id.toolbar_list));
         setupNavDrawer((DrawerLayout) findViewById(R.id.drawer_layout),
                        (NavigationView) findViewById(R.id.drawer));
 
@@ -129,7 +127,7 @@ public class MainActivity extends AppCompatActivity
 
         switch (item.getItemId()) {
             case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
+                getDrawerLayout().openDrawer(GravityCompat.START);
                 return true;
             case R.id.synchronise:
                 Synchroniser.synchronise();
@@ -144,8 +142,10 @@ public class MainActivity extends AppCompatActivity
 
     @Override public void onBackPressed() {
 
-        if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            this.drawerLayout.closeDrawer(GravityCompat.START);
+        DrawerLayout dl = getDrawerLayout();
+
+        if (dl.isDrawerOpen(GravityCompat.START)) {
+            dl.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -153,30 +153,28 @@ public class MainActivity extends AppCompatActivity
 
     @Override public void onListFragmentInteraction(ListAdapter.ViewHolder holder) {
 
-        Entry item;
-        int   menuID;
+        Entry item = holder.entry;
 
-        if (holder instanceof ProjectViewHolder) {
+        if (holder instanceof TaskViewHolder || item.headerRow) {
 
-            item = ((ProjectViewHolder) holder).project;
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.putExtra("ENTRY", holder.entry);
+            intent.putExtra("MENU_ID", menuID);
+            startActivity(intent);
+            return;
+        } else if (holder instanceof ProjectViewHolder) {
+
             menuID = R.id.nav_projects;
         } else if (holder instanceof NestedTaskViewHolder) {
 
-            item = ((NestedTaskViewHolder) holder).task;
             menuID = R.id.nav_projects;
         } else if (holder instanceof ContextViewHolder) {
 
-            item = ((ContextViewHolder) holder).context;
             menuID = R.id.nav_contexts;
         } else if (holder instanceof FolderViewHolder) {
 
-            item = ((FolderViewHolder) holder).folder;
             menuID = R.id.nav_projects;
         } else {
-            return;
-        }
-
-        if (item.headerRow) {
             return;
         }
 
@@ -191,6 +189,51 @@ public class MainActivity extends AppCompatActivity
         currentFragment = newFragment;
     }
 
+    private Toolbar getToolbar() {
+
+        if (mToolbar == null) {
+            Toolbar tb = (Toolbar) findViewById(R.id.toolbar_list);
+
+            if (tb == null) {
+                throw new NullPointerException();
+            }
+
+            mToolbar = tb;
+        }
+
+        return mToolbar;
+    }
+
+    private DrawerLayout getDrawerLayout() {
+
+        if (mDrawerLayout == null) {
+            DrawerLayout dl = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+            if (dl == null) {
+                throw new NullPointerException();
+            }
+
+            mDrawerLayout = dl;
+        }
+
+        return mDrawerLayout;
+    }
+
+    private NavigationView getDrawer() {
+
+        if (mDrawer == null) {
+            NavigationView nv = (NavigationView) findViewById(R.id.drawer);
+
+            if (nv == null) {
+                throw new NullPointerException();
+            }
+
+            mDrawer = nv;
+        }
+
+        return mDrawer;
+    }
+
     private void changeColors(int menuItem) {
 
         // Get the current header colour
@@ -201,30 +244,32 @@ public class MainActivity extends AppCompatActivity
         // Depending on the menu item, we change the current theme (which defines a primary
         // colour), and then set the text colour in the sidebar (for the highlight).
 
+        NavigationView drawer = getDrawer();
+
         switch (menuItem) {
             case R.id.nav_forecast:
                 setTheme(R.style.AppTheme_Red);
-                navigationView.setItemTextColor(ColorStateLists.red);
+                drawer.setItemTextColor(ColorStateLists.red);
                 break;
             case R.id.nav_inbox:
                 setTheme(R.style.AppTheme_BlueGrey);
-                navigationView.setItemTextColor(ColorStateLists.blueGrey);
+                drawer.setItemTextColor(ColorStateLists.blueGrey);
                 break;
             case R.id.nav_projects:
                 setTheme(R.style.AppTheme_Blue);
-                navigationView.setItemTextColor(ColorStateLists.blue);
+                drawer.setItemTextColor(ColorStateLists.blue);
                 break;
             case R.id.nav_contexts:
                 setTheme(R.style.AppTheme);
-                navigationView.setItemTextColor(ColorStateLists.purple);
+                drawer.setItemTextColor(ColorStateLists.purple);
                 break;
             case R.id.nav_flagged:
                 setTheme(R.style.AppTheme_Orange);
-                navigationView.setItemTextColor(ColorStateLists.orange);
+                drawer.setItemTextColor(ColorStateLists.orange);
                 break;
             case R.id.nav_nearby:
                 setTheme(R.style.AppTheme_Green);
-                navigationView.setItemTextColor(ColorStateLists.green);
+                drawer.setItemTextColor(ColorStateLists.green);
                 break;
         }
 
@@ -242,19 +287,22 @@ public class MainActivity extends AppCompatActivity
         toolbarAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override public void onAnimationUpdate(ValueAnimator animator) {
 
+                Toolbar      tb = getToolbar();
+                DrawerLayout dl = getDrawerLayout();
+
                 // The update listener will give you a number between the two values you gave the
                 // animation object initially. Every time it's ready to update, it runs this code.
                 // By the way, you can just set the status bar background colour, and the program
                 // will automatically tint it for you. Just make sure you call 'invalidate()'
                 // afterward.
 
-                toolbar.setBackgroundColor((int) animator.getAnimatedValue());
-                drawerLayout.setStatusBarBackgroundColor((int) animator.getAnimatedValue());
-                drawerLayout.invalidate();
+                tb.setBackgroundColor((int) animator.getAnimatedValue());
+                dl.setStatusBarBackgroundColor((int) animator.getAnimatedValue());
+                dl.invalidate();
             }
         });
 
-        navigationView.invalidate();
+        drawer.invalidate();
 
         toolbarAnimation.start();
     }
@@ -307,7 +355,7 @@ public class MainActivity extends AppCompatActivity
 
             showProgress(true);
 
-            drawerLayout.closeDrawer(GravityCompat.START);
+            getDrawerLayout().closeDrawer(GravityCompat.START);
             return true;
         }
     }

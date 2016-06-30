@@ -24,7 +24,6 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
     public final TextView nameView;
     public final TextView contextView;
     public final TextView dateView;
-    public       Task     task;
 
     public TaskViewHolder(View view) {
 
@@ -37,16 +36,15 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
 
     public void bind(Task task, Context androidContext) {
 
-        this.task = task;
         String     date        = "";
         DateFormat localFormat = SimpleDateFormat.getDateInstance();
 
         // Due / effective due dates (and italicising)
 
-        if (this.task.dateDue != null) {
-            date = "Due " + localFormat.format(this.task.dateDue);
-        } else if (this.task.dateDueEffective != null) {
-            date = "Due " + localFormat.format(this.task.dateDueEffective);
+        if (task.dateDue != null) {
+            date = "Due " + localFormat.format(task.dateDue);
+        } else if (task.dateDueEffective != null) {
+            date = "Due " + localFormat.format(task.dateDueEffective);
             this.dateView.setTypeface(null, Typeface.ITALIC);
         }
 
@@ -55,17 +53,17 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
         int color      = R.color.secondary_text_light;
         int background = 0;
 
-        if (!this.task.isAvailable()) {
+        if (!task.isAvailable()) {
 
             // If the task isn't available, then show the user by changing its colours.
 
             color = R.color.disabled_text_light;
             nameView.setTextColor(ContextCompat.getColor(androidContext, color));
             contextView.setTextColor(ContextCompat.getColor(androidContext, color));
-        } else if (this.task.dueSoon) {
+        } else if (task.dueSoon) {
             color = R.color.foreground_due_soon;
             background = R.drawable.background_due_soon;
-        } else if (this.task.overdue) {
+        } else if (task.overdue) {
             color = R.color.foreground_overdue;
             background = R.drawable.background_overdue;
         }
@@ -77,7 +75,7 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
 
         DataModelHelper     dmHelper       = new DataModelHelper(androidContext);
         Map<String, String> contextNameMap = dmHelper.getContextNameMap();
-        String              context        = contextNameMap.get(this.task.context);
+        String              context        = contextNameMap.get(task.context);
 
         if (context == null) context = "";
 
@@ -87,8 +85,10 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
             nameView.setTypeface(null, Typeface.BOLD);
         }
 
-        nameView.setText(this.task.name);
+        nameView.setText(task.name);
         dateView.setText(date);
         contextView.setText(context);
+
+        this.entry = task;
     }
 }

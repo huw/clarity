@@ -7,4 +7,5 @@
     <dimen name="dot_divider_margin">2dp</dimen>
     <dimen name="due_border_radius">2dp</dimen>
     <dimen name="due_padding">2dp</dimen>
+    <dimen name="action_bar_detail_size">128dp</dimen>
 </resources>

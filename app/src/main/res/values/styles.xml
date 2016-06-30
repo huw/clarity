@@ -10,6 +10,13 @@
         <item name="android:textColorTertiary">@color/disabled_text_light</item>
     </style>
 
+    <style name="WhiteAccent" parent="Widget.Design.TextInputLayout">
+        <item name="colorAccent">@android:color/white</item>
+        <item name="colorControlNormal">@color/divider_dark</item>
+        <item name="colorControlActivated">@android:color/white</item>
+        <item name="colorControlHighlight">@android:color/white</item>
+    </style>
+
     <!-- On pre-lollipop versions of android, the coloured button doesn't
     automatically change its text colours. -->
     <style name="ColouredButton" parent="Widget.AppCompat.Button.Colored">

@@ -144,7 +144,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public final View view;
+        public final View  view;
+        public       Entry entry;
 
         public ViewHolder(View view) {
 

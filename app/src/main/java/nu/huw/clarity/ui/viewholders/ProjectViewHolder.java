@@ -21,7 +21,6 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
     public final TextView overdueView;
     public final TextView dueSoonDivider;
     public final TextView overdueDivider;
-    public       Task     project;
 
     public ProjectViewHolder(View view) {
 
@@ -36,10 +35,10 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
 
     public void bind(Task project, Context androidContext) {
 
-        this.project = project;
-        int remaining = this.project.countRemaining;
-        int dueSoon   = this.project.countDueSoon;
-        int overdue   = this.project.countOverdue;
+        this.entry = project;
+        int remaining = this.entry.countRemaining;
+        int dueSoon   = this.entry.countDueSoon;
+        int overdue   = this.entry.countOverdue;
 
         Resources res = androidContext.getResources();
 
@@ -76,7 +75,7 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
             nameView.setTypeface(null, Typeface.BOLD);
         }
 
-        nameView.setText(this.project.name);
+        nameView.setText(this.entry.name);
         remainingView.setText(remainingString);
     }
 }

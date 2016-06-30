@@ -21,7 +21,6 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
     public final TextView overdueView;
     public final TextView dueSoonDivider;
     public final TextView overdueDivider;
-    public       Context  context;
 
     public ContextViewHolder(View view) {
 
@@ -36,10 +35,10 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
 
     public void bind(Context context, android.content.Context androidContext) {
 
-        this.context = context;
-        int available = this.context.countAvailable;
-        int dueSoon   = this.context.countDueSoon;
-        int overdue   = this.context.countOverdue;
+        this.entry = context;
+        int available = this.entry.countAvailable;
+        int dueSoon   = this.entry.countDueSoon;
+        int overdue   = this.entry.countOverdue;
 
         Resources res = androidContext.getResources();
 
@@ -88,7 +87,7 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
             nameView.setTypeface(null, Typeface.BOLD);
         }
 
-        nameView.setText(this.context.name);
+        nameView.setText(this.entry.name);
         availableView.setText(availableString);
     }
 }

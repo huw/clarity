@@ -21,7 +21,6 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
     public final TextView overdueView;
     public final TextView dueSoonDivider;
     public final TextView overdueDivider;
-    public       Folder   folder;
 
     public FolderViewHolder(View view) {
 
@@ -36,10 +35,10 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
 
     public void bind(Folder folder, Context androidContext) {
 
-        this.folder = folder;
-        int remaining = this.folder.countRemaining;
-        int dueSoon   = this.folder.countDueSoon;
-        int overdue   = this.folder.countOverdue;
+        this.entry = folder;
+        int remaining = this.entry.countRemaining;
+        int dueSoon   = this.entry.countDueSoon;
+        int overdue   = this.entry.countOverdue;
 
         Resources res = androidContext.getResources();
 
@@ -76,7 +75,7 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
             nameView.setTypeface(null, Typeface.BOLD);
         }
 
-        nameView.setText(this.folder.name);
+        nameView.setText(this.entry.name);
         remainingView.setText(remainingString);
     }
 }

@@ -22,7 +22,6 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
     public final TextView nameView;
     public final TextView remainingView;
     public final TextView dateView;
-    public       Task     task;
 
     public NestedTaskViewHolder(View view) {
 
@@ -34,8 +33,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
     public void bind(Task task, Context androidContext) {
 
-        this.task = task;
-        int remaining = this.task.countRemaining;
+        int remaining = this.entry.countRemaining;
 
         Resources res = androidContext.getResources();
 
@@ -45,10 +43,10 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
         // Due dates / effective due dates
         // + italicise effective due dates
 
-        if (this.task.dateDue != null) {
-            date = "Due " + localFormat.format(this.task.dateDue);
-        } else if (this.task.dateDueEffective != null) {
-            date = "Due " + localFormat.format(this.task.dateDueEffective);
+        if (task.dateDue != null) {
+            date = "Due " + localFormat.format(task.dateDue);
+        } else if (task.dateDueEffective != null) {
+            date = "Due " + localFormat.format(task.dateDueEffective);
             this.dateView.setTypeface(null, Typeface.ITALIC);
         }
 
@@ -57,18 +55,18 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
         int color      = R.color.secondary_text_light;
         int background = 0;
 
-        if (!this.task.isAvailable()) {
+        if (!task.isAvailable()) {
 
             // If the task isn't available, then show the user by changing its colours.
 
             color = R.color.disabled_text_light;
             nameView.setTextColor(ContextCompat.getColor(androidContext, color));
             remainingView.setTextColor(ContextCompat.getColor(androidContext, color));
-        } else if (this.task.dueSoon) {
+        } else if (task.dueSoon) {
 
             color = R.color.foreground_due_soon;
             background = R.drawable.background_due_soon;
-        } else if (this.task.overdue) {
+        } else if (task.overdue) {
 
             color = R.color.foreground_overdue;
             background = R.drawable.background_overdue;
@@ -92,8 +90,10 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
             nameView.setTypeface(null, Typeface.BOLD);
         }
 
-        nameView.setText(this.task.name);
+        nameView.setText(this.entry.name);
         dateView.setText(date);
         remainingView.setText(remainingString);
+
+        this.entry = task;
     }
 }

@@ -1,5 +1,7 @@
 package nu.huw.clarity.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 /**
@@ -8,6 +10,17 @@ import android.support.annotation.NonNull;
  */
 public class Entry extends Base implements Comparable<Entry> {
 
+    public static final Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator<Entry>() {
+        public Entry createFromParcel(Parcel in) {
+
+            return new Entry(in);
+        }
+
+        public Entry[] newArray(int size) {
+
+            return new Entry[size];
+        }
+    };
     public boolean active;
     public boolean activeEffective;
     public int     countAvailable;
@@ -23,6 +36,42 @@ public class Entry extends Base implements Comparable<Entry> {
     public boolean headerRow;
 
     public Entry() {}
+
+    protected Entry(Parcel in) {
+
+        super(in);
+        active = in.readInt() != 0;
+        activeEffective = in.readInt() != 0;
+        countAvailable = in.readInt();
+        countChildren = in.readInt();
+        countCompleted = in.readInt();
+        countDueSoon = in.readInt();
+        countOverdue = in.readInt();
+        countRemaining = in.readInt();
+        hasChildren = in.readInt() != 0;
+        name = in.readString();
+        parentID = in.readString();
+        rank = in.readLong();
+        headerRow = in.readInt() != 0;
+    }
+
+    @Override public void writeToParcel(Parcel out, int flags) {
+
+        super.writeToParcel(out, flags);
+        out.writeInt(active ? 1 : 0);
+        out.writeInt(activeEffective ? 1 : 0);
+        out.writeInt(countAvailable);
+        out.writeInt(countChildren);
+        out.writeInt(countCompleted);
+        out.writeInt(countDueSoon);
+        out.writeInt(countOverdue);
+        out.writeInt(countRemaining);
+        out.writeInt(hasChildren ? 1 : 0);
+        out.writeString(name);
+        out.writeString(parentID);
+        out.writeLong(rank);
+        out.writeInt(headerRow ? 1 : 0);
+    }
 
     @Override public int compareTo(@NonNull Entry entry) {
 
