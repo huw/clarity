@@ -5,8 +5,10 @@ import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -37,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.crypto.OmniSyncDecrypter;
 import nu.huw.clarity.db.RecursiveColumnUpdater;
@@ -208,6 +211,9 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
 
             Log.e(TAG, "Failed sync", e);
         }
+
+        Intent intent = new Intent(getContext().getString(R.string.sync_broadcast_intent));
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
     }
 
     /**
@@ -271,7 +277,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
      *
      * @return List of files to download, as `File` objects
      */
-    public List<File> getFilesToDownload() {
+    private List<File> getFilesToDownload() {
 
         try {
             List<File> filesToDownload = new ArrayList<>();

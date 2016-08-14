@@ -3,6 +3,8 @@
     <string name="app_name_short">Clarity</string>
     <string name="account_name">Omni Sync</string>
     <string name="account_type">nu.huw.clarity</string>
+    <string name="sync_broadcast_intent">nu.huw.ACTION_FINISHED_SYNC</string>
+    <string name="authority">nu.huw.clarity.sync</string>
 
     <!-- LoginActivity -->
     <string name="login_title">Welcome to Clarity</string>
@@ -48,7 +50,8 @@
 
     <!-- Empty States -->
     <string name="empty_title">There\'s nothing here</string>
-    <string name="empty_congratulations">Congratulations!</string>
+    <string name="empty_congratulations">Pull down to sync\n(may take some time)\nor change
+        perspectives \nfrom the menu</string>
 
     <!-- Detail View -->
     <string name="task">Task</string>

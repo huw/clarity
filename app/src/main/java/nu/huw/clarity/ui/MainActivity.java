@@ -22,7 +22,6 @@ import android.view.View;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
-import nu.huw.clarity.db.RecursiveColumnUpdater;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.ui.adapters.ListAdapter;
 import nu.huw.clarity.ui.fragments.ListFragment;
@@ -126,11 +125,6 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case android.R.id.home:
                 getDrawerLayout().openDrawer(GravityCompat.START);
-                return true;
-            case R.id.synchronise:
-                return true;
-            case R.id.reload_db:
-                new RecursiveColumnUpdater().updateTree();
                 return true;
         }
 

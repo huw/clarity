@@ -1,10 +1,19 @@
 package nu.huw.clarity.ui.fragments;
 
+import android.accounts.Account;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SyncInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +22,7 @@ import android.widget.RelativeLayout;
 import java.util.List;
 
 import nu.huw.clarity.R;
+import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.DataModelHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.ui.adapters.ListAdapter;
@@ -28,6 +38,24 @@ public class ListFragment extends Fragment {
     private static final String TAG = ListFragment.class.getSimpleName();
     private OnListFragmentInteractionListener mListener;
     private RecyclerView.Adapter              mAdapter;
+    private View                              view;
+    private SwipeRefreshLayout                swipeLayout;
+    // For receiving sync broadcasts
+    private IntentFilter                      syncIntentFilter;
+    private BroadcastReceiver syncReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+
+            if (view == null || swipeLayout == null) {
+                return;
+            }
+
+            if (swipeLayout.isRefreshing()) {
+                create();
+                fillContent(view);
+                swipeLayout.setRefreshing(false);
+            }
+        }
+    };
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the fragment (e.g. upon
@@ -57,6 +85,19 @@ public class ListFragment extends Fragment {
     @Override public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        if (getContext() != null) {
+
+            // Setup receiver
+
+            syncIntentFilter =
+                    new IntentFilter(getContext().getString(R.string.sync_broadcast_intent));
+        }
+
+        create();
+    }
+
+    private void create() {
 
         if (getArguments() != null) {
             int    menuID   = getArguments().getInt("menuID");
@@ -96,10 +137,71 @@ public class ListFragment extends Fragment {
         }
     }
 
+    @Override public void onResume() {
+
+        super.onResume();
+
+        LocalBroadcastManager.getInstance(getContext())
+                             .registerReceiver(syncReceiver, syncIntentFilter);
+    }
+
+    @Override public void onPause() {
+
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(syncReceiver);
+    }
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                        Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_entry_list, container, false);
+        view = inflater.inflate(R.layout.fragment_entry_list, container, false);
+
+        fillContent(view);
+
+        // Swipe to refresh
+
+        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.list_refresh);
+
+        final Account account   = AccountManagerHelper.getAccount();
+        final String  authority = getString(R.string.authority);
+
+        boolean active = false;
+        for (SyncInfo syncInfo : ContentResolver.getCurrentSyncs()) {
+            if (syncInfo.authority.equals(authority)) {
+                active = true;
+            }
+        }
+
+        if (active) {
+
+            // Weird bug with swipe layouts
+            // See: http://stackoverflow.com/a/26910973
+
+            swipeLayout.post(new Runnable() {
+                @Override public void run() {
+
+                    swipeLayout.setRefreshing(true);
+                }
+            });
+        }
+
+        TypedValue typedValue = new TypedValue();
+        getContext().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+        int color = typedValue.data;
+        swipeLayout.setColorSchemeColors(color);
+
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override public void onRefresh() {
+
+                ContentResolver.requestSync(account, authority, new Bundle());
+            }
+        });
+
+        return view;
+    }
+
+    private void fillContent(View view) {
 
         // Set the adapter
         RecyclerView   recyclerView   = (RecyclerView) view.findViewById(R.id.list);
@@ -109,16 +211,15 @@ public class ListFragment extends Fragment {
 
             relativeLayout.setVisibility(View.GONE);
 
-            Context      context      = view.getContext();
+            Context context = view.getContext();
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            recyclerView.invalidateItemDecorations();
             recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
             recyclerView.setAdapter(mAdapter);
         } else {
 
             recyclerView.setVisibility(View.GONE);
         }
-
-        return view;
     }
 
     @Override public void onAttach(Context context) {

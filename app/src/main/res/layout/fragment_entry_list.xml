@@ -6,16 +6,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/list"
-        android:name="nu.huw.clarity.ui.fragments.EntryFragment"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/list_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fadeScrollbars="true"
-        android:scrollbars="vertical"
-        app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.fragments.ListFragment"
-        tools:listitem="@layout/fragment_task"/>
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list"
+            android:name="nu.huw.clarity.ui.fragments.EntryFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadeScrollbars="true"
+            android:scrollbars="vertical"
+            app:layoutManager="LinearLayoutManager"
+            tools:context=".ui.fragments.ListFragment"
+            tools:listitem="@layout/fragment_task"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <RelativeLayout
         android:id="@+id/empty_state"
@@ -48,6 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/empty_headline"
             android:layout_centerHorizontal="true"
+            android:gravity="center"
             android:text="@string/empty_congratulations"
             android:textColor="@color/disabled_text_light"
             android:textSize="@dimen/subhead_size"/>
