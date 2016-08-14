@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="nu.huw.clarity.ui.DetailFragment"
+    tools:context=".ui.fragments.DetailFragment"
     >
 
     <include layout="@layout/detail_status"/>

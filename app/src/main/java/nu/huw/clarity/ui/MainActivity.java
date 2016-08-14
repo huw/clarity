@@ -265,10 +265,6 @@ public class MainActivity extends AppCompatActivity
                 currentTheme = R.style.AppTheme_Orange;
                 drawer.setItemTextColor(ColorStateLists.orange);
                 break;
-            case R.id.nav_nearby:
-                currentTheme = R.style.AppTheme_Green;
-                drawer.setItemTextColor(ColorStateLists.green);
-                break;
         }
 
         // Now to figure out the colour we're transitioning to, we get the _new_ primary theme

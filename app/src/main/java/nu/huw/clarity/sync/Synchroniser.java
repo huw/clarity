@@ -19,8 +19,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import nu.huw.clarity.account.AccountManagerHelper;
+import nu.huw.clarity.crypto.OmniSyncDecrypter;
 import nu.huw.clarity.db.RecursiveColumnUpdater;
 import nu.huw.clarity.db.SyncDownParser;
+import nu.huw.clarity.ui.MainActivity;
 
 /**
  * This class handles all of the synchronisation methods. A.K.A. Anything that needs an Apache
@@ -29,6 +31,7 @@ import nu.huw.clarity.db.SyncDownParser;
 public class Synchroniser {
 
     private static final String TAG = Synchroniser.class.getSimpleName();
+    private static OmniSyncDecrypter decrypter;
 
     /**
      * This function will create a new HttpClient and automatically add the account's credentials in
@@ -40,7 +43,7 @@ public class Synchroniser {
      * This code will be the appropriate setup code 100% of the time, AFTER AN ACCOUNT HAS BEEN
      * MADE.
      */
-    public static HttpClient getHttpClient() {
+    static HttpClient getHttpClient() {
 
         HttpClient client = new HttpClient();
 
@@ -65,40 +68,76 @@ public class Synchroniser {
      * can't use callbacks because we need a specific order. So over in `runEachFile()` we get each
      * file as it finishes, in the order that we hand the files to `downloadFiles()` in.
      *
-     * A slow sync is a disruptive sync. A killer sync, like this sync, is a fucking achievement of
-     * programming. And impossible to represent in a goddamn flowchart.
+     * The cost of a quality sync, I suppose, is readability. Because we run through all of the
+     * files in various weird, confusing orders, it's hard to follow the logic through. I hope
+     * the comments can be descriptive enough.
      */
     public static void synchronise() {
 
-        new GetFilesToDownloadTask(new GetFilesToDownloadTask.TaskListener() {
-            @Override public void onFinished(List<String> result) {
+        // Download encryption metadata
+        new DownloadFileTask(new DownloadFileTask.TaskListener() {
+            @Override public void onFinished(File result) {
 
-                List<DownloadFileTask> downloadList = downloadFiles(result);
+                String passphrase = AccountManagerHelper.getPassword();
 
-                runEachFile(downloadList, new TaskListener() {
-                    @Override public void onFinished(File file) {
+                try {
 
-                        try {
+                    new DecrypterLoaderTask(new DecrypterLoaderTask.TaskListener() {
+                        @Override public void onFinished(OmniSyncDecrypter result) {
 
-                            ZipFile     zipFile     = new ZipFile(file);
-                            ZipEntry    contentsXml = zipFile.getEntry("contents.xml");
-                            InputStream input       = zipFile.getInputStream(contentsXml);
+                            decrypter = result;
 
-                            SyncDownParser.parse(input);
-                        } catch (IOException e) {
-                            Log.e(TAG, "Error reading downloaded zip file", e);
+                            new GetFilesToDownloadTask(new GetFilesToDownloadTask.TaskListener() {
+                                @Override public void onFinished(List<String> result) {
+
+                                    List<DownloadFileTask> downloadList = downloadFiles(result);
+
+                                    runEachFile(downloadList, new TaskListener() {
+                                        @Override public void onFinished(File file) {
+
+                                            try {
+
+                                                File decryptedFile =
+                                                        File.createTempFile("dec-" + file.getName(),
+                                                                            null,
+                                                                            MainActivity.context
+                                                                                    .getCacheDir());
+
+                                                decrypter.decryptFile(file, decryptedFile);
+
+                                                Log.d(TAG, decryptedFile.getAbsolutePath());
+
+                                                ZipFile zipFile = new ZipFile(decryptedFile);
+                                                ZipEntry contentsXml =
+                                                        zipFile.getEntry("contents.xml");
+                                                InputStream input =
+                                                        zipFile.getInputStream(contentsXml);
+
+                                                SyncDownParser.parse(input);
+                                            } catch (IOException e) {
+                                                Log.e(TAG, "Error reading downloaded zip file", e);
+                                            } catch (Exception e) {
+                                                Log.e(TAG, "Error decrypting downloaded file", e);
+                                            }
+                                        }
+                                    });
+                                }
+                            }).execute();
                         }
-                    }
-                });
+                    }).execute(result);
+                } catch (Exception e) {
+
+                    Log.e(TAG, "Failed to load OmniSync decrypter class", e);
+                }
             }
-        }).execute();
+        }).execute("encrypted");
     }
 
     private static List<DownloadFileTask> downloadFiles(List<String> nameList) {
 
         List<DownloadFileTask> downloadList = new ArrayList<>();
 
-        /**
+        /*
          * The setup we want for the threading is as follows:
          * | 1  | 2 - n-1  |   n   |
          * | UI | Download | Parse |

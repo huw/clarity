@@ -15,15 +15,19 @@ import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
 import nu.huw.clarity.R;
+import nu.huw.clarity.db.DataModelHelper;
+import nu.huw.clarity.db.DatabaseContract;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Task;
+import nu.huw.clarity.ui.fragments.DetailFragment;
 
 public class DetailActivity extends AppCompatActivity
         implements DetailFragment.OnDetailInteractionListener {
 
     private Entry entry;
+    private int   themeID;
 
     private void setupToolbar(Toolbar toolbar, int themeID) {
 
@@ -36,6 +40,7 @@ public class DetailActivity extends AppCompatActivity
         }
 
         // Set the theme to the theme we just had back in MainActivity
+        this.themeID = themeID;
         setTheme(themeID);
 
         AppBarLayout   abLayout   = (AppBarLayout) findViewById(R.id.barlayout_detail);
@@ -56,7 +61,22 @@ public class DetailActivity extends AppCompatActivity
         setContentView(R.layout.activity_detail);
 
         Intent intent = getIntent();
-        entry = intent.getParcelableExtra("ENTRY");
+        if (intent.hasExtra("ENTRY")) {
+
+            // If we've passed an entry already, then just pick it up
+
+            entry = intent.getParcelableExtra("ENTRY");
+        } else if (intent.hasExtra("ENTRY_ID") && intent.hasExtra("TABLE_NAME")) {
+
+            // If we've just passed an ID and a table name, read in the associated entry
+
+            String id        = intent.getStringExtra("ENTRY_ID");
+            String tableName = intent.getStringExtra("TABLE_NAME");
+            entry = (new DataModelHelper(getBaseContext())).getEntryFromID(id, tableName);
+        } else {
+            throw new IllegalArgumentException(
+                    "Intent must contain 'ENTRY' or 'ENTRY_ID' and " + "'TABLE NAME'");
+        }
 
         setupToolbar((Toolbar) findViewById(R.id.toolbar_detail),
                      intent.getIntExtra("THEME_ID", R.style.AppTheme));
@@ -107,7 +127,21 @@ public class DetailActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @Override public void onDetailInteraction() {
+    @Override public void onContextClick(String id) {
 
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("ENTRY_ID", id);
+        intent.putExtra("TABLE_NAME", DatabaseContract.Contexts.TABLE_NAME);
+        intent.putExtra("THEME_ID", themeID);
+        startActivity(intent);
+    }
+
+    @Override public void onProjectClick(String id) {
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("ENTRY_ID", id);
+        intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
+        intent.putExtra("THEME_ID", themeID);
+        startActivity(intent);
     }
 }

@@ -22,10 +22,6 @@
             android:id="@+id/nav_flagged"
             android:icon="@drawable/ic_flag_orange"
             android:title="@string/flagged"/>
-        <item
-            android:id="@+id/nav_nearby"
-            android:icon="@drawable/ic_nearby_green"
-            android:title="@string/nearby"/>
     </group>
 
 </menu>

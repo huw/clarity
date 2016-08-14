@@ -26,16 +26,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
         android:layout_toEndOf="@id/detail.project.label"
-        android:layout_toLeftOf="@id/detail.project.button"
+        android:layout_toLeftOf="@+id/detail.project.button"
         android:layout_toRightOf="@id/detail.project.label"
-        android:layout_toStartOf="@+id/detail.project.button"
+        android:layout_toStartOf="@id/detail.project.button"
         android:ellipsize="end"
         android:gravity="end"
         android:maxLines="1"
-        android:textColor="@color/primary_text_light"
+        android:text="@string/none"
+        android:textColor="@color/secondary_text_light"
         android:textSize="@dimen/subhead_size"
-        tools:text="Die Tasche And a Bunch More Of All That Because We're Trying To"
         />
 
     <ImageButton
@@ -45,12 +47,15 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerInParent="true"
-        android:layout_marginLeft="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginLeft="-6dp"
         android:layout_marginRight="10dp"
+        android:layout_marginStart="-6dp"
         android:background="@drawable/circle_ripple"
         android:contentDescription="@string/detail_go_project"
         android:src="@drawable/ic_arrow_forward"
         android:tint="@color/primary_text_light"
+        android:visibility="gone"
         />
 
     <View

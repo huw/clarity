@@ -30,8 +30,6 @@ import nu.huw.clarity.db.DatabaseContract.Tasks;
 public class SyncDownParser {
 
     private static final String         TAG       = SyncDownParser.class.getSimpleName();
-    private static final String         namespace =
-            "http://www.omnigroup.com/namespace/OmniFocus/v1";
     private static final DatabaseHelper mDBHelper = new DatabaseHelper();
 
     public static void parse(InputStream input) {
@@ -49,7 +47,7 @@ public class SyncDownParser {
             // OmniFocus namespace (see the variable above), and that the tag
             // name is 'omnifocus'. A good start to reading these things.
 
-            parser.require(XmlPullParser.START_TAG, namespace, "omnifocus");
+            parser.require(XmlPullParser.START_TAG, null, "omnifocus");
 
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
 
@@ -114,7 +112,7 @@ public class SyncDownParser {
 
             try {
 
-                /**
+                /*
                  * Loop through the tags in this part of the tree. This loop will
                  * catch every tag under the current one, which is nice.
                  */
@@ -187,7 +185,7 @@ public class SyncDownParser {
 
         switch (parser.getName()) {
 
-            /**
+            /*
              * Parents
              */
             case "context":
@@ -204,7 +202,7 @@ public class SyncDownParser {
                 value = parser.getAttributeValue(null, "idref");
                 break;
 
-            /**
+            /*
              * Base
              */
             case "added":
@@ -219,7 +217,7 @@ public class SyncDownParser {
                 value = convertToMilliseconds(parser.getText());
                 break;
 
-            /**
+            /*
              * Entry
              */
             case "name":
@@ -240,7 +238,7 @@ public class SyncDownParser {
                 value = parser.getText().equals("true") ? "0" : "1"; // Invert and convert
                 break;
 
-            /**
+            /*
              * Attachment
              */
             case "preview-image":
@@ -249,7 +247,7 @@ public class SyncDownParser {
                 value = parser.getText();
                 break;
 
-            /**
+            /*
              * Context
              */
             case "location":
@@ -273,14 +271,14 @@ public class SyncDownParser {
                 value = String.valueOf(5 - parser.getText().length()); // I'm so sorry
                 break;
 
-            /**
+            /*
              * Perspectives/Settings
              * TODO: Actually parse
              */
             case "plist":
                 break;
 
-            /**
+            /*
              * Tasks
              */
             case "order":
@@ -355,10 +353,9 @@ public class SyncDownParser {
                 value = parser.getText();
                 break;
 
-            /**
+            /*
              * Projects
              */
-
             case "project":
                 name = Tasks.COLUMN_PROJECT.name;
                 value = "1";
@@ -406,7 +403,7 @@ public class SyncDownParser {
      * Given a string representing an ISO 8601 full datetime, convert it to a string in milliseconds
      * that represents the time since the UNIX epoch.
      */
-    public static String convertToMilliseconds(String dateString) {
+    private static String convertToMilliseconds(String dateString) {
 
         try {
 
@@ -417,6 +414,10 @@ public class SyncDownParser {
             return String.valueOf(format.parse(dateString).getTime());
         } catch (ParseException e) {
             Log.e(TAG, "Invalid date format", e);
+            return null;
+        } catch (NullPointerException e) {
+
+            // Date is null, just return null
             return null;
         }
     }

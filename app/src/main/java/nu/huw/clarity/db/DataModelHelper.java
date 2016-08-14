@@ -55,6 +55,23 @@ public class DataModelHelper {
     }
 
     /**
+     * Given the ID of any entry, get it into the data model
+     */
+    public Entry getEntryFromID(String id, String tableName) {
+
+        switch (tableName) {
+            case Contexts.TABLE_NAME:
+                return getContext(id);
+            case Folders.TABLE_NAME:
+                return getFolder(id);
+            case Tasks.TABLE_NAME:
+                return getTask(id);
+        }
+
+        return null;
+    }
+
+    /**
      * Given the ID of an attachment, get it into the data model
      */
     public Attachment getAttachment(String id) {
@@ -197,6 +214,11 @@ public class DataModelHelper {
         return noContext;
     }
 
+    public Entry getContext(String id) {
+
+        return getContexts(Contexts.COLUMN_ID + " = ?", new String[]{id}).get(0);
+    }
+
     private Context getContextFromCursor(Cursor cursor) {
 
         Context context = new Context();
@@ -269,6 +291,11 @@ public class DataModelHelper {
     public List<Entry> getTopLevelFolders() {
 
         return getFolders(TOP_LEVEL + ORDER_BY_RANK, null);
+    }
+
+    public Entry getFolder(String id) {
+
+        return getFolders(Folders.COLUMN_ID + " = ?", new String[]{id}).get(0);
     }
 
     private Folder getFolderFromCursor(Cursor cursor) {
@@ -418,6 +445,11 @@ public class DataModelHelper {
 
         String selection = REMAINING + AND + Tasks.COLUMN_CONTEXT + " IS NULL" + ORDER_BY_RANK;
         return getTasks(selection, null);
+    }
+
+    public Entry getTask(String id) {
+
+        return getTasks(Tasks.COLUMN_ID + " = ?", new String[]{id}).get(0);
     }
 
     private Task getTaskFromCursor(Cursor cursor) {

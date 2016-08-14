@@ -7,9 +7,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.RandomAccessFile;
 
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.ui.MainActivity;
@@ -18,17 +17,17 @@ import nu.huw.clarity.ui.MainActivity;
  * Given a single file, downloads it and returns the file object. Designed to be used in an
  * asynchronous context with multiple files at once, along with `.get()` instead of callbacks.
  */
-public class DownloadFileTask extends AsyncTask<String, Void, File> {
+class DownloadFileTask extends AsyncTask<String, Void, File> {
 
     private static final String TAG = DownloadFileTask.class.getSimpleName();
     private final TaskListener taskListener;
 
-    public DownloadFileTask(TaskListener listener) {
+    DownloadFileTask(TaskListener listener) {
 
         taskListener = listener;
     }
 
-    public DownloadFileTask() {
+    DownloadFileTask() {
 
         taskListener = null;
     }
@@ -49,10 +48,10 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
                 // `.releaseConnection()` until we're done), and bitwise copy the in
                 // stream to the out stream. THEN we close everything. File downloaded.
 
-                InputStream  input  = getFileMethod.getResponseBodyAsStream();
+                InputStream input = getFileMethod.getResponseBodyAsStream();
                 File file =
                         File.createTempFile(params[0], null, MainActivity.context.getCacheDir());
-                OutputStream output = new FileOutputStream(file);
+                RandomAccessFile output = new RandomAccessFile(file, "rw");
 
                 // Copy input stream to output stream, bitwise
                 byte data[] = new byte[4096];
@@ -92,7 +91,7 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
         }
     }
 
-    public interface TaskListener {
+    interface TaskListener {
 
         void onFinished(File result);
     }
