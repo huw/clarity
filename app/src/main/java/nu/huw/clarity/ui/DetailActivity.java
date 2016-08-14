@@ -129,19 +129,31 @@ public class DetailActivity extends AppCompatActivity
 
     @Override public void onContextClick(String id) {
 
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("ENTRY_ID", id);
         intent.putExtra("TABLE_NAME", DatabaseContract.Contexts.TABLE_NAME);
         intent.putExtra("THEME_ID", themeID);
         startActivity(intent);
+
+        /*Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("ENTRY_ID", id);
+        intent.putExtra("TABLE_NAME", DatabaseContract.Contexts.TABLE_NAME);
+        intent.putExtra("THEME_ID", themeID);
+        startActivity(intent);*/
     }
 
     @Override public void onProjectClick(String id) {
 
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("ENTRY_ID", id);
         intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
         intent.putExtra("THEME_ID", themeID);
         startActivity(intent);
+
+        /*Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("ENTRY_ID", id);
+        intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
+        intent.putExtra("THEME_ID", themeID);
+        startActivity(intent);*/
     }
 }

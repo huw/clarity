@@ -3,6 +3,7 @@ package nu.huw.clarity.db;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.StrictMode;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import nu.huw.clarity.BuildConfig;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
 import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
@@ -30,6 +32,15 @@ public class RecursiveColumnUpdater {
     private DatabaseHelper mDBHelper;
 
     public RecursiveColumnUpdater() {
+
+        // Strict mode for debugging
+
+        if (BuildConfig.DEBUG) {
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectLeakedSqlLiteObjects()
+                                                                    .detectLeakedClosableObjects()
+                                                                    .penaltyLog().penaltyDeath()
+                                                                    .build());
+        }
 
         mDBHelper = new DatabaseHelper();
         mBlockedValue.put(Tasks.COLUMN_BLOCKED.name, true);
@@ -113,6 +124,8 @@ public class RecursiveColumnUpdater {
             updateTaskBlocked(db, id, blocked, blockedByDefer, status);
         }
 
+        projects.close();
+
         // Now the same, but for Contexts. Keep in mind that the recursive call in contexts is a
         // little different, see below.
 
@@ -160,27 +173,27 @@ public class RecursiveColumnUpdater {
             Cursor countChildrenCursor = mDBHelper
                     .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=?",
                            new String[]{id});
-            Cursor countAvailableCursor = mDBHelper
-                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=? AND " +
-                                                       Tasks.COLUMN_DATE_COMPLETED +
-                                                       " IS NULL AND " +
-                                                       Tasks.COLUMN_BLOCKED + "=0 AND " +
-                                                       Tasks.COLUMN_BLOCKED_BY_DEFER.name +
-                                                       "=0 AND " +
-                                                       Tasks.COLUMN_HAS_CHILDREN.name + "=0",
-                           new String[]{id});
-            Cursor countRemainingCursor = mDBHelper
-                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=? AND " +
-                                                       Tasks.COLUMN_DATE_COMPLETED +
-                                                       " IS NULL", new String[]{id});
-            Cursor countDueSoonCursor = mDBHelper
-                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=? AND " +
-                                                       Tasks.COLUMN_DUE_SOON + "=1",
-                           new String[]{id});
-            Cursor countOverdueCursor = mDBHelper
-                    .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_PROJECT_ID + "=? AND " +
-                                                       Tasks.COLUMN_OVERDUE + "=1",
-                           new String[]{id});
+            Cursor countAvailableCursor = mDBHelper.query(db, Tasks.TABLE_NAME, null,
+                                                          Tasks.COLUMN_PROJECT_ID + "=? AND " +
+                                                          Tasks.COLUMN_DATE_COMPLETED +
+                                                          " IS NULL AND " + Tasks.COLUMN_BLOCKED +
+                                                          "=0 AND " +
+                                                          Tasks.COLUMN_BLOCKED_BY_DEFER.name +
+                                                          "=0 AND " +
+                                                          Tasks.COLUMN_HAS_CHILDREN.name + "=0",
+                                                          new String[]{id});
+            Cursor countRemainingCursor = mDBHelper.query(db, Tasks.TABLE_NAME, null,
+                                                          Tasks.COLUMN_PROJECT_ID + "=? AND " +
+                                                          Tasks.COLUMN_DATE_COMPLETED + " IS NULL",
+                                                          new String[]{id});
+            Cursor countDueSoonCursor = mDBHelper.query(db, Tasks.TABLE_NAME, null,
+                                                        Tasks.COLUMN_PROJECT_ID + "=? AND " +
+                                                        Tasks.COLUMN_DUE_SOON + "=1",
+                                                        new String[]{id});
+            Cursor countOverdueCursor = mDBHelper.query(db, Tasks.TABLE_NAME, null,
+                                                        Tasks.COLUMN_PROJECT_ID + "=? AND " +
+                                                        Tasks.COLUMN_OVERDUE + "=1",
+                                                        new String[]{id});
 
             // Note that countCompleted + countRemaining = countChildren, so we can save on an
             // extra SQL query each time.
@@ -383,7 +396,7 @@ public class RecursiveColumnUpdater {
             String childFlagged   = mDBHelper.getString(children, Tasks.COLUMN_FLAGGED.name);
             String childStatus    = mDBHelper.getString(children, Tasks.COLUMN_PROJECT_STATUS.name);
             String childType      = mDBHelper.getString(children, Tasks.COLUMN_TYPE.name);
-            long childRank =
+            long   childRank      =
                     Long.valueOf(mDBHelper.getString(children, Tasks.COLUMN_RANK.name));
 
             String localDateDefer = dateDefer;
@@ -605,6 +618,8 @@ public class RecursiveColumnUpdater {
                 mDBHelper.getString(dates, Tasks.COLUMN_DATE_COMPLETED.name) != null;
         Date    today            = new Date();
 
+        dates.close();
+
         if (!completed && (dueDate != null || effectiveDueDate != null)) {
             Date due = new Date();
 
@@ -697,27 +712,24 @@ public class RecursiveColumnUpdater {
 
         Cursor countChildrenCursor = mDBHelper
                 .query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=?", new String[]{id});
-        Cursor countAvailableCursor =
-                mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
-                                                            Tasks.COLUMN_DATE_COMPLETED +
-                                                            " IS NULL AND " +
-                                                            Tasks.COLUMN_BLOCKED + "=0 AND " +
-                                                            Tasks.COLUMN_BLOCKED_BY_DEFER.name +
-                                                            "=0 AND " +
-                                                            Tasks.COLUMN_HAS_CHILDREN.name + "=0",
-                                new String[]{id});
-        Cursor countRemainingCursor =
-                mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
-                                                            Tasks.COLUMN_DATE_COMPLETED +
-                                                            " IS NULL", new String[]{id});
-        Cursor countDueSoonCursor =
-                mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
-                                                            Tasks.COLUMN_DUE_SOON + "=1",
-                                new String[]{id});
-        Cursor countOverdueCursor =
-                mDBHelper.query(db, Tasks.TABLE_NAME, null, Tasks.COLUMN_CONTEXT + "=? AND " +
-                                                            Tasks.COLUMN_OVERDUE + "=1",
-                                new String[]{id});
+        Cursor countAvailableCursor = mDBHelper.query(db, Tasks.TABLE_NAME, null,
+                                                      Tasks.COLUMN_CONTEXT + "=? AND " +
+                                                      Tasks.COLUMN_DATE_COMPLETED +
+                                                      " IS NULL AND " + Tasks.COLUMN_BLOCKED +
+                                                      "=0 AND " +
+                                                      Tasks.COLUMN_BLOCKED_BY_DEFER.name +
+                                                      "=0 AND " + Tasks.COLUMN_HAS_CHILDREN.name +
+                                                      "=0", new String[]{id});
+        Cursor countRemainingCursor = mDBHelper.query(db, Tasks.TABLE_NAME, null,
+                                                      Tasks.COLUMN_CONTEXT + "=? AND " +
+                                                      Tasks.COLUMN_DATE_COMPLETED + " IS NULL",
+                                                      new String[]{id});
+        Cursor countDueSoonCursor = mDBHelper.query(db, Tasks.TABLE_NAME, null,
+                                                    Tasks.COLUMN_CONTEXT + "=? AND " +
+                                                    Tasks.COLUMN_DUE_SOON + "=1", new String[]{id});
+        Cursor countOverdueCursor = mDBHelper.query(db, Tasks.TABLE_NAME, null,
+                                                    Tasks.COLUMN_CONTEXT + "=? AND " +
+                                                    Tasks.COLUMN_OVERDUE + "=1", new String[]{id});
 
         countChildren = countChildrenCursor.getCount();
         countAvailable = countAvailableCursor.getCount();

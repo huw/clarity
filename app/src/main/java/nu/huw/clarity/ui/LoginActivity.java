@@ -29,11 +29,12 @@ public class LoginActivity extends AppCompatActivity
         implements ErrorDialogFragment.onErrorDismissListener {
 
     private static final String            TAG       = LoginActivity.class.getSimpleName();
-    /**
+    static               int               RESULT_OK = 1;
+    /*
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private              OmniSyncLoginTask mAuthTask = null;
-    /**
+    /*
      * References for the UI.
      */
     private TextInputEditText mUsernameView;
@@ -42,7 +43,7 @@ public class LoginActivity extends AppCompatActivity
     private TextInputLayout   mPasswordIL;
     private View              mProgressView;
     private View              mLoginFormView;
-    /**
+    /*
      * Other
      */
     private AccountManager    mAccountManager;
@@ -149,7 +150,7 @@ public class LoginActivity extends AppCompatActivity
                     (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mLoginFormView.getWindowToken(), 0);
 
-            mAuthTask = new OmniSyncLoginTask(mUsername, mPassword, new loginListener());
+            mAuthTask = new OmniSyncLoginTask(mUsername, mPassword, new LoginListener());
             mAuthTask.execute((Void) null);
         }
     }
@@ -212,10 +213,11 @@ public class LoginActivity extends AppCompatActivity
         mAccountManager.addAccountExplicitly(account, password, userData);
         Log.i(TAG, "Added account to system");
 
+        setResult(RESULT_OK);
         finish();
     }
 
-    public class loginListener implements OmniSyncLoginTask.TaskListener {
+    private class LoginListener implements OmniSyncLoginTask.TaskListener {
 
         @Override public void onFinished(Bundle result) {
 

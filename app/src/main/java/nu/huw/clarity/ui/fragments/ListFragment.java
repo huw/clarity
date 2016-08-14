@@ -49,11 +49,10 @@ public class ListFragment extends Fragment {
                 return;
             }
 
-            if (swipeLayout.isRefreshing()) {
-                create();
-                fillContent(view);
-                swipeLayout.setRefreshing(false);
-            }
+            create();
+
+            fillContent(view);
+            swipeLayout.setRefreshing(false);
         }
     };
 
@@ -133,7 +132,7 @@ public class ListFragment extends Fragment {
                     items = dmHelper.getTasks();
             }
 
-            mAdapter = new ListAdapter(this.getContext(), items, mListener);
+            mAdapter = new ListAdapter(getContext(), items, mListener);
         }
     }
 
@@ -157,46 +156,29 @@ public class ListFragment extends Fragment {
 
         view = inflater.inflate(R.layout.fragment_entry_list, container, false);
 
-        fillContent(view);
-
         // Swipe to refresh
 
-        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.list_refresh);
+        if (AccountManagerHelper.doesAccountExist()) {
 
-        final Account account   = AccountManagerHelper.getAccount();
-        final String  authority = getString(R.string.authority);
+            swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.list_refresh);
 
-        boolean active = false;
-        for (SyncInfo syncInfo : ContentResolver.getCurrentSyncs()) {
-            if (syncInfo.authority.equals(authority)) {
-                active = true;
-            }
-        }
+            final Account account   = AccountManagerHelper.getAccount();
+            final String  authority = getString(R.string.authority);
 
-        if (active) {
+            TypedValue typedValue = new TypedValue();
+            getContext().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+            int color = typedValue.data;
+            swipeLayout.setColorSchemeColors(color);
 
-            // Weird bug with swipe layouts
-            // See: http://stackoverflow.com/a/26910973
+            swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override public void onRefresh() {
 
-            swipeLayout.post(new Runnable() {
-                @Override public void run() {
-
-                    swipeLayout.setRefreshing(true);
+                    ContentResolver.requestSync(account, authority, new Bundle());
                 }
             });
         }
 
-        TypedValue typedValue = new TypedValue();
-        getContext().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        int color = typedValue.data;
-        swipeLayout.setColorSchemeColors(color);
-
-        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override public void onRefresh() {
-
-                ContentResolver.requestSync(account, authority, new Bundle());
-            }
-        });
+        fillContent(view);
 
         return view;
     }
@@ -209,6 +191,7 @@ public class ListFragment extends Fragment {
 
         if (mAdapter.getItemCount() > 0) {
 
+            recyclerView.setVisibility(View.VISIBLE);
             relativeLayout.setVisibility(View.GONE);
 
             Context context = view.getContext();
@@ -216,9 +199,61 @@ public class ListFragment extends Fragment {
             recyclerView.invalidateItemDecorations();
             recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
             recyclerView.setAdapter(mAdapter);
+
         } else {
 
             recyclerView.setVisibility(View.GONE);
+            relativeLayout.setVisibility(View.VISIBLE);
+        }
+
+        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.list_refresh);
+
+        if (AccountManagerHelper.doesAccountExist()) {
+
+            // Update swipe layout spinner
+
+            String  authority = getString(R.string.authority);
+            boolean active    = false;
+
+            for (SyncInfo syncInfo : ContentResolver.getCurrentSyncs()) {
+                if (syncInfo.authority.equals(authority)) {
+                    active = true;
+                }
+            }
+
+            if (active) {
+
+                // Weird bug with swipe layouts
+                // See: http://stackoverflow.com/a/26910973
+
+                swipeLayout.post(new Runnable() {
+                    @Override public void run() {
+
+                        swipeLayout.setRefreshing(true);
+                    }
+                });
+            } else {
+
+                swipeLayout.post(new Runnable() {
+                    @Override public void run() {
+
+                        swipeLayout.setRefreshing(false);
+                    }
+                });
+            }
+        }
+    }
+
+    public void showProgress() {
+
+        if (swipeLayout != null) {
+
+            swipeLayout.post(new Runnable() {
+                @Override public void run() {
+
+                    swipeLayout.setRefreshing(true);
+                }
+            });
         }
     }
 

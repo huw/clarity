@@ -1,9 +1,11 @@
 package nu.huw.clarity.ui;
 
+import android.accounts.Account;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,7 +37,8 @@ import nu.huw.clarity.ui.viewholders.TaskViewHolder;
 public class MainActivity extends AppCompatActivity
         implements ListFragment.OnListFragmentInteractionListener {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    static final         int    LOG_IN_FIRST_REQUEST = 1;
+    private static final String TAG                  = MainActivity.class.getSimpleName();
     /**
      * Okay, this is really bad practice but from what I've found it's basically the only way
      * forward.
@@ -52,7 +55,8 @@ public class MainActivity extends AppCompatActivity
     private       Fragment       newFragment;
     private       Fragment       currentFragment;
     private       boolean        isChangingFragment;
-    private int currentTheme = R.style.AppTheme_Red;
+    private int     currentTheme   = R.style.AppTheme_Red;
+    private boolean requestSpinner = false;
 
     private void setupToolbar(Toolbar toolbar) {
 
@@ -102,8 +106,13 @@ public class MainActivity extends AppCompatActivity
         if (!AccountManagerHelper.doesAccountExist()) {
 
             // If there are no syncing accounts, sign in
-            startActivityForResult(new Intent(this, LoginActivity.class), 1);
+            startActivityForResult(new Intent(this, LoginActivity.class), LOG_IN_FIRST_REQUEST);
+        } else {
+
+            registerSyncs();
         }
+
+        // Add list fragment
 
         currentFragment = ListFragment.newInstance(R.id.nav_forecast);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, currentFragment)
@@ -118,6 +127,23 @@ public class MainActivity extends AppCompatActivity
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        if (requestCode == LOG_IN_FIRST_REQUEST) {
+
+            if (resultCode == LoginActivity.RESULT_OK) {
+
+                // OK to start syncing
+
+                Account account   = AccountManagerHelper.getAccount();
+                String  authority = getString(R.string.authority);
+                Bundle  extras    = new Bundle();
+
+                registerSyncs();    // Also requests a new sync
+
+                if (currentFragment instanceof ListFragment) {
+                    ((ListFragment) currentFragment).showProgress();
+                }
+            }
+        }
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -315,6 +341,21 @@ public class MainActivity extends AppCompatActivity
                                 progressView.setVisibility(show ? View.VISIBLE : View.GONE);
                             }
                         });
+        }
+    }
+
+    private void registerSyncs() {
+
+        Account account   = AccountManagerHelper.getAccount();
+        String  authority = getString(R.string.authority);
+
+        ContentResolver.setSyncAutomatically(account, authority, true);
+
+        if (ContentResolver.getPeriodicSyncs(account, authority).size() == 0) {
+
+            long seconds = 60L * 60L;   // One hour
+
+            ContentResolver.addPeriodicSync(account, authority, new Bundle(), seconds);
         }
     }
 
