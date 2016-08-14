@@ -24,7 +24,6 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.RecursiveColumnUpdater;
 import nu.huw.clarity.model.Entry;
-import nu.huw.clarity.sync.Synchroniser;
 import nu.huw.clarity.ui.adapters.ListAdapter;
 import nu.huw.clarity.ui.fragments.ListFragment;
 import nu.huw.clarity.ui.misc.ColorStateLists;
@@ -120,7 +119,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Synchroniser.synchronise();
     }
 
     @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -130,7 +128,6 @@ public class MainActivity extends AppCompatActivity
                 getDrawerLayout().openDrawer(GravityCompat.START);
                 return true;
             case R.id.synchronise:
-                Synchroniser.synchronise();
                 return true;
             case R.id.reload_db:
                 new RecursiveColumnUpdater().updateTree();

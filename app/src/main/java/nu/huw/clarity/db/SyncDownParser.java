@@ -4,10 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import android.util.Xml;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +17,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseContract.Base;
@@ -38,98 +44,90 @@ public class SyncDownParser {
 
         try {
 
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(input, null);
-            parser.next(); // Bypass the header tag
+            // Load XML into DOM
 
-            // Require that the first tag is an XML start (i.e. "<start>" and
-            // not "</finish>" or "<self-closing />", that we belong to the
-            // OmniFocus namespace (see the variable above), and that the tag
-            // name is 'omnifocus'. A good start to reading these things.
+            Document               document;
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder        db  = dbf.newDocumentBuilder();
 
-            parser.require(XmlPullParser.START_TAG, null, "omnifocus");
+            document = db.parse(input);
 
-            while (parser.next() != XmlPullParser.END_DOCUMENT) {
+            document.getDocumentElement().normalize();
+            NodeList nodes = document.getChildNodes().item(0).getChildNodes();
 
-                if (parser.getEventType() != XmlPullParser.START_TAG) {
+            // For each element in DOM
 
-                    // We only want to deal with parent tags for now, and
-                    // some self-closing child tags can accidentally match
-                    // out parameters.
+            for (int i = 0; i < nodes.getLength(); i++) {
 
-                    continue;
+                Node node = nodes.item(i);
+
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+
+                    String tableName;
+                    String tagName = node.getNodeName();
+                    switch (tagName) {
+                        case "attachment":
+                            tableName = Attachments.TABLE_NAME;
+                            break;
+                        case "setting":
+                            tableName = Settings.TABLE_NAME;
+                            break;
+                        case "context":
+                            tableName = Contexts.TABLE_NAME;
+                            break;
+                        case "folder":
+                            tableName = Folders.TABLE_NAME;
+                            break;
+                        case "task":
+                            tableName = Tasks.TABLE_NAME;
+                            break;
+                        case "perspective":
+                            tableName = Perspectives.TABLE_NAME;
+                            break;
+                        default:
+                            tableName = "";
+                    }
+
+                    parseEntry(tableName, node);
                 }
-
-                String tableName;
-                String tagName = parser.getName();
-                switch (tagName) {
-                    case "attachment":
-                        tableName = Attachments.TABLE_NAME;
-                        break;
-                    case "setting":
-                        tableName = Settings.TABLE_NAME;
-                        break;
-                    case "context":
-                        tableName = Contexts.TABLE_NAME;
-                        break;
-                    case "folder":
-                        tableName = Folders.TABLE_NAME;
-                        break;
-                    case "task":
-                        tableName = Tasks.TABLE_NAME;
-                        break;
-                    case "perspective":
-                        tableName = Perspectives.TABLE_NAME;
-                        break;
-                    default:
-                        tableName = "";
-                }
-
-                parseEntry(tableName, parser);
             }
 
+            Log.i(TAG, "End of document");
+
             input.close();
-        } catch (XmlPullParserException e) {
+        } catch (ParserConfigurationException | SAXException e) {
             Log.e(TAG, "Error parsing XML", e);
         } catch (IOException e) {
             Log.e(TAG, "Streams unexpectedly crossed", e);
         }
     }
 
-    private static void parseEntry(String tableName, XmlPullParser parser) {
+    private static void parseEntry(String tableName, Node node) {
 
         // Create a map of values to add in the new line
         ContentValues values = new ContentValues();
 
-        String id        = parser.getAttributeValue(null, "id");
-        String operation = "";
+        NamedNodeMap attributes = node.getAttributes();
 
-        if (parser.getAttributeValue(null, "op") != null) {
-            operation = parser.getAttributeValue(null, "op");
+        Node   idNode        = attributes.getNamedItem("id");
+        Node   opNode        = attributes.getNamedItem("op");
+        String id, operation = "";
+
+        if (idNode == null) {
+            return;
+        }
+        if (opNode != null) {
+            operation = attributes.getNamedItem("op").getNodeValue();
         }
 
-        if (id != null) {
+        id = attributes.getNamedItem("id").getNodeValue();
+        NodeList children = node.getChildNodes();
 
-            try {
+        for (int i = 0; i < children.getLength(); i++) {
 
-                /*
-                 * Loop through the tags in this part of the tree. This loop will
-                 * catch every tag under the current one, which is nice.
-                 */
-                int depth = 1;
-                while (depth != 0) {
-                    int next = parser.next();
-                    if (next == XmlPullParser.START_TAG) {
-                        depth++;
+            Node child = children.item(i);
 
-                        parseTag(parser, values, tableName);
-                    } else if (next == XmlPullParser.END_TAG) {
-                        depth--;
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error parsing XML", e);
-            }
+            parseTag(child, values, tableName);
         }
 
         switch (operation) {
@@ -177,13 +175,18 @@ public class SyncDownParser {
      * Given a parser object, parses the current XML tag appropriately, and adds the result to the
      * passed ContentValues.
      */
-    private static void parseTag(XmlPullParser parser, ContentValues values, String table)
-            throws IOException, XmlPullParserException {
+    private static void parseTag(Node node, ContentValues values, String table) {
 
         String name  = "";
-        String value = "";
+        String value = node.getTextContent();
 
-        switch (parser.getName()) {
+        if (value == null) {
+            value = "";
+        }
+
+        NamedNodeMap attributes = node.getAttributes();
+
+        switch (node.getNodeName()) {
 
             /*
              * Parents
@@ -191,7 +194,10 @@ public class SyncDownParser {
             case "context":
                 if (table.equals(Tasks.TABLE_NAME)) {
                     name = Tasks.COLUMN_CONTEXT.name;
-                    value = parser.getAttributeValue(null, "idref");
+                    Node attr = attributes.getNamedItem("idref");
+                    if (attr != null) {
+                        value = attr.getTextContent();
+                    }
                     break;
                 }
                 // else, fall through to adding a parent ID
@@ -199,64 +205,80 @@ public class SyncDownParser {
             case "folder":
             case "task":
                 name = DatabaseContract.Entries.COLUMN_PARENT_ID.name;
-                value = parser.getAttributeValue(null, "idref");
+                Node attr = attributes.getNamedItem("idref");
+                if (attr != null) {
+                    value = attr.getTextContent();
+                }
                 break;
 
             /*
              * Base
              */
             case "added":
-                parser.next();
                 name = Base.COLUMN_DATE_ADDED.name;
-                value = convertToMilliseconds(parser.getText());
+                value = convertToMilliseconds(value);
                 break;
 
             case "modified":
-                parser.next();
                 name = Base.COLUMN_DATE_MODIFIED.name;
-                value = convertToMilliseconds(parser.getText());
+                value = convertToMilliseconds(value);
                 break;
 
             /*
              * Entry
              */
             case "name":
-                parser.next();
                 name = DatabaseContract.Entries.COLUMN_NAME.name;
-                value = parser.getText();
                 break;
 
             case "rank":
-                parser.next();
                 name = DatabaseContract.Entries.COLUMN_RANK.name;
-                value = parser.getText();
                 break;
 
             case "hidden":
-                parser.next();
                 name = DatabaseContract.Entries.COLUMN_ACTIVE.name;
-                value = parser.getText().equals("true") ? "0" : "1"; // Invert and convert
+                value = value.equals("true") ? "0" : "1"; // Invert and convert
                 break;
 
             /*
              * Attachment
              */
             case "preview-image":
-                parser.next();
                 name = Attachments.COLUMN_PNG_PREVIEW.name;
-                value = parser.getText();
                 break;
 
             /*
              * Context
              */
             case "location":
-                // If it's a null value, then we just add a null value to the database.
-                String locationName = parser.getAttributeValue(null, "name");
-                String altitude = parser.getAttributeValue(null, "altitude");
-                String latitude = parser.getAttributeValue(null, "latitude");
-                String longitude = parser.getAttributeValue(null, "longitude");
-                String radius = parser.getAttributeValue(null, "radius");
+
+                Node locationNameAttr = attributes.getNamedItem("name");
+                Node altitudeAttr = attributes.getNamedItem("altitude");
+                Node latitudeAttr = attributes.getNamedItem("latitude");
+                Node longitudeAttr = attributes.getNamedItem("longitude");
+                Node radiusAttr = attributes.getNamedItem("radius");
+
+                String locationName = "", altitude = "", latitude = "", longitude = "", radius = "";
+
+                if (locationNameAttr != null) {
+                    locationName = locationNameAttr.getTextContent();
+                }
+
+                if (altitudeAttr != null) {
+                    altitude = altitudeAttr.getTextContent();
+                }
+
+                if (latitudeAttr != null) {
+                    latitude = latitudeAttr.getTextContent();
+                }
+
+                if (longitudeAttr != null) {
+                    longitude = longitudeAttr.getTextContent();
+                }
+
+                if (radiusAttr != null) {
+                    radius = radiusAttr.getTextContent();
+                }
 
                 values.put(Contexts.COLUMN_LOCATION_NAME.name, locationName);
                 values.put(Contexts.COLUMN_ALTITUDE.name, altitude);
@@ -266,9 +288,8 @@ public class SyncDownParser {
                 break;
 
             case "prohibits-next-action":
-                parser.next();
                 name = Contexts.COLUMN_ON_HOLD.name;
-                value = String.valueOf(5 - parser.getText().length()); // I'm so sorry
+                value = value.equals("true") ? "1" : "0";
                 break;
 
             /*
@@ -290,51 +311,42 @@ public class SyncDownParser {
                 // we've already added the 'type' column, and only proceed if we haven't.
 
                 if (!values.containsKey(Tasks.COLUMN_TYPE.name)) {
-                    parser.next();
                     name = Tasks.COLUMN_TYPE.name;
-                    value = parser.getText();
                 }
                 break;
 
             case "completed-by-children":
-                parser.next();
                 name = Tasks.COLUMN_COMPLETE_WITH_CHILDREN.name;
-                value = parser.getText().equals("true") ? "1" : "0";
+                value = value.equals("true") ? "1" : "0";
                 break;
 
             case "start":
-                parser.next();
                 name = Tasks.COLUMN_DATE_DEFER.name;
-                value = convertToMilliseconds(parser.getText());
+                value = convertToMilliseconds(value);
                 break;
 
             case "due":
-                parser.next();
                 name = Tasks.COLUMN_DATE_DUE.name;
-                value = convertToMilliseconds(parser.getText());
+                value = convertToMilliseconds(value);
                 break;
 
             case "completed":
-                parser.next();
                 name = Tasks.COLUMN_DATE_COMPLETED.name;
-                value = convertToMilliseconds(parser.getText());
+                value = convertToMilliseconds(value);
                 break;
 
             case "estimated-minutes":
-                parser.next();
                 name = Tasks.COLUMN_ESTIMATED_TIME.name;
-                value = parser.getText();
                 break;
 
             case "flagged":
-                parser.next();
                 name = Tasks.COLUMN_FLAGGED.name;
-                value = parser.getText().equals("true") ? "1" : "0";
+                value = value.equals("true") ? "1" : "0";
                 break;
 
             case "inbox":
                 name = Tasks.COLUMN_INBOX.name;
-                value = "1";
+                value = value.equals("false") ? "0" : "1";
                 break;
 
             case "note":
@@ -342,15 +354,11 @@ public class SyncDownParser {
                 break;
 
             case "repetition-rule":
-                parser.next();
                 name = Tasks.COLUMN_REPETITION_RULE.name;
-                value = parser.getText();
                 break;
 
             case "repetition-method":
-                parser.next();
                 name = Tasks.COLUMN_REPETITION_METHOD.name;
-                value = parser.getText();
                 break;
 
             /*
@@ -359,42 +367,47 @@ public class SyncDownParser {
             case "project":
                 name = Tasks.COLUMN_PROJECT.name;
                 value = "1";
+
+                // GO DEEPER
+
+                NodeList children = node.getChildNodes();
+
+                for (int i = 0; i < children.getLength(); i++) {
+
+                    Node child = children.item(i);
+
+                    parseTag(child, values, table);
+                }
+
                 break;
 
             case "singleton":
-                parser.next();
-                if (parser.getText().equals("true")) {
+                if (value.equals("true")) {
                     name = Tasks.COLUMN_TYPE.name;
                     value = "single action";
                 }
                 break;
 
             case "last-review":
-                parser.next();
                 name = Tasks.COLUMN_PROJECT_LAST_REVIEW.name;
-                value = convertToMilliseconds(parser.getText());
+                value = convertToMilliseconds(value);
                 break;
 
             case "next-review":
-                parser.next();
                 name = Tasks.COLUMN_PROJECT_NEXT_REVIEW.name;
-                value = convertToMilliseconds(parser.getText());
+                value = convertToMilliseconds(value);
                 break;
 
             case "review-interval":
-                parser.next();
                 name = Tasks.COLUMN_PROJECT_REPEAT_REVIEW.name;
-                value = parser.getText();
                 break;
 
             case "status":
-                parser.next();
                 name = Tasks.COLUMN_PROJECT_STATUS.name;
-                value = parser.getText();
                 break;
         }
 
-        if (!name.isEmpty()) {
+        if (!name.isEmpty() && !value.isEmpty()) {
             values.put(name, value);
         }
     }
@@ -407,6 +420,11 @@ public class SyncDownParser {
 
         try {
 
+            if (dateString.isEmpty()) {
+
+                return dateString;
+            }
+
             SimpleDateFormat format =
                     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
             format.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -414,11 +432,11 @@ public class SyncDownParser {
             return String.valueOf(format.parse(dateString).getTime());
         } catch (ParseException e) {
             Log.e(TAG, "Invalid date format", e);
-            return null;
+            return "";
         } catch (NullPointerException e) {
 
             // Date is null, just return null
-            return null;
+            return "";
         }
     }
 }

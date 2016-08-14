@@ -246,8 +246,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public String getString(Cursor cursor, String columnName) {
 
         int index = cursor.getColumnIndex(columnName);
-        if (index != -1 && cursor.getColumnCount() != 0) {
-            return cursor.getString(index);
+        if (index != -1 && cursor.getColumnCount() > 0) {
+            String string = cursor.getString(index);
+            if (string == null) {
+                return null;
+            } else if (!cursor.getString(index).isEmpty()) {
+                return cursor.getString(index);
+            }
         } else if (index == -1) {
             throw new IndexOutOfBoundsException("No such column " + columnName);
         }

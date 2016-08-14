@@ -17,7 +17,7 @@ import nu.huw.clarity.ui.MainActivity;
  * Given a single file, downloads it and returns the file object. Designed to be used in an
  * asynchronous context with multiple files at once, along with `.get()` instead of callbacks.
  */
-class DownloadFileTask extends AsyncTask<String, Void, File> {
+class DownloadFileTask extends AsyncTask<File, Void, File> {
 
     private static final String TAG = DownloadFileTask.class.getSimpleName();
     private final TaskListener taskListener;
@@ -32,10 +32,11 @@ class DownloadFileTask extends AsyncTask<String, Void, File> {
         taskListener = null;
     }
 
-    @Override protected File doInBackground(String... params) {
+    @Override protected File doInBackground(File... params) {
 
-        HttpClient client        = Synchroniser.getHttpClient();
-        GetMethod  getFileMethod = new GetMethod(AccountManagerHelper.getOfocusURI() + params[0]);
+        HttpClient client        = OmniSyncAdapter.getHttpClient();
+        GetMethod  getFileMethod =
+                new GetMethod(AccountManagerHelper.getOfocusURI() + params[0].getName());
 
         try {
 
@@ -49,8 +50,8 @@ class DownloadFileTask extends AsyncTask<String, Void, File> {
                 // stream to the out stream. THEN we close everything. File downloaded.
 
                 InputStream input = getFileMethod.getResponseBodyAsStream();
-                File file =
-                        File.createTempFile(params[0], null, MainActivity.context.getCacheDir());
+                File file = File.createTempFile(params[0].getName(), null,
+                                                MainActivity.context.getCacheDir());
                 RandomAccessFile output = new RandomAccessFile(file, "rw");
 
                 // Copy input stream to output stream, bitwise

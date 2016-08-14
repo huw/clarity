@@ -84,7 +84,7 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
      *
      * I thought I was going to be able to use a HEAD method to query the server minimally, but it
      * looks like the Omni Sync Server only responds to DavMethods when it wants to (it responds
-     * fine to a HEAD request below). For a run-down on DavMethods, see GetFilesToDownloadTask.
+     * fine to a HEAD request below).
      */
     private URI verifyOmniSyncHost(HttpClient client, Bundle bundle) throws Exception {
 

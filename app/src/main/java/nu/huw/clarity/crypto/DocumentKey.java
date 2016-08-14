@@ -332,7 +332,7 @@ class DocumentKey {
 
         // Unencrypted plaintext files
 
-        if (!Arrays.equals(magic, FILE_MAGIC) && canReadPlaintext) {
+        if (!Arrays.equals(magic, FILE_MAGIC) /*&& canReadPlaintext*/) {
 
             RandomAccessFile outFile = new RandomAccessFile(outPath, "rw");
 

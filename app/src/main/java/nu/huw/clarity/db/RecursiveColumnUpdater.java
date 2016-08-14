@@ -75,6 +75,8 @@ public class RecursiveColumnUpdater {
         // See
         // the method itself for more details.
 
+        Log.i(TAG, "Updating project children");
+
         while (projects.moveToNext()) {
 
             String id        = mDBHelper.getString(projects, Tasks.COLUMN_ID.name);
@@ -88,6 +90,8 @@ public class RecursiveColumnUpdater {
         }
 
         projects.close();
+
+        Log.i(TAG, "Filling 'blocked' attributes");
 
         // A quick loop to recursively fill down the `blocked` and `blockedByDefer` attributes.
         // This is pretty much the only way, sadly.
@@ -112,6 +116,8 @@ public class RecursiveColumnUpdater {
         // Now the same, but for Contexts. Keep in mind that the recursive call in contexts is a
         // little different, see below.
 
+        Log.i(TAG, "Updating context children");
+
         String[] contextColumns = new String[]{Contexts.COLUMN_ID.name, Contexts.COLUMN_ACTIVE.name,
                                                Contexts.COLUMN_ACTIVE_EFFECTIVE.name,
                                                Contexts.COLUMN_ON_HOLD.name};
@@ -133,6 +139,8 @@ public class RecursiveColumnUpdater {
 
         // Now, again for projects, but we're just counting now. This loop isn't recursive by any
         // means, which is good for system resources! More speed!
+
+        Log.i(TAG, "Counting project children");
 
         projectColumns = new String[]{Tasks.COLUMN_ID.name, Tasks.COLUMN_PARENT_ID.name};
         projects = mDBHelper
@@ -250,7 +258,9 @@ public class RecursiveColumnUpdater {
         // understand how it works, but at the same time, I don't. It _is_ pretty fast though,
         // somehow.
 
-        List<Object> array = new LinkedList<Object>(Arrays.asList(folderCounts.keySet().toArray()));
+        Log.i(TAG, "Counting folder children");
+
+        List<Object> array = new LinkedList<>(Arrays.asList(folderCounts.keySet().toArray()));
         while (!array.isEmpty()) {
             String id = (String) array.get(0);
 
@@ -258,26 +268,30 @@ public class RecursiveColumnUpdater {
             Cursor cursor = mDBHelper
                     .query(db, Folders.TABLE_NAME, new String[]{Folders.COLUMN_PARENT_ID.name},
                            Folders.COLUMN_ID + " = ?", new String[]{id});
-            cursor.moveToFirst();
-            String parentID = mDBHelper.getString(cursor, Folders.COLUMN_PARENT_ID.name);
+            if (cursor != null && cursor.moveToFirst()) {
+                String parentID = mDBHelper.getString(cursor, Folders.COLUMN_PARENT_ID.name);
 
-            Integer[] childCounts = folderCounts.get(id);
+                Integer[] childCounts = folderCounts.get(id);
 
-            // Add up the child counts for the folder
+                // Add up the child counts for the folder
 
-            if (folderCounts.containsKey(parentID)) {
-                for (int j = 0; j < childCounts.length; j++) {
-                    folderCounts.get(parentID)[j] = folderCounts.get(parentID)[j] + childCounts[j];
+                if (folderCounts.containsKey(parentID)) {
+                    for (int j = 0; j < childCounts.length; j++) {
+                        folderCounts.get(parentID)[j] =
+                                folderCounts.get(parentID)[j] + childCounts[j];
+                    }
+                } else {
+
+                    // If this folder isn't in our HashMap yet, add it. But also add an extra
+                    // iteration to this loop.
+
+                    if (parentID != null) {
+                        folderCounts.put(parentID, childCounts);
+                        array.add(parentID);
+                    }
                 }
-            } else {
 
-                // If this folder isn't in our HashMap yet, add it. But also add an extra
-                // iteration to this loop.
-
-                if (parentID != null) {
-                    folderCounts.put(parentID, childCounts);
-                    array.add(parentID);
-                }
+                cursor.close();
             }
 
             // Could probably be better handled than this, but it works.
@@ -300,7 +314,6 @@ public class RecursiveColumnUpdater {
             db.update(Folders.TABLE_NAME, values, Folders.COLUMN_ID + " = ?", new String[]{id});
         }
 
-        Log.i(TAG, "Database tree fully updated");
         db.close();
     }
 
