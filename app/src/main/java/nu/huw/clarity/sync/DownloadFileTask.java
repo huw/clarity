@@ -1,5 +1,6 @@
 package nu.huw.clarity.sync;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -17,7 +18,7 @@ import nu.huw.clarity.ui.MainActivity;
  * Given a single file, downloads it and returns the file object. Designed to be used in an
  * asynchronous context with multiple files at once, along with `.get()` instead of callbacks.
  */
-class DownloadFileTask extends AsyncTask<File, Void, File> {
+class DownloadFileTask extends AsyncTask<Object, Void, File> {
 
     private static final String TAG = DownloadFileTask.class.getSimpleName();
     private final TaskListener taskListener;
@@ -32,11 +33,13 @@ class DownloadFileTask extends AsyncTask<File, Void, File> {
         taskListener = null;
     }
 
-    @Override protected File doInBackground(File... params) {
+    @Override protected File doInBackground(Object... params) {
 
-        HttpClient client        = OmniSyncAdapter.getHttpClient();
-        GetMethod  getFileMethod =
-                new GetMethod(AccountManagerHelper.getOfocusURI() + params[0].getName());
+        File                 file     = (File) params[0];
+        AccountManagerHelper AMHelper = new AccountManagerHelper((Context) params[1]);
+        HttpClient           client   = (HttpClient) params[2];
+
+        GetMethod getFileMethod = new GetMethod(AMHelper.getOfocusURI() + file.getName());
 
         try {
 
@@ -50,9 +53,9 @@ class DownloadFileTask extends AsyncTask<File, Void, File> {
                 // stream to the out stream. THEN we close everything. File downloaded.
 
                 InputStream input = getFileMethod.getResponseBodyAsStream();
-                File file = File.createTempFile(params[0].getName(), null,
-                                                MainActivity.context.getCacheDir());
-                RandomAccessFile output = new RandomAccessFile(file, "rw");
+                File outFile = File.createTempFile(file.getName(), null,
+                                                   MainActivity.context.getCacheDir());
+                RandomAccessFile output = new RandomAccessFile(outFile, "rw");
 
                 // Copy input stream to output stream, bitwise
                 byte data[] = new byte[4096];

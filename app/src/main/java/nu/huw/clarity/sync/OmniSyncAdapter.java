@@ -52,38 +52,14 @@ import nu.huw.clarity.ui.MainActivity;
 class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final String TAG = OmniSyncAdapter.class.getSimpleName();
-    private final AccountManager accountManager;
+    private final AccountManager       accountManager;
+    private final AccountManagerHelper AMHelper;
 
-    public OmniSyncAdapter(Context context, boolean autoInitialise) {
+    OmniSyncAdapter(Context context, boolean autoInitialise) {
 
         super(context, autoInitialise);
         accountManager = AccountManager.get(context);
-    }
-
-    /**
-     * This function will create a new HttpClient and automatically add the account's credentials in
-     * an appropriate form.
-     *
-     * It's really useful, because we can just call `getHttpClient()` and run WebDAV/HTTP methods on
-     * it straightaway, without having to configure it.
-     *
-     * This code will be the appropriate setup code 100% of the time, AFTER AN ACCOUNT HAS BEEN
-     * MADE.
-     */
-    static HttpClient getHttpClient() {
-
-        HttpClient client = new HttpClient();
-
-        UsernamePasswordCredentials credentials =
-                new UsernamePasswordCredentials(AccountManagerHelper.getUsername(),
-                                                AccountManagerHelper.getPassword());
-        AuthScope newHostScope = new AuthScope(AccountManagerHelper.getServerDomain(),
-                                               AccountManagerHelper.getServerPort(),
-                                               AuthScope.ANY_REALM);
-
-        client.getState().setCredentials(newHostScope, credentials);
-        client.getParams().setAuthenticationPreemptive(true);
-        return client;
+        AMHelper = new AccountManagerHelper(context);
     }
 
     /**
@@ -110,7 +86,31 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private static List<DownloadFileTask> downloadFiles(List<File> nameList) {
+    /**
+     * This function will create a new HttpClient and automatically add the account's credentials in
+     * an appropriate form.
+     *
+     * It's really useful, because we can just call `getHttpClient()` and run WebDAV/HTTP methods on
+     * it straightaway, without having to configure it.
+     *
+     * This code will be the appropriate setup code 100% of the time, AFTER AN ACCOUNT HAS BEEN
+     * MADE.
+     */
+    HttpClient getHttpClient() {
+
+        HttpClient client = new HttpClient();
+
+        UsernamePasswordCredentials credentials =
+                new UsernamePasswordCredentials(AMHelper.getUsername(), AMHelper.getPassword());
+        AuthScope newHostScope = new AuthScope(AMHelper.getServerDomain(), AMHelper.getServerPort(),
+                                               AuthScope.ANY_REALM);
+
+        client.getState().setCredentials(newHostScope, credentials);
+        client.getParams().setAuthenticationPreemptive(true);
+        return client;
+    }
+
+    private List<DownloadFileTask> downloadFiles(List<File> nameList) {
 
         List<DownloadFileTask> downloadList = new ArrayList<>();
 
@@ -137,7 +137,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
             // a list of these objects to be called up later.
 
             DownloadFileTask download = new DownloadFileTask();
-            download.executeOnExecutor(downloadPool, file);
+            download.executeOnExecutor(downloadPool, file, getContext(), getHttpClient());
             downloadList.add(download);
         }
 
@@ -226,7 +226,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
     private File downloadFile(String name) {
 
         HttpClient client        = getHttpClient();
-        GetMethod  getFileMethod = new GetMethod(AccountManagerHelper.getOfocusURI() + name);
+        GetMethod  getFileMethod = new GetMethod(AMHelper.getOfocusURI() + name);
 
         try {
 
@@ -288,9 +288,9 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
             // from a server, you execute a DavMethod to do non-http things like listing
             // files in a folder or telling the server to copy/move a file.
 
-            DavMethod listAllFiles = new PropFindMethod(AccountManagerHelper.getOfocusURI(),
-                                                        DavConstants.PROPFIND_ALL_PROP,
-                                                        DavConstants.DEPTH_1);
+            DavMethod listAllFiles =
+                    new PropFindMethod(AMHelper.getOfocusURI(), DavConstants.PROPFIND_ALL_PROP,
+                                       DavConstants.DEPTH_1);
             client.executeMethod(listAllFiles);
             listAllFiles.releaseConnection();
 
@@ -310,9 +310,8 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
                             new URI(listAllFiles.getResponseHeader(DeltaVConstants.HEADER_LOCATION)
                                                 .getValue());
 
-                    AccountManagerHelper.setUserData("SERVER_DOMAIN", newHost.getHost());
-                    AccountManagerHelper
-                            .setUserData("SERVER_PORT", String.valueOf(newHost.getPort()));
+                    AMHelper.setUserData("SERVER_DOMAIN", newHost.getHost());
+                    AMHelper.setUserData("SERVER_PORT", String.valueOf(newHost.getPort()));
 
                     // TODO: RESTART SYNC
                 } catch (URISyntaxException e) {

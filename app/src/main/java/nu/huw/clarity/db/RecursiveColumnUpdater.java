@@ -303,9 +303,9 @@ public class RecursiveColumnUpdater {
                         array.add(parentID);
                     }
                 }
-
-                cursor.close();
             }
+
+            cursor.close();
 
             // Could probably be better handled than this, but it works.
             array.remove(0);

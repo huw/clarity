@@ -158,11 +158,12 @@ public class ListFragment extends Fragment {
 
         // Swipe to refresh
 
-        if (AccountManagerHelper.doesAccountExist()) {
+        AccountManagerHelper AMHelper = new AccountManagerHelper(getContext());
+        if (AMHelper.doesAccountExist()) {
 
             swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.list_refresh);
 
-            final Account account   = AccountManagerHelper.getAccount();
+            final Account account   = AMHelper.getAccount();
             final String  authority = getString(R.string.authority);
 
             TypedValue typedValue = new TypedValue();
@@ -208,7 +209,7 @@ public class ListFragment extends Fragment {
 
         swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.list_refresh);
 
-        if (AccountManagerHelper.doesAccountExist()) {
+        if (new AccountManagerHelper(getContext()).doesAccountExist()) {
 
             // Update swipe layout spinner
 

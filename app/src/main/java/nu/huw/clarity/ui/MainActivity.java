@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        if (!AccountManagerHelper.doesAccountExist()) {
+        if (!new AccountManagerHelper(getApplicationContext()).doesAccountExist()) {
 
             // If there are no syncing accounts, sign in
             startActivityForResult(new Intent(this, LoginActivity.class), LOG_IN_FIRST_REQUEST);
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity
 
                 // OK to start syncing
 
-                Account account   = AccountManagerHelper.getAccount();
+                Account account   = new AccountManagerHelper(getApplicationContext()).getAccount();
                 String  authority = getString(R.string.authority);
                 Bundle  extras    = new Bundle();
 
@@ -346,7 +346,7 @@ public class MainActivity extends AppCompatActivity
 
     private void registerSyncs() {
 
-        Account account   = AccountManagerHelper.getAccount();
+        Account account   = new AccountManagerHelper(getApplicationContext()).getAccount();
         String  authority = getString(R.string.authority);
 
         ContentResolver.setSyncAutomatically(account, authority, true);
