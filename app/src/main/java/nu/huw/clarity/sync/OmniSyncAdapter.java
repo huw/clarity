@@ -44,7 +44,6 @@ import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.crypto.OmniSyncDecrypter;
 import nu.huw.clarity.db.RecursiveColumnUpdater;
 import nu.huw.clarity.db.SyncDownParser;
-import nu.huw.clarity.ui.MainActivity;
 
 /**
  * Connect to Android's syncing services
@@ -184,7 +183,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
                     // Create a temporary file to hold decrypted contents, and decrypt to that file.
 
                     File decryptedFile = File.createTempFile("dec-" + file.getName(), null,
-                                                             MainActivity.context.getCacheDir());
+                                                             this.getContext().getCacheDir());
                     decrypter.decryptFile(file, decryptedFile);
 
                     // Read that file as a zip file, and then parse its `contents.xml` into the
@@ -194,7 +193,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
                     ZipEntry    contentsXml = zipFile.getEntry("contents.xml");
                     InputStream input       = zipFile.getInputStream(contentsXml);
 
-                    SyncDownParser.parse(input);
+                    new SyncDownParser(getContext()).parse(input);
                 } catch (IOException e) {
                     Log.e(TAG, "Error reading downloaded zip file", e);
                 } catch (Exception e) {
@@ -204,7 +203,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
 
             // Now that everything has been added to the database, recursively update the db tree.
 
-            new RecursiveColumnUpdater().updateTree();
+            new RecursiveColumnUpdater(getContext()).updateTree();
 
             Log.i(TAG, "Database tree updated");
         } catch (Exception e) {
@@ -240,7 +239,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
                 // stream to the out stream. THEN we close everything. File downloaded.
 
                 InputStream input = getFileMethod.getResponseBodyAsStream();
-                File file = File.createTempFile(name, null, MainActivity.context.getCacheDir());
+                File file = File.createTempFile(name, null, this.getContext().getCacheDir());
                 RandomAccessFile output = new RandomAccessFile(file, "rw");
 
                 // Copy input stream to output stream, bitwise

@@ -1,6 +1,7 @@
 package nu.huw.clarity.db;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.StrictMode;
@@ -31,7 +32,7 @@ public class RecursiveColumnUpdater {
     ContentValues mBlockedValue = new ContentValues();
     private DatabaseHelper mDBHelper;
 
-    public RecursiveColumnUpdater() {
+    public RecursiveColumnUpdater(Context context) {
 
         // Strict mode for debugging
 
@@ -42,7 +43,7 @@ public class RecursiveColumnUpdater {
                                                                     .build());
         }
 
-        mDBHelper = new DatabaseHelper();
+        mDBHelper = new DatabaseHelper(context);
         mBlockedValue.put(Tasks.COLUMN_BLOCKED.name, true);
     }
 

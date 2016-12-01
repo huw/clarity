@@ -6,7 +6,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -48,7 +47,6 @@ public class MainActivity extends AppCompatActivity
      * application's context, so I can access AccountManager stuff. This is called from any class
      * which needs to get a basic context for the app.
      */
-    public static Context        context;
     private       Toolbar        mToolbar;
     private       DrawerLayout   mDrawerLayout;
     private       NavigationView mDrawer;
@@ -91,8 +89,6 @@ public class MainActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        context = getApplicationContext();
 
         // Toolbar & Nav Drawer Setup
         setupToolbar((Toolbar) findViewById(R.id.toolbar_list));
@@ -254,7 +250,8 @@ public class MainActivity extends AppCompatActivity
         // Get the current header colour
         TypedValue typedValue = new TypedValue();
         getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        int colorFrom = typedValue.data;
+        int             colorFrom = typedValue.data;
+        ColorStateLists colors    = new ColorStateLists(this.getApplicationContext());
 
         // Depending on the menu item, we change the current theme (which defines a primary
         // colour), and then set the text colour in the sidebar (for the highlight).
@@ -264,23 +261,23 @@ public class MainActivity extends AppCompatActivity
         switch (menuItem) {
             case R.id.nav_forecast:
                 currentTheme = R.style.AppTheme_Red;
-                drawer.setItemTextColor(ColorStateLists.red);
+                drawer.setItemTextColor(colors.red);
                 break;
             case R.id.nav_inbox:
                 currentTheme = R.style.AppTheme_BlueGrey;
-                drawer.setItemTextColor(ColorStateLists.blueGrey);
+                drawer.setItemTextColor(colors.blueGrey);
                 break;
             case R.id.nav_projects:
                 currentTheme = R.style.AppTheme_Blue;
-                drawer.setItemTextColor(ColorStateLists.blue);
+                drawer.setItemTextColor(colors.blue);
                 break;
             case R.id.nav_contexts:
                 currentTheme = R.style.AppTheme;
-                drawer.setItemTextColor(ColorStateLists.purple);
+                drawer.setItemTextColor(colors.purple);
                 break;
             case R.id.nav_flagged:
                 currentTheme = R.style.AppTheme_Orange;
-                drawer.setItemTextColor(ColorStateLists.orange);
+                drawer.setItemTextColor(colors.orange);
                 break;
         }
 

@@ -50,7 +50,7 @@ public class DataModelHelper {
 
     public DataModelHelper(android.content.Context context) {
 
-        dbHelper = new DatabaseHelper();
+        dbHelper = new DatabaseHelper(context);
         mContext = context;
     }
 

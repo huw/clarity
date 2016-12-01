@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 import nu.huw.clarity.account.AccountManagerHelper;
-import nu.huw.clarity.ui.MainActivity;
 
 /**
  * Given a single file, downloads it and returns the file object. Designed to be used in an
@@ -35,8 +34,9 @@ class DownloadFileTask extends AsyncTask<Object, Void, File> {
 
     @Override protected File doInBackground(Object... params) {
 
+        Context              context  = (Context) params[1];
         File                 file     = (File) params[0];
-        AccountManagerHelper AMHelper = new AccountManagerHelper((Context) params[1]);
+        AccountManagerHelper AMHelper = new AccountManagerHelper(context);
         HttpClient           client   = (HttpClient) params[2];
 
         GetMethod getFileMethod = new GetMethod(AMHelper.getOfocusURI() + file.getName());
@@ -52,10 +52,12 @@ class DownloadFileTask extends AsyncTask<Object, Void, File> {
                 // `.releaseConnection()` until we're done), and bitwise copy the in
                 // stream to the out stream. THEN we close everything. File downloaded.
 
-                InputStream input = getFileMethod.getResponseBodyAsStream();
-                File outFile = File.createTempFile(file.getName(), null,
-                                                   MainActivity.context.getCacheDir());
-                RandomAccessFile output = new RandomAccessFile(outFile, "rw");
+                Log.d(TAG, "context cache dir: " + context.getCacheDir());
+
+                InputStream      input   = getFileMethod.getResponseBodyAsStream();
+                File             outFile =
+                        File.createTempFile(file.getName(), null, context.getCacheDir());
+                RandomAccessFile output  = new RandomAccessFile(outFile, "rw");
 
                 // Copy input stream to output stream, bitwise
                 byte data[] = new byte[4096];
@@ -74,7 +76,7 @@ class DownloadFileTask extends AsyncTask<Object, Void, File> {
 
                 Log.v(TAG, params[0] + " successfully downloaded (" + file.length() + " bytes)");
 
-                return file;
+                return outFile;
             } else {
                 Log.e(TAG, "Unexpected WebDAV status " + getFileMethod.getStatusCode() + ": " +
                            getFileMethod.getStatusText());

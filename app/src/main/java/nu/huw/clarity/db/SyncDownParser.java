@@ -1,6 +1,7 @@
 package nu.huw.clarity.db;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -36,9 +37,42 @@ import nu.huw.clarity.db.DatabaseContract.Tasks;
 public class SyncDownParser {
 
     private static final String         TAG       = SyncDownParser.class.getSimpleName();
-    private static final DatabaseHelper mDBHelper = new DatabaseHelper();
+    private final DatabaseHelper mDBHelper;
 
-    public static void parse(InputStream input) {
+    public SyncDownParser(Context context) {
+
+        mDBHelper = new DatabaseHelper(context);
+    }
+
+    /**
+     * Given a string representing an ISO 8601 full datetime, convert it to a string in milliseconds
+     * that represents the time since the UNIX epoch.
+     */
+    private static String convertToMilliseconds(String dateString) {
+
+        try {
+
+            if (dateString.isEmpty()) {
+
+                return dateString;
+            }
+
+            SimpleDateFormat format =
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            return String.valueOf(format.parse(dateString).getTime());
+        } catch (ParseException e) {
+            Log.e(TAG, "Invalid date format", e);
+            return "";
+        } catch (NullPointerException e) {
+
+            // Date is null, just return null
+            return "";
+        }
+    }
+
+    public void parse(InputStream input) {
 
         Log.v(TAG, "New file encountered");
 
@@ -102,7 +136,7 @@ public class SyncDownParser {
         }
     }
 
-    private static void parseEntry(String tableName, Node node) {
+    private void parseEntry(String tableName, Node node) {
 
         // Create a map of values to add in the new line
         ContentValues values = new ContentValues();
@@ -175,7 +209,7 @@ public class SyncDownParser {
      * Given a parser object, parses the current XML tag appropriately, and adds the result to the
      * passed ContentValues.
      */
-    private static void parseTag(Node node, ContentValues values, String table) {
+    private void parseTag(Node node, ContentValues values, String table) {
 
         String name  = "";
         String value = node.getTextContent();
@@ -409,34 +443,6 @@ public class SyncDownParser {
 
         if (!name.isEmpty() && !value.isEmpty()) {
             values.put(name, value);
-        }
-    }
-
-    /**
-     * Given a string representing an ISO 8601 full datetime, convert it to a string in milliseconds
-     * that represents the time since the UNIX epoch.
-     */
-    private static String convertToMilliseconds(String dateString) {
-
-        try {
-
-            if (dateString.isEmpty()) {
-
-                return dateString;
-            }
-
-            SimpleDateFormat format =
-                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
-            format.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-            return String.valueOf(format.parse(dateString).getTime());
-        } catch (ParseException e) {
-            Log.e(TAG, "Invalid date format", e);
-            return "";
-        } catch (NullPointerException e) {
-
-            // Date is null, just return null
-            return "";
         }
     }
 }

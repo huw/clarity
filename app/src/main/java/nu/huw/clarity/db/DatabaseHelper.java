@@ -1,6 +1,7 @@
 package nu.huw.clarity.db;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,7 +18,6 @@ import nu.huw.clarity.db.DatabaseContract.Perspectives;
 import nu.huw.clarity.db.DatabaseContract.SQLKeyValue;
 import nu.huw.clarity.db.DatabaseContract.Settings;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
-import nu.huw.clarity.ui.MainActivity;
 
 /**
  * A set of helper methods for dealing with the SQLite database.
@@ -34,9 +34,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static String SQL_CREATE_SETTINGS;
     public static String SQL_CREATE_TASKS;
 
-    public DatabaseHelper() {
+    public DatabaseHelper(Context context) {
 
-        super(MainActivity.context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
         /**
          * For each table, generate a CREATE TABLE statement from the values
