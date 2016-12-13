@@ -94,6 +94,8 @@ import java.io.RandomAccessFile;
         byte[] bytes = new byte[(int) file.length()];
         file.readFully(bytes);
 
+        file.close();
+
         return bytes;
     }
 }
