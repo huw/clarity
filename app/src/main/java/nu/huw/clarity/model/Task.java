@@ -32,6 +32,7 @@ public class Task extends Entry {
     public Date    dateDue;
     public Date    dateDueEffective;
     public boolean dueSoon;
+    public boolean dropped;
     public int     estimatedTime;
     public boolean flagged;
     public boolean flaggedEffective;
@@ -67,6 +68,7 @@ public class Task extends Entry {
         dateDue = getDateOrNull(in.readLong());
         dateDueEffective = getDateOrNull(in.readLong());
         dueSoon = in.readInt() != 0;
+        dropped = in.readInt() != 0;
         estimatedTime = in.readInt();
         flagged = in.readInt() != 0;
         flaggedEffective = in.readInt() != 0;
@@ -106,6 +108,7 @@ public class Task extends Entry {
         out.writeLong(getTimeOrNull(dateDue));
         out.writeLong(getTimeOrNull(dateDueEffective));
         out.writeInt(dueSoon ? 1 : 0);
+        out.writeInt(dropped ? 1 : 0);
         out.writeInt(estimatedTime);
         out.writeInt(flagged ? 1 : 0);
         out.writeInt(flaggedEffective ? 1 : 0);

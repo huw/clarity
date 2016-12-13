@@ -28,23 +28,34 @@ import nu.huw.clarity.model.Task;
  */
 public class DataModelHelper {
 
-    private static final String TAG           = DataModelHelper.class.getSimpleName();
+    private static final String TAG              = DataModelHelper.class.getSimpleName();
     // Entries selections
-    private static       String AND           = " AND ";
-    private static       String ORDER_BY_RANK = " ORDER BY " + DatabaseContract.Entries.COLUMN_RANK;
-    private static       String TOP_LEVEL     = Entries.COLUMN_PARENT_ID + " IS NULL";
-    private static       String ACTIVE        =
+    private static       String AND              = " AND ";
+    private static       String OR               = " OR ";
+    private static       String ORDER_BY_RANK    =
+            " ORDER BY " + DatabaseContract.Entries.COLUMN_RANK;
+    private static       String TOP_LEVEL        = Entries.COLUMN_PARENT_ID + " IS NULL";
+    private static       String ACTIVE           =
             DatabaseContract.Entries.COLUMN_ACTIVE + " = 1 AND " + Entries.COLUMN_ACTIVE_EFFECTIVE +
             " = 1";
     // Task selections
-    private static       String REMAINING     = Tasks.COLUMN_DATE_COMPLETED + " IS NULL";
-    private static       String IN_INBOX      = Tasks.COLUMN_INBOX + " = 1";
-    private static       String IS_PROJECT    = Tasks.COLUMN_PROJECT + " = 1";
-    private static       String AVAILABLE     = REMAINING + AND + Tasks.COLUMN_BLOCKED + " = 0" +
-                                                AND + Tasks.COLUMN_BLOCKED_BY_DEFER.name + " = 0";
-    private static       String NO_CONTEXT    = Tasks.COLUMN_CONTEXT + " IS NULL";
-    private static       String DUE_SOON      = Tasks.COLUMN_DUE_SOON + " = 1";
-    private static       String OVERDUE       = Tasks.COLUMN_OVERDUE + " = 1";
+    private static       String REMAINING        =
+            Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND " + Tasks.COLUMN_DROPPED + " = 0";
+    private static       String IN_INBOX         = Tasks.COLUMN_INBOX + " = 1";
+    private static       String IS_PROJECT       = Tasks.COLUMN_PROJECT + " = 1";
+    private static       String AVAILABLE        =
+            REMAINING + AND + Tasks.COLUMN_BLOCKED + " = 0" + AND +
+            Tasks.COLUMN_BLOCKED_BY_DEFER.name + " = 0";
+    private static       String NO_CONTEXT       = Tasks.COLUMN_CONTEXT + " IS NULL";
+    private static       String DUE_SOON         = Tasks.COLUMN_DUE_SOON + " = 1";
+    private static       String OVERDUE          = Tasks.COLUMN_OVERDUE + " = 1";
+    private static       String HAS_DUE          =
+            "(" + Tasks.COLUMN_DATE_DUE + " IS NOT NULL" + OR + Tasks.COLUMN_DATE_DUE_EFFECTIVE +
+            " IS NOT NULL)";
+    private static       String HAS_DEFER        =
+            "(" + Tasks.COLUMN_DATE_DEFER + " IS NOT NULL" + OR +
+            Tasks.COLUMN_DATE_DEFER_EFFECTIVE + " IS NOT NULL)";
+    private static       String HAS_DUE_OR_DEFER = "(" + HAS_DUE + OR + HAS_DEFER + ")";
     private DatabaseHelper          dbHelper;
     private android.content.Context mContext;
 
@@ -369,8 +380,9 @@ public class DataModelHelper {
 
     public List<Entry> getTasks() {
 
-        String selection = REMAINING + AND + Tasks.COLUMN_DATE_DUE + " IS NOT NULL ORDER BY " +
-                           Tasks.COLUMN_DATE_DUE;
+        String selection =
+                REMAINING + AND + HAS_DUE + " ORDER BY COALESCE(" + Tasks.COLUMN_DATE_DUE + ", " +
+                Tasks.COLUMN_DATE_DUE_EFFECTIVE + ")";
         return getTasks(selection, null);
     }
 
@@ -416,8 +428,9 @@ public class DataModelHelper {
 
         List<Entry> topLevel = new ArrayList<>();
 
-        String selection = IS_PROJECT + AND + REMAINING + AND + TOP_LEVEL + AND +
-                           Tasks.COLUMN_PROJECT_STATUS + " = 'active'" + ORDER_BY_RANK;
+        String selection =
+                IS_PROJECT + AND + REMAINING + AND + TOP_LEVEL + AND + Tasks.COLUMN_PROJECT_STATUS +
+                " = 'active'" + ORDER_BY_RANK;
         topLevel.addAll(getTasks(selection, null));
         topLevel.addAll(getTopLevelFolders());
 
@@ -429,9 +442,8 @@ public class DataModelHelper {
     public List<Entry> getFlagged() {
 
         String selection =
-                "(" + Tasks.COLUMN_FLAGGED + " = 1 OR " + Tasks.COLUMN_FLAGGED_EFFECTIVE +
-                " = 1)" + AND + AVAILABLE + AND + Tasks.COLUMN_INBOX + " = 0" +
-                ORDER_BY_RANK;
+                "(" + Tasks.COLUMN_FLAGGED + " = 1 OR " + Tasks.COLUMN_FLAGGED_EFFECTIVE + " = 1)" +
+                AND + AVAILABLE + AND + Tasks.COLUMN_INBOX + " = 0" + ORDER_BY_RANK;
         return getTasks(selection, null);
     }
 
@@ -491,6 +503,7 @@ public class DataModelHelper {
         task.dateDue = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DUE.name);
         task.dateDueEffective = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DUE_EFFECTIVE.name);
         task.dueSoon = dbHelper.getBoolean(cursor, Tasks.COLUMN_DUE_SOON.name);
+        task.dropped = dbHelper.getBoolean(cursor, Tasks.COLUMN_DROPPED.name);
         task.estimatedTime = dbHelper.getInt(cursor, Tasks.COLUMN_ESTIMATED_TIME.name);
         task.flagged = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED.name);
         task.flaggedEffective = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED_EFFECTIVE.name);

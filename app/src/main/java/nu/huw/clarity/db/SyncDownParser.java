@@ -399,8 +399,10 @@ public class SyncDownParser {
              * Projects
              */
             case "project":
-                name = Tasks.COLUMN_PROJECT.name;
-                value = "1";
+                if (node.hasChildNodes()) {
+                    name = Tasks.COLUMN_PROJECT.name;
+                    value = "1";
+                }
 
                 // GO DEEPER
 

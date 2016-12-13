@@ -84,8 +84,7 @@ public class RecursiveColumnUpdater {
         // iterate over.
         //
         // On this first call to `updateProjectChildren()`, we set off the huge recursive update.
-        // See
-        // the method itself for more details.
+        // See the method itself for more details.
 
         Log.i(TAG, "Updating project children");
 
@@ -306,7 +305,7 @@ public class RecursiveColumnUpdater {
                 }
             }
 
-            cursor.close();
+            if (cursor != null) cursor.close();
 
             // Could probably be better handled than this, but it works.
             array.remove(0);
@@ -374,6 +373,7 @@ public class RecursiveColumnUpdater {
         childValues.put(Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name, dateDefer);
         childValues.put(Tasks.COLUMN_DATE_DUE_EFFECTIVE.name, dateDue);
         childValues.put(Tasks.COLUMN_PROJECT_ID.name, projectID);
+        childValues.put(Tasks.COLUMN_PROJECT_STATUS.name, status);
 
         db.update(Tasks.TABLE_NAME, childValues, Tasks.COLUMN_PARENT_ID.name + "=?",
                   new String[]{id});
@@ -478,6 +478,7 @@ public class RecursiveColumnUpdater {
 
         if (status.equals("dropped")) {
             values.putAll(mBlockedValue);
+            values.put(Tasks.COLUMN_DROPPED.name, true);
         }
 
         // Overdue & Due Soon

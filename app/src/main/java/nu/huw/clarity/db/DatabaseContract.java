@@ -181,11 +181,11 @@ public class DatabaseContract {
 
     public static abstract class Tasks extends Entries {
 
-        public static final String        TABLE_NAME              = "Tasks";
-        public static final SQLKeyValue   COLUMN_BLOCKED          =
+        public static final String        TABLE_NAME                    = "Tasks";
+        public static final SQLKeyValue   COLUMN_BLOCKED                =
                 new SQLKeyValue("blocked", "0", "BOOLEAN");
         // Is this in a sequential project and are there things in front of it?
-        public static final SQLKeyValue   COLUMN_BLOCKED_BY_DEFER =
+        public static final SQLKeyValue   COLUMN_BLOCKED_BY_DEFER       =
                 new SQLKeyValue("blockedByDefer", "0", "BOOLEAN");
         // Will always set 'blocked' to true
         public static final SQLKeyValue   COLUMN_COMPLETE_WITH_CHILDREN =
@@ -204,6 +204,8 @@ public class DatabaseContract {
                 new SQLKeyValue("dateDueEffective");
         public static final SQLKeyValue   COLUMN_DUE_SOON               =
                 new SQLKeyValue("isDueSoon", "0", "BOOLEAN");
+        public static final SQLKeyValue   COLUMN_DROPPED                =
+                new SQLKeyValue("dropped", "0", "BOOLEAN");
         public static final SQLKeyValue   COLUMN_ESTIMATED_TIME         =
                 new SQLKeyValue("estimatedInMinutes");                    // Always a number
         public static final SQLKeyValue   COLUMN_FLAGGED                =
@@ -240,20 +242,20 @@ public class DatabaseContract {
         public static final SQLKeyValue   COLUMN_TYPE                   =
                 new SQLKeyValue("type", "sequential", "TEXT");// sequential, parallel or single
         // action
-        public static final SQLKeyValue[] keys                    =
+        public static final SQLKeyValue[] keys                          =
                 {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_COUNT_AVAILABLE,
                  COLUMN_COUNT_CHILDREN, COLUMN_COUNT_COMPLETED, COLUMN_COUNT_DUE_SOON,
                  COLUMN_COUNT_OVERDUE, COLUMN_COUNT_REMAINING, COLUMN_HAS_CHILDREN, COLUMN_NAME,
                  COLUMN_PARENT_ID, COLUMN_RANK, COLUMN_BLOCKED, COLUMN_BLOCKED_BY_DEFER,
                  COLUMN_COMPLETE_WITH_CHILDREN, COLUMN_CONTEXT, COLUMN_DATE_COMPLETED,
                  COLUMN_DATE_DEFER, COLUMN_DATE_DEFER_EFFECTIVE, COLUMN_DATE_DUE,
-                 COLUMN_DATE_DUE_EFFECTIVE, COLUMN_DUE_SOON, COLUMN_ESTIMATED_TIME, COLUMN_FLAGGED,
-                 COLUMN_FLAGGED_EFFECTIVE, COLUMN_INBOX, COLUMN_NEXT, COLUMN_NOTE_PLAINTEXT,
-                 COLUMN_NOTE_XML, COLUMN_OVERDUE, COLUMN_PROJECT, COLUMN_PROJECT_ID,
-                 COLUMN_PROJECT_LAST_REVIEW, COLUMN_PROJECT_NEXT_REVIEW,
+                 COLUMN_DATE_DUE_EFFECTIVE, COLUMN_DUE_SOON, COLUMN_DROPPED, COLUMN_ESTIMATED_TIME,
+                 COLUMN_FLAGGED, COLUMN_FLAGGED_EFFECTIVE, COLUMN_INBOX, COLUMN_NEXT,
+                 COLUMN_NOTE_PLAINTEXT, COLUMN_NOTE_XML, COLUMN_OVERDUE, COLUMN_PROJECT,
+                 COLUMN_PROJECT_ID, COLUMN_PROJECT_LAST_REVIEW, COLUMN_PROJECT_NEXT_REVIEW,
                  COLUMN_PROJECT_REPEAT_REVIEW, COLUMN_PROJECT_STATUS, COLUMN_REPETITION_METHOD,
                  COLUMN_REPETITION_RULE, COLUMN_TYPE};
-        public static final String[]      columns                 =
+        public static final String[]      columns                       =
                 {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name,
                  COLUMN_COUNT_AVAILABLE.name, COLUMN_COUNT_CHILDREN.name,
                  COLUMN_COUNT_COMPLETED.name, COLUMN_COUNT_DUE_SOON.name, COLUMN_COUNT_OVERDUE.name,
@@ -262,12 +264,13 @@ public class DatabaseContract {
                  COLUMN_BLOCKED_BY_DEFER.name, COLUMN_COMPLETE_WITH_CHILDREN.name,
                  COLUMN_CONTEXT.name, COLUMN_DATE_COMPLETED.name, COLUMN_DATE_DEFER.name,
                  COLUMN_DATE_DEFER_EFFECTIVE.name, COLUMN_DATE_DUE.name,
-                 COLUMN_DATE_DUE_EFFECTIVE.name, COLUMN_DUE_SOON.name, COLUMN_ESTIMATED_TIME.name,
-                 COLUMN_FLAGGED.name, COLUMN_FLAGGED_EFFECTIVE.name, COLUMN_INBOX.name,
-                 COLUMN_NEXT.name, COLUMN_NOTE_PLAINTEXT.name, COLUMN_NOTE_XML.name,
-                 COLUMN_OVERDUE.name, COLUMN_PROJECT.name, COLUMN_PROJECT_ID.name,
-                 COLUMN_PROJECT_LAST_REVIEW.name, COLUMN_PROJECT_NEXT_REVIEW.name,
-                 COLUMN_PROJECT_REPEAT_REVIEW.name, COLUMN_PROJECT_STATUS.name,
-                 COLUMN_REPETITION_METHOD.name, COLUMN_REPETITION_RULE.name, COLUMN_TYPE.name};
+                 COLUMN_DATE_DUE_EFFECTIVE.name, COLUMN_DUE_SOON.name, COLUMN_DROPPED.name,
+                 COLUMN_ESTIMATED_TIME.name, COLUMN_FLAGGED.name, COLUMN_FLAGGED_EFFECTIVE.name,
+                 COLUMN_INBOX.name, COLUMN_NEXT.name, COLUMN_NOTE_PLAINTEXT.name,
+                 COLUMN_NOTE_XML.name, COLUMN_OVERDUE.name, COLUMN_PROJECT.name,
+                 COLUMN_PROJECT_ID.name, COLUMN_PROJECT_LAST_REVIEW.name,
+                 COLUMN_PROJECT_NEXT_REVIEW.name, COLUMN_PROJECT_REPEAT_REVIEW.name,
+                 COLUMN_PROJECT_STATUS.name, COLUMN_REPETITION_METHOD.name,
+                 COLUMN_REPETITION_RULE.name, COLUMN_TYPE.name};
     }
 }

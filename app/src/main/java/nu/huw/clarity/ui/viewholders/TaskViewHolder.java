@@ -97,6 +97,10 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
             checkCircleView.setDueSoon(false);
         }
 
+        if (task.dropped) {
+            checkCircleView.setFlagged(true);
+        }
+
         // Check circle callback
         // Adapter will handle necessary logic for removal
         checkCircleView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
