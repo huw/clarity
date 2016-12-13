@@ -70,26 +70,26 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             case 1: // TASK VIEW
                 view = LayoutInflater.from(parent.getContext())
                                      .inflate(R.layout.fragment_task, parent, false);
-                return new TaskViewHolder(view);
+                return new TaskViewHolder(view, this);
             case 2:  // CONTEXT VIEW
                 view = LayoutInflater.from(parent.getContext())
                                      .inflate(R.layout.fragment_context, parent, false);
-                return new ContextViewHolder(view);
+                return new ContextViewHolder(view, this);
             case 3:  // FOLDER VIEW
                 view = LayoutInflater.from(parent.getContext())
                                      .inflate(R.layout.fragment_folder, parent, false);
-                return new FolderViewHolder(view);
+                return new FolderViewHolder(view, this);
             case 4:  // PROJECT VIEW
                 view = LayoutInflater.from(parent.getContext())
                                      .inflate(R.layout.fragment_project, parent, false);
-                return new ProjectViewHolder(view);
+                return new ProjectViewHolder(view, this);
             case 5:  // NESTED TASK
                 view = LayoutInflater.from(parent.getContext())
                                      .inflate(R.layout.fragment_nested_task, parent, false);
-                return new NestedTaskViewHolder(view);
+                return new NestedTaskViewHolder(view, this);
         }
 
-        return new ViewHolder(new View(mContext));
+        return new ViewHolder(new View(mContext), this);
     }
 
     /**
@@ -142,15 +142,24 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         return mValues.size();
     }
 
+    public void removeItem(Entry entry) {
+
+        int position = mValues.indexOf(entry);
+        mValues.remove(position);
+        notifyItemRemoved(position);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public final View  view;
-        public       Entry entry;
+        public final View        view;
+        public final ListAdapter adapter;
+        public       Entry       entry;
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, ListAdapter adapter) {
 
             super(view);
             this.view = view;
+            this.adapter = adapter;
         }
     }
 }

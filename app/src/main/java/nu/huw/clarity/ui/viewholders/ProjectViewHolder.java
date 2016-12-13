@@ -22,9 +22,9 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
     public final TextView dueSoonDivider;
     public final TextView overdueDivider;
 
-    public ProjectViewHolder(View view) {
+    public ProjectViewHolder(View view, ListAdapter adapter) {
 
-        super(view);
+        super(view, adapter);
         nameView = (TextView) view.findViewById(R.id.name);
         remainingView = (TextView) view.findViewById(R.id.remaining);
         dueSoonView = (TextView) view.findViewById(R.id.due_soon);

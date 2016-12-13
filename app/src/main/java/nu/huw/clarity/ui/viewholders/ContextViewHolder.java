@@ -22,9 +22,9 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
     public final TextView dueSoonDivider;
     public final TextView overdueDivider;
 
-    public ContextViewHolder(View view) {
+    public ContextViewHolder(View view, ListAdapter adapter) {
 
-        super(view);
+        super(view, adapter);
         nameView = (TextView) view.findViewById(R.id.name);
         availableView = (TextView) view.findViewById(R.id.available);
         dueSoonView = (TextView) view.findViewById(R.id.due_soon);

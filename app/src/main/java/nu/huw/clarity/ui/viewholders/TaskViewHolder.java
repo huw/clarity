@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -12,27 +13,30 @@ import java.text.SimpleDateFormat;
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapters.ListAdapter;
+import nu.huw.clarity.ui.misc.CheckCircle;
 
 /**
  * A view holder for a task, using R.layout.fragment_task
  */
 public class TaskViewHolder extends ListAdapter.ViewHolder {
 
-    public final View     view;
-    public final TextView nameView;
-    public final TextView contextView;
-    public final TextView dateView;
+    public final View        view;
+    public final TextView    nameView;
+    public final TextView    contextView;
+    public final TextView    dateView;
+    public final CheckCircle checkCircleView;
 
-    public TaskViewHolder(View view) {
+    public TaskViewHolder(View view, ListAdapter adapter) {
 
-        super(view);
+        super(view, adapter);
         this.view = view;
         nameView = (TextView) view.findViewById(R.id.name);
         contextView = (TextView) view.findViewById(R.id.context);
         dateView = (TextView) view.findViewById(R.id.date);
+        checkCircleView = (CheckCircle) view.findViewById(R.id.checkcircle);
     }
 
-    public void bind(Task task, Context androidContext) {
+    public void bind(final Task task, Context androidContext) {
 
         String     date        = "";
         DateFormat localFormat = SimpleDateFormat.getDateInstance();
@@ -78,6 +82,31 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
         nameView.setText(task.name);
         dateView.setText(date);
         contextView.setText(task.contextName);
+
+        // Check circle
+        // Available tasks can have a flag, but they can't have colorised overdue/due soon
+        // circles because the user doesn't want to start them yet.
+        checkCircleView.setChecked(task.dateCompleted != null);
+        checkCircleView.setFlagged(task.flagged);
+
+        if (task.isAvailable()) {
+            checkCircleView.setOverdue(task.overdue);
+            checkCircleView.setDueSoon(task.dueSoon);
+        } else {
+            checkCircleView.setOverdue(false);
+            checkCircleView.setDueSoon(false);
+        }
+
+        // Check circle callback
+        // Adapter will handle necessary logic for removal
+        checkCircleView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+
+                if (checked) {
+                    adapter.removeItem(task);
+                }
+            }
+        });
 
         this.entry = task;
     }
