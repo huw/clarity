@@ -12,8 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_toLeftOf="@+id/detail.project_complete.switch"
-        android:layout_toStartOf="@id/detail.project_complete.switch"
+        android:layout_toStartOf="@+id/detail.project_complete.switch"
         android:ellipsize="middle"
         android:maxLines="2"
         android:paddingLeft="@dimen/horizontal_margin"
@@ -28,10 +27,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_centerInParent="true"
         android:layout_marginEnd="@dimen/horizontal_margin"
-        android:layout_marginRight="@dimen/horizontal_margin"
         android:enabled="false"
         />
 
