@@ -53,13 +53,13 @@
 
     <nu.huw.clarity.ui.misc.CheckCircle
         android:id="@id/checkcircle"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/check_circle_size"
+        android:layout_height="@dimen/check_circle_size"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="@dimen/horizontal_margin"
         android:layout_marginStart="@dimen/horizontal_margin"
-        android:button="@drawable/check_circle"
+        android:button="@drawable/check_circle_dark"
         android:checked="false"/>
 
 </RelativeLayout>

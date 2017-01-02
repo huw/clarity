@@ -14,7 +14,7 @@
     <android.support.design.widget.AppBarLayout
         android:id="@+id/barlayout_detail"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/action_bar_detail_size"
+        android:layout_height="wrap_content"
         android:background="@color/primary"
         android:focusableInTouchMode="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
@@ -27,33 +27,51 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
             />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/detail_name_layout"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="@dimen/horizontal_margin"
-            android:paddingRight="@dimen/horizontal_margin"
-            android:theme="@style/WhiteAccent"
-            >
+            android:paddingEnd="@dimen/horizontal_margin"
+            android:paddingStart="@dimen/horizontal_margin">
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/detail_name"
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/detail_name_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:focusable="false"
-                android:hint="@string/prompt_name"
-                android:inputType="none"
-                android:singleLine="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/checkcircle"
+                android:theme="@style/WhiteAccent">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/detail_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:hint="@string/prompt_name"
+                    android:inputType="textMultiLine"
+                    android:maxLines="3"
+                    tools:text="This is a much longer name, that might cause this thing to take up multiple lines. But I'm not sure what's going to happen with it."
+                    />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <nu.huw.clarity.ui.misc.CheckCircle
+                android:id="@id/checkcircle"
+                android:layout_width="@dimen/check_circle_size"
+                android:layout_height="@dimen/check_circle_size"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/horizontal_margin"
+                android:button="@drawable/check_circle_light"
+                android:checked="false"
                 />
 
-        </android.support.design.widget.TextInputLayout>
+        </RelativeLayout>
 
-        <android.support.design.widget.TabLayout
+        <!--<android.support.design.widget.TabLayout
             android:id="@+id/detail_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            />
+            />-->
 
     </android.support.design.widget.AppBarLayout>
 

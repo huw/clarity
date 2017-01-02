@@ -20,11 +20,11 @@ import nu.huw.clarity.ui.misc.CheckCircle;
  */
 public class TaskViewHolder extends ListAdapter.ViewHolder {
 
-    public final View        view;
-    public final TextView    nameView;
-    public final TextView    contextView;
-    public final TextView    dateView;
-    public final CheckCircle checkCircleView;
+    public final  View        view;
+    private final TextView    nameView;
+    private final TextView    contextView;
+    private final TextView    dateView;
+    private final CheckCircle checkCircleView;
 
     public TaskViewHolder(View view, ListAdapter adapter) {
 
@@ -95,10 +95,6 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
         } else {
             checkCircleView.setOverdue(false);
             checkCircleView.setDueSoon(false);
-        }
-
-        if (task.dropped) {
-            checkCircleView.setFlagged(true);
         }
 
         // Check circle callback
