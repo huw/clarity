@@ -1,5 +1,7 @@
 package nu.huw.clarity.crypto;
 
+import android.content.Context;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -7,7 +9,8 @@ import java.io.RandomAccessFile;
 
 @SuppressWarnings("ResultOfMethodCallIgnored") public class OmniSyncDecrypter {
 
-    private static String METADATA_NAME = "encrypted";
+    private static final String TAG           = OmniSyncDecrypter.class.getSimpleName();
+    private static       String METADATA_NAME = "encrypted";
     private DocumentKey documentKey;
 
     /**
@@ -21,10 +24,11 @@ import java.io.RandomAccessFile;
      * @param metadataFile File object representing the location of the sync metadata
      * @param passphrase   String of the passphrase used to encrypt the data
      */
-    public OmniSyncDecrypter(File metadataFile, String passphrase) throws Exception {
+    public OmniSyncDecrypter(File metadataFile, String passphrase, Context context)
+            throws Exception {
 
         documentKey = getDocumentKey(metadataFile);
-        documentKey.usePassword(passphrase);
+        documentKey.usePassword(passphrase, context);
     }
 
     /**

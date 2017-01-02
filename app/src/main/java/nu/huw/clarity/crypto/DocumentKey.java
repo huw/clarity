@@ -1,5 +1,7 @@
 package nu.huw.clarity.crypto;
 
+import android.content.Context;
+
 import com.dd.plist.NSArray;
 import com.dd.plist.NSData;
 import com.dd.plist.NSDictionary;
@@ -9,90 +11,23 @@ import com.dd.plist.NSString;
 import com.dd.plist.PropertyListParser;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-/**
- * Struct-like data type for holding the data of a 'slot' on the AES key.
- * Equivalent to `Slot = collections.namedtuple('Slot', ('tp', 'id', 'contents'))` in
- * `DecryptionExample.py`.
- */
-class Slot {
-
-    byte   type;
-    int    id;
-    byte[] contents;
-
-    Slot(byte type, int id, byte[] contents) {
-
-        this.type = type;
-        this.id = id;
-        this.contents = contents;
-    }
-
-    /**
-     * Analogue of `SlotType` from `DecryptionExample`, but kind of the other way around
-     *
-     * @return A human-readable string indicating the type of slot
-     */
-    String getTypeString() {
-
-        switch (type) {
-
-            case 1:
-                return "ActiveAESWrap";         // (Obsolete) Currently active AES-wrap key
-            case 2:
-                return "RetiredAESWrap";        // (Obsolete) Old AES-wrap key (from rollover)
-            case 3:
-                return "ActiveAES_CTR_HMAC";    // Active CTR + HMAC key
-            case 4:
-                return "RetiredAES_CTR_HMAC";   // Old CTR + HMAC key
-            case 5:
-                return "PlaintextMask";         // Filename patterns which should not be encrypted
-            case 6:
-                return "RetiredPlaintextMask";  // Filename patterns which have legacy
-            // unencrypted entries
-            default:
-                return "None";                  // Trailing padding
-        }
-    }
-
-    /**
-     * @return True if slot type is a plaintext mask. See `getTypeString()` above.
-     */
-    boolean plaintextReadable() {
-
-        return type == 5 || type == 6;
-    }
-
-    /**
-     * @return True if slot type is an AES wrap. Use of AES wrap slots are deprecated.
-     */
-    boolean typeAESWrap() {
-
-        return type == 1 || type == 2;
-    }
-
-    /**
-     * @return True if slot type is a modern AES/CTR/HMAC slot.
-     */
-    boolean typeAESCTR() {
-
-        return type == 3 || type == 4;
-    }
-}
-
-/**
- * Main decryption routine
- */
 class DocumentKey {
 
     private byte[] FILE_MAGIC = "OmniFileEncryption\00\00".getBytes();
@@ -138,38 +73,14 @@ class DocumentKey {
      *
      * @param passphrase The user's passphrase
      */
-    void usePassword(String passphrase) throws Exception {
+    void usePassword(String passphrase, Context context) throws Exception {
 
         // Establish algorithm & method
 
         String method    = ((NSString) metadata.get("method")).getContent();
         String algorithm = ((NSString) metadata.get("algorithm")).getContent();
 
-        // Input parameters
-
-        int    rounds       = ((NSNumber) metadata.get("rounds")).intValue();
-        byte[] salt         = ((NSData) metadata.get("salt")).bytes();
-        byte[] encryptedKey = ((NSData) metadata.get("key")).bytes();
-
-        // Generate cipher engine
-        // (default key length is 128 (= AES128-wrap))
-
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(passphrase.toCharArray(),   // passphrase (byte[])
-                                      salt,                       // salt (byte[])
-                                      rounds,                     // rounds (int)
-                                      128                         // key length (in bits)
-        );
-        SecretKeySpec derivedKey =
-                new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
-
-        // Unwrap AES key
-
-        Cipher cipher = Cipher.getInstance("AESWRAP");
-        cipher.init(Cipher.UNWRAP_MODE, derivedKey);
-
-        unwrapped =
-                cipher.unwrap(encryptedKey, "AES/CTR/NOPADDING", Cipher.SECRET_KEY).getEncoded();
+        unwrapped = unwrapKey(passphrase, context.getFilesDir());
 
         // Generate list of file type secrets
 
@@ -223,6 +134,88 @@ class DocumentKey {
         }
 
         return slots.get(0);
+    }
+
+    /**
+     * Get the secret key used to decrypt the metadata file (derived from the user's passphrase),
+     * either by generating it from scratch or retrieving it from a cache in a file.
+     *
+     * @param passphrase The user's passphrase
+     *
+     * @return byte[] from unwrapping AES key
+     */
+    private byte[] unwrapKey(String passphrase, File fileDir)
+            throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+                   IOException, InvalidKeyException {
+
+        File   wrapKeyFile  = new File(fileDir, "wrap_key");
+        byte[] encryptedKey = ((NSData) metadata.get("key")).bytes();
+        byte[] secret;
+
+        // Read secret key if it exists, generate it if it doesn't
+
+        if (!wrapKeyFile.exists()) {
+            secret = generateWrapKey(passphrase, wrapKeyFile);
+        } else {
+            RandomAccessFile file = new RandomAccessFile(wrapKeyFile, "r");
+            secret = new byte[(int) file.length()];
+            file.readFully(secret);
+        }
+
+        SecretKeySpec derivedKey = new SecretKeySpec(secret, "AES");
+
+        // Unwrap AES key
+        byte[] key;
+        try {
+            Cipher cipher = Cipher.getInstance("AESWRAP");
+            cipher.init(Cipher.UNWRAP_MODE, derivedKey);
+
+            key = cipher.unwrap(encryptedKey, "AES/CTR/NOPADDING", Cipher.SECRET_KEY).getEncoded();
+        } catch (InvalidKeyException e) {
+
+            // Saved key is invalid, regenerate
+
+            secret = generateWrapKey(passphrase, wrapKeyFile);
+            derivedKey = new SecretKeySpec(secret, "AES");
+            Cipher cipher = Cipher.getInstance("AESWRAP");
+            cipher.init(Cipher.UNWRAP_MODE, derivedKey);
+            key = cipher.unwrap(encryptedKey, "AES/CTR/NOPADDING", Cipher.SECRET_KEY).getEncoded();
+        }
+
+        return key;
+    }
+
+    /**
+     * Generates the AES128-wrap key using the user's passphrase, and saves it to the given File
+     *
+     * @param passphrase  The user's passphrase
+     * @param wrapKeyFile File object representing the wrap key's saved location
+     *
+     * @return The wrap key's bytes (so it doesn't have to be re-read)
+     */
+    private byte[] generateWrapKey(String passphrase, File wrapKeyFile)
+            throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+
+        // Input parameters
+        int    rounds = ((NSNumber) metadata.get("rounds")).intValue();
+        byte[] salt   = ((NSData) metadata.get("salt")).bytes();
+
+        // Generate cipher engine
+        // (default key length is 128 (= AES128-wrap))
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        KeySpec spec = new PBEKeySpec(passphrase.toCharArray(),   // passphrase (byte[])
+                                      salt,                       // salt (byte[])
+                                      rounds,                     // rounds (int)
+                                      128                         // key length (in bits)
+        );
+        byte[] secret = factory.generateSecret(spec).getEncoded();
+
+        // Save to file
+        FileOutputStream outStream = new FileOutputStream(wrapKeyFile);
+        outStream.write(secret);
+        outStream.close();
+
+        return secret;
     }
 
     /**

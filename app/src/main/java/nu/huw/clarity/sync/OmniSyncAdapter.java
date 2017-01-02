@@ -95,7 +95,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
      * This code will be the appropriate setup code 100% of the time, AFTER AN ACCOUNT HAS BEEN
      * MADE.
      */
-    HttpClient getHttpClient() {
+    private HttpClient getHttpClient() {
 
         HttpClient client = new HttpClient();
 
@@ -156,7 +156,8 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG, "Loading encryption metadata...");
 
             String                  passphrase = accountManager.getPassword(account);
-            final OmniSyncDecrypter decrypter  = new OmniSyncDecrypter(metadataFile, passphrase);
+            final OmniSyncDecrypter decrypter =
+                    new OmniSyncDecrypter(metadataFile, passphrase, getContext());
 
             // Get list of files to download
 
