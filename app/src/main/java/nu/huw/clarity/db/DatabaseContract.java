@@ -157,14 +157,28 @@ public class DatabaseContract {
 
     public static abstract class Perspectives extends Base {
 
-        public static final String        TABLE_NAME   = "Perspectives";
-        public static final SQLKeyValue   COLUMN_VALUE = new SQLKeyValue("valueData");
-        // Contains a bunch of data about the perspective TODO: Expand
-        public static final SQLKeyValue[] keys         =
-                {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_VALUE};
-        public static final String[]      columns      =
+        public static final String        TABLE_NAME             = "Perspectives";
+        public static final SQLKeyValue   COLUMN_FILTER_DURATION =
+                new SQLKeyValue("actionDurationFilter");
+        public static final SQLKeyValue   COLUMN_FILTER_FLAGGED  =
+                new SQLKeyValue("actionFlaggedFilter");
+        public static final SQLKeyValue   COLUMN_FILTER_STATUS   =
+                new SQLKeyValue("actionCompletionFilter");
+        public static final SQLKeyValue   COLUMN_GROUP           = new SQLKeyValue("collation");
+        public static final SQLKeyValue   COLUMN_ICON            = new SQLKeyValue("icon");
+        public static final SQLKeyValue   COLUMN_NAME            = new SQLKeyValue("name");
+        public static final SQLKeyValue   COLUMN_SORT            = new SQLKeyValue("sort");
+        public static final SQLKeyValue   COLUMN_VALUE           = new SQLKeyValue("valueData");
+        public static final SQLKeyValue   COLUMN_VIEW_MODE       = new SQLKeyValue("viewMode");
+        public static final SQLKeyValue[] keys                   =
+                {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED, COLUMN_FILTER_DURATION,
+                 COLUMN_FILTER_FLAGGED, COLUMN_FILTER_STATUS, COLUMN_GROUP, COLUMN_ICON,
+                 COLUMN_NAME, COLUMN_SORT, COLUMN_VALUE, COLUMN_VIEW_MODE};
+        public static final String[]      columns                =
                 {COLUMN_ID.name, COLUMN_DATE_ADDED.name, COLUMN_DATE_MODIFIED.name,
-                 COLUMN_VALUE.name};
+                 COLUMN_FILTER_DURATION.name, COLUMN_FILTER_FLAGGED.name, COLUMN_FILTER_STATUS.name,
+                 COLUMN_GROUP.name, COLUMN_ICON.name, COLUMN_NAME.name, COLUMN_SORT.name,
+                 COLUMN_VALUE.name, COLUMN_VIEW_MODE.name};
     }
 
     public static abstract class Settings extends Base {

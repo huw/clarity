@@ -52,8 +52,6 @@ class DownloadFileTask extends AsyncTask<Object, Void, File> {
                 // `.releaseConnection()` until we're done), and bitwise copy the in
                 // stream to the out stream. THEN we close everything. File downloaded.
 
-                Log.d(TAG, "context cache dir: " + context.getCacheDir());
-
                 InputStream      input   = getFileMethod.getResponseBodyAsStream();
                 File             outFile =
                         File.createTempFile(file.getName(), null, context.getCacheDir());

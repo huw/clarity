@@ -6,6 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.dd.plist.NSDictionary;
+import com.dd.plist.NSString;
+import com.dd.plist.PropertyListParser;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -14,6 +18,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -22,6 +27,17 @@ import java.util.TimeZone;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseContract.Base;
@@ -69,6 +85,36 @@ public class SyncDownParser {
 
             // Date is null, just return null
             return "";
+        }
+    }
+
+    private static String stringOf(Node node) {
+
+        if (node == null) {
+            throw new IllegalArgumentException("Node is null");
+        }
+
+        try {
+            // Remove unwanted whitespaces
+            XPath           xpath    = XPathFactory.newInstance().newXPath();
+            XPathExpression expr     = xpath.compile("//text()[normalize-space()='']");
+            NodeList        nodeList = (NodeList) expr.evaluate(node, XPathConstants.NODESET);
+
+            for (int i = 0; i < nodeList.getLength(); ++i) {
+                Node nd = nodeList.item(i);
+                nd.getParentNode().removeChild(nd);
+            }
+
+            // Create and setup transformer
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+
+            // Turn the node into a string
+            StringWriter writer = new StringWriter();
+            transformer.transform(new DOMSource(node), new StreamResult(writer));
+            return writer.toString();
+        } catch (TransformerException | XPathExpressionException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -328,9 +374,67 @@ public class SyncDownParser {
 
             /*
              * Perspectives/Settings
-             * TODO: Actually parse
+             * TODO: Parse settings
              */
             case "plist":
+                if (table.equals(Perspectives.TABLE_NAME)) {
+
+                    // Parse as perspective
+
+                    name = Perspectives.COLUMN_VALUE.name;
+
+                    try {
+                        byte[] tagBytes = stringOf(node).getBytes();
+
+                        NSDictionary plist         =
+                                (NSDictionary) PropertyListParser.parse(tagBytes);
+                        NSDictionary viewState     = (NSDictionary) plist.get("viewState");
+                        NSDictionary viewModeState = (NSDictionary) viewState.get("viewModeState");
+                        String       viewMode      =
+                                ((NSString) viewState.get("viewMode")).getContent();
+                        NSDictionary data          = (NSDictionary) viewModeState.get(viewMode);
+
+                        String perspectiveName = ((NSString) plist.get("name")).getContent();
+                        String icon            =
+                                ((NSString) plist.get("iconNameInBundle")).getContent();
+                        String group           = ((NSString) data.get("collation")).getContent();
+                        String sort            = ((NSString) data.get("sort")).getContent();
+
+                        // These three fields could be null, so check for that
+
+                        NSString filterDurationData = ((NSString) data.get("actionDurationFilter"));
+                        NSString filterFlaggedData  = ((NSString) data.get("actionDurationFilter"));
+                        NSString filterStatusData   = ((NSString) data.get("actionDurationFilter"));
+
+                        if (filterDurationData != null) {
+                            String filterDuration = filterDurationData.getContent();
+                            values.put(Perspectives.COLUMN_FILTER_DURATION.name, filterDuration);
+                        }
+
+                        if (filterFlaggedData != null) {
+                            String filterFlagged = filterFlaggedData.getContent();
+                            values.put(Perspectives.COLUMN_FILTER_FLAGGED.name, filterFlagged);
+                        }
+
+                        if (filterStatusData != null) {
+                            String filterStatus = filterStatusData.getContent();
+                            values.put(Perspectives.COLUMN_FILTER_STATUS.name, filterStatus);
+                        }
+
+                        values.put(Perspectives.COLUMN_NAME.name, perspectiveName);
+                        values.put(Perspectives.COLUMN_ICON.name, icon);
+                        values.put(Perspectives.COLUMN_VIEW_MODE.name, viewMode);
+                        values.put(Perspectives.COLUMN_GROUP.name, group);
+                        values.put(Perspectives.COLUMN_SORT.name, sort);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to parse perspective", e);
+                    }
+                } else if (table.equals(Settings.TABLE_NAME)) {
+
+                    // Parse as setting
+
+                    name = Settings.COLUMN_VALUE.name;
+                }
                 break;
 
             /*
