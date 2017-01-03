@@ -175,27 +175,18 @@ public class DataModelHelper {
     /**
      * Given a context ID, get all child contexts
      */
-    public List<Entry> getContexts(String parentID) {
+    public List<Entry> getContexts(Entry parent) {
 
         return getContexts(ACTIVE + AND + Contexts.COLUMN_PARENT_ID + " = ?",
-                           new String[]{parentID});
+                           new String[]{parent.id});
     }
 
-    public Entry getHeaderContext(String parentID) {
-
-        Entry context = getContexts(Contexts.COLUMN_ID + " = ?", new String[]{parentID}).get(0);
-        context.headerRow = true;
-        return context;
-    }
-
-    public List<Entry> getContextChildren(String parentID) {
+    public List<Entry> getContextChildren(Entry parent) {
 
         List<Entry> result = new ArrayList<>();
 
-        result.add(getHeaderContext(parentID));
-
-        result.addAll(getContexts(parentID));
-        result.addAll(getTasksWithContext(parentID));
+        result.addAll(getContexts(parent));
+        result.addAll(getTasksWithContext(parent.id));
 
         return result;
     }
@@ -284,9 +275,9 @@ public class DataModelHelper {
         return result;
     }
 
-    public List<Entry> getFolders(String parentID) {
+    public List<Entry> getFolders(Entry parent) {
 
-        return getFolders(Folders.COLUMN_PARENT_ID + " = ?", new String[]{parentID});
+        return getFolders(Folders.COLUMN_PARENT_ID + " = ?", new String[]{parent.id});
     }
 
     public List<Entry> getFolders() {
@@ -364,10 +355,10 @@ public class DataModelHelper {
         return result;
     }
 
-    public List<Entry> getTasks(String parentID) {
+    public List<Entry> getTasks(Entry parent) {
 
         String selection = REMAINING + AND + Entries.COLUMN_PARENT_ID + " = ?" + ORDER_BY_RANK;
-        return getTasks(selection, new String[]{parentID});
+        return getTasks(selection, new String[]{parent.id});
     }
 
     public List<Entry> getTasks() {
@@ -383,33 +374,14 @@ public class DataModelHelper {
         return getTasks(IN_INBOX + AND + REMAINING + ORDER_BY_RANK, null);
     }
 
-    public Entry getHeaderTask(String parentID) {
-
-        String      selection = Tasks.COLUMN_ID + " = ?";
-        String[]    args      = new String[]{parentID};
-        List<Entry> tasks     = getTasks(selection, args);
-
-        Entry entry;
-        if (!tasks.isEmpty()) {
-            entry = tasks.get(0);
-        } else {
-            entry = getFolders(selection, args).get(0);
-        }
-
-        entry.headerRow = true;
-        return entry;
-    }
-
-    public List<Entry> getChildren(String parentID) {
+    public List<Entry> getChildren(Entry parent) {
 
         List<Entry> entries = new ArrayList<>();
 
-        entries.addAll(getTasks(parentID));
-        entries.addAll(getFolders(parentID));
+        entries.addAll(getTasks(parent));
+        entries.addAll(getFolders(parent));
 
         Collections.sort(entries);
-
-        entries.add(0, getHeaderTask(parentID));
 
         return entries;
     }
@@ -522,27 +494,27 @@ public class DataModelHelper {
     /**
      * Logic for using perspectives to get entries
      */
-    public List<Entry> getEntriesFromPerspective(int menuID, String parentID) {
+    public List<Entry> getEntriesFromPerspective(Perspective perspective, Entry parent) {
 
-        List<Entry> items = new ArrayList<>();
-        switch (menuID) {
+        List<Entry> items;
+        switch (perspective.menuID) {
             case R.id.nav_inbox:
                 items = getTasksInInbox();
                 break;
             case R.id.nav_projects:
-                if (parentID == null) {
+                if (parent == null) {
                     items = getTopLevelProjects();
                 } else {
-                    items = getChildren(parentID);
+                    items = getChildren(parent);
                 }
                 break;
             case R.id.nav_contexts:
-                if (parentID == null) {
+                if (parent == null) {
                     items = getTopLevelContexts();
-                } else if (parentID.equals("NO_CONTEXT")) {
+                } else if (parent.id.equals("NO_CONTEXT")) {
                     items = getTasksWithNoContext();
                 } else {
-                    items = getContextChildren(parentID);
+                    items = getContextChildren(parent);
                 }
                 break;
             case R.id.nav_flagged:
@@ -668,8 +640,11 @@ public class DataModelHelper {
                 perspective.themeID = R.style.AppTheme_Blue;
                 break;
             case "ProcessInbox":
+                perspective.color = R.color.primary_blue_grey;
+                perspective.colorStateListID = R.color.state_list_blue_grey;
                 perspective.menuID = R.id.nav_inbox;
-                // Fall through to default attributes
+                perspective.themeID = R.style.AppTheme_BlueGrey;
+                break;
             default:
                 perspective.color = R.color.primary_blue_grey;
                 perspective.colorStateListID = R.color.state_list_blue_grey;

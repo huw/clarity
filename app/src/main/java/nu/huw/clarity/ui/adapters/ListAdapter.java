@@ -26,21 +26,27 @@ import nu.huw.clarity.ui.viewholders.TaskViewHolder;
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     private static final String TAG = ListAdapter.class.getSimpleName();
-    private final OnListFragmentInteractionListener mListener;
-    private final List<Entry>                       mValues;
-    private final android.content.Context           mContext;
+    private final OnListFragmentInteractionListener listener;
+    private final List<Entry>                       items;
+    private final android.content.Context           context;
+    private final Entry                             parentEntry;
 
-    public ListAdapter(android.content.Context context, List<Entry> items,
+    public ListAdapter(android.content.Context context, Entry parent, List<Entry> items,
                        OnListFragmentInteractionListener listener) {
 
-        mContext = context;
-        mValues = items;
-        mListener = listener;
+        this.context = context;
+        this.parentEntry = parent;
+        this.items = items;
+        this.listener = listener;
+
+        if (parentEntry != null) {
+            this.items.add(0, parentEntry);
+        }
     }
 
     @Override public int getItemViewType(int position) {
 
-        Entry item = mValues.get(position);
+        Entry item = items.get(position);
 
         if (item instanceof Task) {
             if (((Task) item).project) {
@@ -48,13 +54,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             } else if (item.hasChildren) {
                 return 5;
             }
-            return 1;
         } else if (item instanceof Context) {
             return 2;
         } else if (item instanceof Folder) {
             return 3;
         }
-
         return 1;
     }
 
@@ -89,7 +93,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 return new NestedTaskViewHolder(view, this);
         }
 
-        return new ViewHolder(new View(mContext), this);
+        return new ViewHolder(new View(context), this);
     }
 
     /**
@@ -101,34 +105,34 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         switch (type) {
             case 1: // TASK VIEW
-                Task task = (Task) mValues.get(position);
-                ((TaskViewHolder) holder).bind(task, mContext);
+                Task task = (Task) items.get(position);
+                ((TaskViewHolder) holder).bind(task, context);
                 break;
             case 2: // CONTEXT VIEW
-                Context context = (Context) mValues.get(position);
-                ((ContextViewHolder) holder).bind(context, mContext);
+                Context context = (Context) items.get(position);
+                ((ContextViewHolder) holder).bind(context, this.context);
                 break;
             case 3: // FOLDER VIEW
-                Folder folder = (Folder) mValues.get(position);
-                ((FolderViewHolder) holder).bind(folder, mContext);
+                Folder folder = (Folder) items.get(position);
+                ((FolderViewHolder) holder).bind(folder, this.context);
                 break;
             case 4: // PROJECT VIEW
-                Task project = (Task) mValues.get(position);
-                ((ProjectViewHolder) holder).bind(project, mContext);
+                Task project = (Task) items.get(position);
+                ((ProjectViewHolder) holder).bind(project, this.context);
                 break;
             case 5: // NESTED TASK VIEW
-                Task nestedTask = (Task) mValues.get(position);
-                ((NestedTaskViewHolder) holder).bind(nestedTask, mContext);
+                Task nestedTask = (Task) items.get(position);
+                ((NestedTaskViewHolder) holder).bind(nestedTask, this.context);
                 break;
         }
 
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
 
-                if (null != mListener) {
+                if (null != listener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder);
+                    listener.onListFragmentInteraction(holder);
                 }
             }
         });
@@ -139,14 +143,21 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
      */
     @Override public int getItemCount() {
 
-        return mValues.size();
+        return items.size();
     }
 
     public void removeItem(Entry entry) {
 
-        int position = mValues.indexOf(entry);
-        mValues.remove(position);
+        int position = items.indexOf(entry);
+        items.remove(position);
         notifyItemRemoved(position);
+    }
+
+    public void enableHeader(boolean enable) {
+
+        if (parentEntry != null) {
+            parentEntry.headerRow = enable;
+        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

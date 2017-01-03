@@ -29,7 +29,6 @@ public class Perspective extends Base {
     public int    icon;
     public int    menuID;
     public String name;
-    public String parentID;
     public String sort;
     public int    themeID;
     public String value;
@@ -49,7 +48,6 @@ public class Perspective extends Base {
         icon = in.readInt();
         menuID = in.readInt();
         name = in.readString();
-        parentID = in.readString();
         themeID = in.readInt();
         sort = in.readString();
         value = in.readString();
@@ -68,7 +66,6 @@ public class Perspective extends Base {
         out.writeInt(icon);
         out.writeInt(menuID);
         out.writeString(name);
-        out.writeString(parentID);
         out.writeInt(themeID);
         out.writeString(sort);
         out.writeString(value);

@@ -25,6 +25,7 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.DataModelHelper;
 import nu.huw.clarity.model.Entry;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.ui.adapters.ListAdapter;
 import nu.huw.clarity.ui.misc.DividerItemDecoration;
 
@@ -37,20 +38,17 @@ public class ListFragment extends Fragment {
 
     private static final String TAG = ListFragment.class.getSimpleName();
     private OnListFragmentInteractionListener mListener;
-    private RecyclerView.Adapter              mAdapter;
+    private ListAdapter                       mAdapter;
     private View                              view;
     private SwipeRefreshLayout                swipeLayout;
+
     // For receiving sync broadcasts
     private IntentFilter                      syncIntentFilter;
     private BroadcastReceiver syncReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
 
-            if (view == null || swipeLayout == null) {
-                return;
-            }
-
+            if (view == null || swipeLayout == null) return;
             create();
-
             fillContent(view);
             swipeLayout.setRefreshing(false);
         }
@@ -62,51 +60,46 @@ public class ListFragment extends Fragment {
      */
     public ListFragment() {}
 
-    public static ListFragment newInstance(int menuID) {
+    public static ListFragment newInstance(Perspective perspective) {
 
         ListFragment fragment = new ListFragment();
         Bundle       args     = new Bundle();
-        args.putInt("menuID", menuID);
+        args.putParcelable("perspective", perspective);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public static ListFragment newInstance(int menuID, String parentID) {
+    public static ListFragment newInstance(Perspective perspective, Entry parent) {
 
         ListFragment fragment = new ListFragment();
         Bundle       args     = new Bundle();
-        args.putInt("menuID", menuID);
-        args.putString("parentID", parentID);
+        args.putParcelable("perspective", perspective);
+        args.putParcelable("parent", parent);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
         if (getContext() != null) {
-
             // Setup receiver
-
             syncIntentFilter =
                     new IntentFilter(getContext().getString(R.string.sync_broadcast_intent));
         }
-
         create();
     }
 
     private void create() {
 
         if (getArguments() != null) {
-            int    menuID   = getArguments().getInt("menuID");
-            String parentID = getArguments().getString("parentID");
+            Entry       parent      = getArguments().getParcelable("parent");
+            Perspective perspective = getArguments().getParcelable("perspective");
 
             DataModelHelper dmHelper = new DataModelHelper(getContext());
             List<Entry>     items;
 
-            items = dmHelper.getEntriesFromPerspective(menuID, parentID);
-            mAdapter = new ListAdapter(getContext(), items, mListener);
+            items = dmHelper.getEntriesFromPerspective(perspective, parent);
+            mAdapter = new ListAdapter(getContext(), parent, items, mListener);
         }
     }
 
@@ -116,6 +109,7 @@ public class ListFragment extends Fragment {
 
         LocalBroadcastManager.getInstance(getContext())
                              .registerReceiver(syncReceiver, syncIntentFilter);
+        mAdapter.enableHeader(true);
     }
 
     @Override public void onPause() {
@@ -123,6 +117,7 @@ public class ListFragment extends Fragment {
         super.onPause();
 
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(syncReceiver);
+        mAdapter.enableHeader(false);
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,

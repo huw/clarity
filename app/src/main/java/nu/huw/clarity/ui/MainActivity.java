@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity
 
         // Add list fragment
 
-        currentFragment = ListFragment.newInstance(perspective.menuID);
+        currentFragment = ListFragment.newInstance(perspective);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, currentFragment)
                                    .commit();
     }
@@ -125,14 +125,32 @@ public class MainActivity extends AppCompatActivity
             refreshMenu(navigationView);
 
             // Colour and set the checked item
-            MenuItem firstItem = navigationView.getMenu().getItem(0);
+            Perspective oldPerspective = perspective;
+            MenuItem    firstItem      = navigationView.getMenu().getItem(0);
+            updatePerspective(firstItem.getItemId());
+
             navigationView.setCheckedItem(firstItem.getItemId());
             setTitle(firstItem.getTitle());
-            changeColors(firstItem.getItemId());
+            changeColors(oldPerspective);
 
             navigationView.setNavigationItemSelectedListener(new NavigationViewListener());
             drawerLayout.addDrawerListener(new DrawerListener());
         }
+    }
+
+    private void updatePerspective(int menuID) {
+
+        Perspective newPerspective = null;
+        for (Perspective candidate : perspectiveList) {
+            if (candidate.menuID == menuID) {
+                newPerspective = candidate;
+            }
+        }
+
+        if (newPerspective == null) {
+            newPerspective = new DataModelHelper(getApplicationContext()).getForecast();
+        }
+        perspective = newPerspective;
     }
 
     private void refreshMenu(NavigationView navigationView) {
@@ -217,7 +235,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        newFragment = ListFragment.newInstance(perspective.menuID, item.id);
+        newFragment = ListFragment.newInstance(perspective, item);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
@@ -273,35 +291,15 @@ public class MainActivity extends AppCompatActivity
         return drawer;
     }
 
-    private void changeColors(int menuItem) {
+    private void changeColors(Perspective oldPerspective) {
 
         // Get the current header colour
-        int colorFrom = ResourcesCompat.getColor(getResources(), perspective.color, null);
-
-        // Depending on the menu item, we change the current theme (which defines a primary
-        // colour), and then set the text colour in the sidebar (for the highlight).
-
-        NavigationView drawer = getDrawer();
-
-        // Change to the new perspective based on its menuID
-
-        Perspective newPerspective = null;
-        for (Perspective candidate : perspectiveList) {
-            if (candidate.menuID == menuItem) {
-                newPerspective = candidate;
-            }
-        }
-
-        if (newPerspective == null) {
-            newPerspective = new DataModelHelper(getApplicationContext()).getForecast();
-        }
-        perspective = newPerspective;
+        int colorFrom = ResourcesCompat.getColor(getResources(), oldPerspective.color, null);
 
         // Set the drawer highlight color to the current perspective's
-
-        drawer.setItemTextColor(ResourcesCompat.getColorStateList(getResources(),
-                                                                  perspective.colorStateListID,
-                                                                  null));
+        getDrawer().setItemTextColor(ResourcesCompat.getColorStateList(getResources(),
+                                                                       perspective.colorStateListID,
+                                                                       null));
 
         // Now to figure out the colour we're transitioning to, we get the _new_ primary theme
         // colour, which has been changed, and save it into a new value.
@@ -401,10 +399,14 @@ public class MainActivity extends AppCompatActivity
 
         @Override public boolean onNavigationItemSelected(MenuItem menuItem) {
 
-            changeColors(menuItem.getItemId());
+            // Get perspective for new item
+            Perspective oldPerspective = perspective;
+            updatePerspective(menuItem.getItemId());
+
+            changeColors(oldPerspective);
             setTitle(menuItem.getTitle());
 
-            newFragment = ListFragment.newInstance(menuItem.getItemId());
+            newFragment = ListFragment.newInstance(perspective);
             isChangingFragment = true;
             currentFragment = new Fragment();
 
