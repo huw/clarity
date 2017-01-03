@@ -184,14 +184,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             try {
                 db.insertOrThrow(tableName, null, values);
-
-                Log.v(TAG, rowID + " added to " + tableName);
             } catch (SQLiteConstraintException e) {
 
                 // If there's an error because we already have this key,
                 // then just update it! Yay!
-
-                Log.v(TAG, rowID + " already exists, updating");
                 update(tableName, rowID, values);
             }
         }
@@ -216,8 +212,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String   selection     = Base.COLUMN_ID.name + "=?";
             String[] selectionArgs = {rowID};
             db.update(tableName, values, selection, selectionArgs);
-
-            Log.v(TAG, rowID + " updated in " + tableName);
         }
 
         db.close();
@@ -233,8 +227,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String   selection     = Base.COLUMN_ID.name + "=?";
         String[] selectionArgs = {rowID};
         db.delete(tableName, selection, selectionArgs);
-
-        Log.v(TAG, rowID + " deleted from " + tableName);
 
         db.close();
     }

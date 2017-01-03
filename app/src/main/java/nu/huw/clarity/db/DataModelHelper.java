@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract.Attachments;
@@ -56,13 +57,16 @@ public class DataModelHelper {
             "(" + Tasks.COLUMN_DATE_DEFER + " IS NOT NULL" + OR +
             Tasks.COLUMN_DATE_DEFER_EFFECTIVE + " IS NOT NULL)";
     private static       String HAS_DUE_OR_DEFER = "(" + HAS_DUE + OR + HAS_DEFER + ")";
+
     private DatabaseHelper          dbHelper;
     private android.content.Context mContext;
+    private Random                  random;
 
     public DataModelHelper(android.content.Context context) {
 
         dbHelper = new DatabaseHelper(context);
         mContext = context;
+        random = new Random();
     }
 
     /**
@@ -569,7 +573,9 @@ public class DataModelHelper {
 
     public List<Perspective> getPerspectives() {
 
-        return getPerspectives(null, null);
+        List<Perspective> perspectives = getPerspectives(null, null);
+        perspectives.add(getForecast());
+        return perspectives;
     }
 
     public Perspective getForecast() {
@@ -588,7 +594,17 @@ public class DataModelHelper {
         perspective.themeID = R.style.AppTheme_Red;
         perspective.color = R.color.primary_red;
         perspective.colorStateListID = R.color.state_list_red;
+        perspective.icon = R.drawable.ic_forecast_red;
 
+        return perspective;
+    }
+
+    public Perspective getBlankPerspective() {
+
+        Perspective perspective = getForecast();
+        perspective.color = R.color.primary;
+        perspective.colorStateListID = R.color.state_list_purple;
+        perspective.themeID = R.style.AppTheme;
         return perspective;
     }
 
@@ -609,11 +625,28 @@ public class DataModelHelper {
         perspective.filterStatus =
                 dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_STATUS.name);
         perspective.group = dbHelper.getString(cursor, Perspectives.COLUMN_GROUP.name);
-        perspective.icon = dbHelper.getString(cursor, Perspectives.COLUMN_ICON.name);
         perspective.name = dbHelper.getString(cursor, Perspectives.COLUMN_NAME.name);
         perspective.sort = dbHelper.getString(cursor, Perspectives.COLUMN_SORT.name);
         perspective.value = dbHelper.getString(cursor, Perspectives.COLUMN_VALUE.name);
         perspective.viewMode = dbHelper.getString(cursor, Perspectives.COLUMN_VIEW_MODE.name);
+
+        String iconName = dbHelper.getString(cursor, Perspectives.COLUMN_ICON.name);
+
+        switch (iconName) {
+            case "ProcessFlagged":
+                perspective.icon = R.drawable.ic_flag_orange;
+                break;
+            case "ProcessContexts":
+                perspective.icon = R.drawable.ic_contexts_purple;
+                break;
+            case "ProcessProjects":
+                perspective.icon = R.drawable.ic_projects_blue;
+                break;
+            case "ProcessInbox":
+            default:
+                perspective.icon = R.drawable.ic_inbox_bluegrey;
+                break;
+        }
 
         switch (perspective.id) {
             case "ProcessFlagged":
@@ -622,11 +655,11 @@ public class DataModelHelper {
                 perspective.menuID = R.id.nav_flagged;
                 perspective.themeID = R.style.AppTheme_Orange;
                 break;
-            case "ProcessInbox":
-                perspective.color = R.color.primary_blue_grey;
-                perspective.colorStateListID = R.color.state_list_blue_grey;
-                perspective.menuID = R.id.nav_inbox;
-                perspective.themeID = R.style.AppTheme_BlueGrey;
+            case "ProcessContexts":
+                perspective.color = R.color.primary;
+                perspective.colorStateListID = R.color.state_list_purple;
+                perspective.menuID = R.id.nav_contexts;
+                perspective.themeID = R.style.AppTheme;
                 break;
             case "ProcessProjects":
                 perspective.color = R.color.primary_blue;
@@ -634,13 +667,15 @@ public class DataModelHelper {
                 perspective.menuID = R.id.nav_projects;
                 perspective.themeID = R.style.AppTheme_Blue;
                 break;
-            case "ProcessContexts":
-                perspective.menuID = R.id.nav_contexts;
+            case "ProcessInbox":
+                perspective.menuID = R.id.nav_inbox;
                 // Fall through to default attributes
             default:
-                perspective.color = R.color.primary;
-                perspective.colorStateListID = R.color.state_list_purple;
-                perspective.themeID = R.style.AppTheme;
+                perspective.color = R.color.primary_blue_grey;
+                perspective.colorStateListID = R.color.state_list_blue_grey;
+                perspective.themeID = R.style.AppTheme_BlueGrey;
+                // Generate a random number for the other menu IDs, fine as long as it's saved
+                perspective.menuID = random.nextInt();
                 break;
         }
 

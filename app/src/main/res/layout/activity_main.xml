@@ -49,6 +49,7 @@
         android:layout_gravity="start"
         android:background="@color/background_navigation"
         app:itemBackground="@drawable/navigation_highlight"
-        app:menu="@menu/drawer_items"/>
+        app:menu="@menu/drawer_items"
+        />
 
 </android.support.v4.widget.DrawerLayout>

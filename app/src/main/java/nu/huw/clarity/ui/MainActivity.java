@@ -5,12 +5,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -54,35 +58,13 @@ public class MainActivity extends AppCompatActivity
     private boolean           isChangingFragment;
     private Perspective       perspective;
     private List<Perspective> perspectiveList;
+    private IntentFilter      syncIntentFilter;
+    private BroadcastReceiver syncReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
 
-    private void setupToolbar(Toolbar toolbar) {
-
-        setSupportActionBar(toolbar);
-        final ActionBar actionBar = getSupportActionBar();
-
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white);
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            refreshMenu(drawer);
         }
-    }
-
-    private void setupNavDrawer(DrawerLayout drawerLayout, NavigationView navigationView) {
-
-        if (navigationView != null && drawerLayout != null) {
-
-            // Keep all icons as their original colours
-            navigationView.setItemIconTintList(null);
-
-            // Colour and set the checked item
-            MenuItem firstItem = navigationView.getMenu().getItem(0);
-            navigationView.setCheckedItem(firstItem.getItemId());
-            setTitle(firstItem.getTitle());
-            changeColors(firstItem.getItemId());
-
-            navigationView.setNavigationItemSelectedListener(new NavigationViewListener());
-            drawerLayout.addDrawerListener(new DrawerListener());
-        }
-    }
+    };
 
     @Override protected void onCreate(Bundle savedInstanceState) {
 
@@ -91,13 +73,16 @@ public class MainActivity extends AppCompatActivity
 
         // Get some perspective
         DataModelHelper dmHelper = new DataModelHelper(getApplicationContext());
-        perspective = dmHelper.getForecast();
+        perspective = dmHelper.getBlankPerspective();
         perspectiveList = dmHelper.getPerspectives();
 
+        // Register sync receiver
+        syncIntentFilter =
+                new IntentFilter(getApplicationContext().getString(R.string.sync_broadcast_intent));
+
         // Toolbar & Nav Drawer Setup
-        setupToolbar((Toolbar) findViewById(R.id.toolbar_list));
-        setupNavDrawer((DrawerLayout) findViewById(R.id.drawer_layout),
-                       (NavigationView) findViewById(R.id.drawer));
+        setupToolbar(getToolbar());
+        setupNavDrawer(getDrawerLayout(), getDrawer());
 
         if (savedInstanceState != null) {
             return;
@@ -117,6 +102,57 @@ public class MainActivity extends AppCompatActivity
         currentFragment = ListFragment.newInstance(perspective.menuID);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, currentFragment)
                                    .commit();
+    }
+
+    private void setupToolbar(Toolbar toolbar) {
+
+        setSupportActionBar(toolbar);
+        final ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    private void setupNavDrawer(DrawerLayout drawerLayout, NavigationView navigationView) {
+
+        if (navigationView != null && drawerLayout != null) {
+
+            // Keep all icons as their original colours
+            navigationView.setItemIconTintList(null);
+
+            refreshMenu(navigationView);
+
+            // Colour and set the checked item
+            MenuItem firstItem = navigationView.getMenu().getItem(0);
+            navigationView.setCheckedItem(firstItem.getItemId());
+            setTitle(firstItem.getTitle());
+            changeColors(firstItem.getItemId());
+
+            navigationView.setNavigationItemSelectedListener(new NavigationViewListener());
+            drawerLayout.addDrawerListener(new DrawerListener());
+        }
+    }
+
+    private void refreshMenu(NavigationView navigationView) {
+
+        // Build menu
+        // We have a default menu for before the sync finishes, but as soon as that's done we
+        // build the menu appropriately based on the user's own perspective choices.
+
+        perspectiveList = new DataModelHelper(getApplicationContext()).getPerspectives();
+
+        Menu menu = navigationView.getMenu();
+        menu.clear();
+
+        for (Perspective menuItem : perspectiveList) {
+            menu.add(R.id.checkable_group, menuItem.menuID, Menu.NONE, menuItem.name);
+            menu.findItem(menuItem.menuID).setIcon(menuItem.icon).setCheckable(true);
+        }
+
+        // Re-select the current perspective in the menu
+        drawer.setCheckedItem(perspective.menuID);
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -172,7 +208,6 @@ public class MainActivity extends AppCompatActivity
 
         Entry item = holder.entry;
 
-        if (perspective.menuID == 0) return;
         if (holder instanceof TaskViewHolder || item.headerRow) {
 
             Intent intent = new Intent(this, DetailActivity.class);
@@ -340,6 +375,22 @@ public class MainActivity extends AppCompatActivity
 
             ContentResolver.addPeriodicSync(account, authority, new Bundle(), seconds);
         }
+    }
+
+    /**
+     * These functions help initialise the sync receiver
+     */
+    @Override public void onResume() {
+
+        super.onResume();
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                             .registerReceiver(syncReceiver, syncIntentFilter);
+    }
+
+    @Override public void onPause() {
+
+        super.onPause();
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(syncReceiver);
     }
 
     /**

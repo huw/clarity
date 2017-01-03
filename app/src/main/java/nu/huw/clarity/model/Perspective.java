@@ -26,7 +26,7 @@ public class Perspective extends Base {
     public String filterFlagged;
     public String filterStatus;
     public String group;
-    public String icon;
+    public int    icon;
     public int    menuID;
     public String name;
     public String parentID;
@@ -46,7 +46,7 @@ public class Perspective extends Base {
         filterFlagged = in.readString();
         filterStatus = in.readString();
         group = in.readString();
-        icon = in.readString();
+        icon = in.readInt();
         menuID = in.readInt();
         name = in.readString();
         parentID = in.readString();
@@ -65,7 +65,7 @@ public class Perspective extends Base {
         out.writeString(filterFlagged);
         out.writeString(filterStatus);
         out.writeString(group);
-        out.writeString(icon);
+        out.writeInt(icon);
         out.writeInt(menuID);
         out.writeString(name);
         out.writeString(parentID);
