@@ -11,26 +11,25 @@ import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.List;
+
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
+import nu.huw.clarity.db.DataModelHelper;
 import nu.huw.clarity.model.Entry;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.ui.adapters.ListAdapter;
 import nu.huw.clarity.ui.fragments.ListFragment;
-import nu.huw.clarity.ui.misc.ColorStateLists;
-import nu.huw.clarity.ui.viewholders.ContextViewHolder;
-import nu.huw.clarity.ui.viewholders.FolderViewHolder;
-import nu.huw.clarity.ui.viewholders.NestedTaskViewHolder;
-import nu.huw.clarity.ui.viewholders.ProjectViewHolder;
 import nu.huw.clarity.ui.viewholders.TaskViewHolder;
 
 public class MainActivity extends AppCompatActivity
@@ -47,14 +46,14 @@ public class MainActivity extends AppCompatActivity
      * application's context, so I can access AccountManager stuff. This is called from any class
      * which needs to get a basic context for the app.
      */
-    private       Toolbar        mToolbar;
-    private       DrawerLayout   mDrawerLayout;
-    private       NavigationView mDrawer;
-    private       Fragment       newFragment;
-    private       Fragment       currentFragment;
-    private       boolean        isChangingFragment;
-    private int     currentTheme   = R.style.AppTheme_Red;
-    private boolean requestSpinner = false;
+    private Toolbar           toolbar;
+    private DrawerLayout      drawerLayout;
+    private NavigationView    drawer;
+    private Fragment          newFragment;
+    private Fragment          currentFragment;
+    private boolean           isChangingFragment;
+    private Perspective       perspective;
+    private List<Perspective> perspectiveList;
 
     private void setupToolbar(Toolbar toolbar) {
 
@@ -90,6 +89,11 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Get some perspective
+        DataModelHelper dmHelper = new DataModelHelper(getApplicationContext());
+        perspective = dmHelper.getForecast();
+        perspectiveList = dmHelper.getPerspectives();
+
         // Toolbar & Nav Drawer Setup
         setupToolbar((Toolbar) findViewById(R.id.toolbar_list));
         setupNavDrawer((DrawerLayout) findViewById(R.id.drawer_layout),
@@ -110,7 +114,7 @@ public class MainActivity extends AppCompatActivity
 
         // Add list fragment
 
-        currentFragment = ListFragment.newInstance(R.id.nav_forecast);
+        currentFragment = ListFragment.newInstance(perspective.menuID);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, currentFragment)
                                    .commit();
     }
@@ -167,29 +171,18 @@ public class MainActivity extends AppCompatActivity
     @Override public void onListFragmentInteraction(ListAdapter.ViewHolder holder) {
 
         Entry item = holder.entry;
-        int   menuID;
 
+        if (perspective.menuID == 0) return;
         if (holder instanceof TaskViewHolder || item.headerRow) {
 
             Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra("ENTRY", holder.entry);
-            intent.putExtra("THEME_ID", currentTheme);
+            intent.putExtra("THEME_ID", perspective.themeID);
             startActivity(intent);
-            return;
-
-        } else if (holder instanceof ProjectViewHolder) {
-            menuID = R.id.nav_projects;
-        } else if (holder instanceof NestedTaskViewHolder) {
-            menuID = R.id.nav_projects;
-        } else if (holder instanceof ContextViewHolder) {
-            menuID = R.id.nav_contexts;
-        } else if (holder instanceof FolderViewHolder) {
-            menuID = R.id.nav_projects;
-        } else {
             return;
         }
 
-        newFragment = ListFragment.newInstance(menuID, item.id);
+        newFragment = ListFragment.newInstance(perspective.menuID, item.id);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
@@ -202,91 +195,84 @@ public class MainActivity extends AppCompatActivity
 
     private Toolbar getToolbar() {
 
-        if (mToolbar == null) {
+        if (toolbar == null) {
             Toolbar tb = (Toolbar) findViewById(R.id.toolbar_list);
 
             if (tb == null) {
                 throw new NullPointerException();
             }
 
-            mToolbar = tb;
+            toolbar = tb;
         }
 
-        return mToolbar;
+        return toolbar;
     }
 
     private DrawerLayout getDrawerLayout() {
 
-        if (mDrawerLayout == null) {
+        if (drawerLayout == null) {
             DrawerLayout dl = (DrawerLayout) findViewById(R.id.drawer_layout);
 
             if (dl == null) {
                 throw new NullPointerException();
             }
 
-            mDrawerLayout = dl;
+            drawerLayout = dl;
         }
 
-        return mDrawerLayout;
+        return drawerLayout;
     }
 
     private NavigationView getDrawer() {
 
-        if (mDrawer == null) {
+        if (drawer == null) {
             NavigationView nv = (NavigationView) findViewById(R.id.drawer);
 
             if (nv == null) {
                 throw new NullPointerException();
             }
 
-            mDrawer = nv;
+            drawer = nv;
         }
 
-        return mDrawer;
+        return drawer;
     }
 
     private void changeColors(int menuItem) {
 
         // Get the current header colour
-        TypedValue typedValue = new TypedValue();
-        getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        int             colorFrom = typedValue.data;
-        ColorStateLists colors    = new ColorStateLists(this.getApplicationContext());
+        int colorFrom = ResourcesCompat.getColor(getResources(), perspective.color, null);
 
         // Depending on the menu item, we change the current theme (which defines a primary
         // colour), and then set the text colour in the sidebar (for the highlight).
 
         NavigationView drawer = getDrawer();
 
-        switch (menuItem) {
-            case R.id.nav_forecast:
-                currentTheme = R.style.AppTheme_Red;
-                drawer.setItemTextColor(colors.red);
-                break;
-            case R.id.nav_inbox:
-                currentTheme = R.style.AppTheme_BlueGrey;
-                drawer.setItemTextColor(colors.blueGrey);
-                break;
-            case R.id.nav_projects:
-                currentTheme = R.style.AppTheme_Blue;
-                drawer.setItemTextColor(colors.blue);
-                break;
-            case R.id.nav_contexts:
-                currentTheme = R.style.AppTheme;
-                drawer.setItemTextColor(colors.purple);
-                break;
-            case R.id.nav_flagged:
-                currentTheme = R.style.AppTheme_Orange;
-                drawer.setItemTextColor(colors.orange);
-                break;
+        // Change to the new perspective based on its menuID
+
+        Perspective newPerspective = null;
+        for (Perspective candidate : perspectiveList) {
+            if (candidate.menuID == menuItem) {
+                newPerspective = candidate;
+            }
         }
+
+        if (newPerspective == null) {
+            newPerspective = new DataModelHelper(getApplicationContext()).getForecast();
+        }
+        perspective = newPerspective;
+
+        // Set the drawer highlight color to the current perspective's
+
+        drawer.setItemTextColor(ResourcesCompat.getColorStateList(getResources(),
+                                                                  perspective.colorStateListID,
+                                                                  null));
 
         // Now to figure out the colour we're transitioning to, we get the _new_ primary theme
         // colour, which has been changed, and save it into a new value.
 
-        setTheme(currentTheme);
-        getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        int colorTo = typedValue.data;
+        setTheme(perspective.themeID);
+        int colorTo = ResourcesCompat.getColor(getResources(), perspective.color, null);
 
         // Animation tweens the two colours together according to Material Design principles.
         ValueAnimator toolbarAnimation =

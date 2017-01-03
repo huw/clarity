@@ -105,33 +105,7 @@ public class ListFragment extends Fragment {
             DataModelHelper dmHelper = new DataModelHelper(getContext());
             List<Entry>     items;
 
-            switch (menuID) {
-                case R.id.nav_inbox:
-                    items = dmHelper.getTasksInInbox();
-                    break;
-                case R.id.nav_projects:
-                    if (parentID == null) {
-                        items = dmHelper.getTopLevelProjects();
-                    } else {
-                        items = dmHelper.getChildren(parentID);
-                    }
-                    break;
-                case R.id.nav_contexts:
-                    if (parentID == null) {
-                        items = dmHelper.getTopLevelContexts();
-                    } else if (parentID.equals("NO_CONTEXT")) {
-                        items = dmHelper.getTasksWithNoContext();
-                    } else {
-                        items = dmHelper.getContextChildren(parentID);
-                    }
-                    break;
-                case R.id.nav_flagged:
-                    items = dmHelper.getFlagged();
-                    break;
-                default:
-                    items = dmHelper.getTasks();
-            }
-
+            items = dmHelper.getEntriesFromPerspective(menuID, parentID);
             mAdapter = new ListAdapter(getContext(), items, mListener);
         }
     }

@@ -14,11 +14,13 @@ import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
 import nu.huw.clarity.db.DatabaseContract.Entries;
 import nu.huw.clarity.db.DatabaseContract.Folders;
+import nu.huw.clarity.db.DatabaseContract.Perspectives;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
 import nu.huw.clarity.model.Attachment;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 
 /**
@@ -28,22 +30,20 @@ import nu.huw.clarity.model.Task;
  */
 public class DataModelHelper {
 
-    private static final String TAG              = DataModelHelper.class.getSimpleName();
+    private static final String TAG           = DataModelHelper.class.getSimpleName();
     // Entries selections
-    private static       String AND              = " AND ";
-    private static       String OR               = " OR ";
-    private static       String ORDER_BY_RANK    =
-            " ORDER BY " + DatabaseContract.Entries.COLUMN_RANK;
-    private static       String TOP_LEVEL        = Entries.COLUMN_PARENT_ID + " IS NULL";
-    private static       String ACTIVE           =
-            DatabaseContract.Entries.COLUMN_ACTIVE + " = 1 AND " + Entries.COLUMN_ACTIVE_EFFECTIVE +
-            " = 1";
+    private static       String AND           = " AND ";
+    private static       String OR            = " OR ";
+    private static       String ORDER_BY_RANK = " ORDER BY " + Entries.COLUMN_RANK;
+    private static       String TOP_LEVEL     = Entries.COLUMN_PARENT_ID + " IS NULL";
+    private static       String ACTIVE        =
+            Entries.COLUMN_ACTIVE + " = 1 AND " + Entries.COLUMN_ACTIVE_EFFECTIVE + " = 1";
     // Task selections
-    private static       String REMAINING        =
+    private static       String REMAINING     =
             Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND " + Tasks.COLUMN_DROPPED + " = 0";
-    private static       String IN_INBOX         = Tasks.COLUMN_INBOX + " = 1";
-    private static       String IS_PROJECT       = Tasks.COLUMN_PROJECT + " = 1";
-    private static       String AVAILABLE        =
+    private static       String IN_INBOX      = Tasks.COLUMN_INBOX + " = 1";
+    private static       String IS_PROJECT    = Tasks.COLUMN_PROJECT + " = 1";
+    private static       String AVAILABLE     =
             REMAINING + AND + Tasks.COLUMN_BLOCKED + " = 0" + AND +
             Tasks.COLUMN_BLOCKED_BY_DEFER.name + " = 0";
     private static       String NO_CONTEXT       = Tasks.COLUMN_CONTEXT + " IS NULL";
@@ -240,27 +240,18 @@ public class DataModelHelper {
         context.modified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
 
         // Entries methods
-        context.active = dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_ACTIVE.name);
-        context.activeEffective =
-                dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_ACTIVE_EFFECTIVE.name);
-        context.countAvailable =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_AVAILABLE.name);
-        context.countChildren =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_CHILDREN.name);
-        context.countCompleted =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_COMPLETED.name);
-        context.countDueSoon =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_DUE_SOON.name);
-        context.countOverdue =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_OVERDUE.name);
-        context.countRemaining =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_REMAINING.name);
-        context.hasChildren =
-                dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_HAS_CHILDREN.name);
-        context.name = dbHelper.getString(cursor, DatabaseContract.Entries.COLUMN_NAME.name);
-        context.parentID =
-                dbHelper.getString(cursor, DatabaseContract.Entries.COLUMN_PARENT_ID.name);
-        context.rank = dbHelper.getLong(cursor, DatabaseContract.Entries.COLUMN_RANK.name);
+        context.active = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE.name);
+        context.activeEffective = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE_EFFECTIVE.name);
+        context.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE.name);
+        context.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN.name);
+        context.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED.name);
+        context.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON.name);
+        context.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE.name);
+        context.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING.name);
+        context.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN.name);
+        context.name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
+        context.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID.name);
+        context.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK.name);
 
         // Context methods
         context.altitude = dbHelper.getLong(cursor, Contexts.COLUMN_ALTITUDE.name);
@@ -319,21 +310,18 @@ public class DataModelHelper {
         folder.modified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
 
         // Entries methods
-        folder.active = dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_ACTIVE.name);
-        folder.activeEffective =
-                dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_ACTIVE_EFFECTIVE.name);
+        folder.active = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE.name);
+        folder.activeEffective = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE_EFFECTIVE.name);
         folder.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE.name);
         folder.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN.name);
-        folder.countCompleted =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_COMPLETED.name);
-        folder.countDueSoon =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_DUE_SOON.name);
+        folder.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED.name);
+        folder.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON.name);
         folder.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE.name);
         folder.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING.name);
         folder.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN.name);
         folder.name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
         folder.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID.name);
-        folder.rank = dbHelper.getLong(cursor, DatabaseContract.Entries.COLUMN_RANK.name);
+        folder.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK.name);
 
         return folder;
     }
@@ -474,22 +462,16 @@ public class DataModelHelper {
         task.modified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
 
         // Entries methods
-        task.countAvailable =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_AVAILABLE.name);
-        task.countChildren =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_CHILDREN.name);
-        task.countCompleted =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_COMPLETED.name);
-        task.countDueSoon =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_DUE_SOON.name);
+        task.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE.name);
+        task.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN.name);
+        task.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED.name);
+        task.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON.name);
         task.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE.name);
-        task.countRemaining =
-                dbHelper.getInt(cursor, DatabaseContract.Entries.COLUMN_COUNT_REMAINING.name);
-        task.hasChildren =
-                dbHelper.getBoolean(cursor, DatabaseContract.Entries.COLUMN_HAS_CHILDREN.name);
-        task.name = dbHelper.getString(cursor, DatabaseContract.Entries.COLUMN_NAME.name);
-        task.parentID = dbHelper.getString(cursor, DatabaseContract.Entries.COLUMN_PARENT_ID.name);
-        task.rank = dbHelper.getLong(cursor, DatabaseContract.Entries.COLUMN_RANK.name);
+        task.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING.name);
+        task.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN.name);
+        task.name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
+        task.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID.name);
+        task.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK.name);
 
         // Task methods
         task.blocked = dbHelper.getBoolean(cursor, Tasks.COLUMN_BLOCKED.name);
@@ -531,5 +513,137 @@ public class DataModelHelper {
         }
 
         return task;
+    }
+
+    /**
+     * Logic for using perspectives to get entries
+     */
+    public List<Entry> getEntriesFromPerspective(int menuID, String parentID) {
+
+        List<Entry> items = new ArrayList<>();
+        switch (menuID) {
+            case R.id.nav_inbox:
+                items = getTasksInInbox();
+                break;
+            case R.id.nav_projects:
+                if (parentID == null) {
+                    items = getTopLevelProjects();
+                } else {
+                    items = getChildren(parentID);
+                }
+                break;
+            case R.id.nav_contexts:
+                if (parentID == null) {
+                    items = getTopLevelContexts();
+                } else if (parentID.equals("NO_CONTEXT")) {
+                    items = getTasksWithNoContext();
+                } else {
+                    items = getContextChildren(parentID);
+                }
+                break;
+            case R.id.nav_flagged:
+                items = getFlagged();
+                break;
+            default:
+                items = getTasks();
+        }
+
+        return items;
+    }
+
+    public List<Perspective> getPerspectives(String selection, String[] selectionArgs) {
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = dbHelper.query(db, Perspectives.TABLE_NAME, Perspectives.columns, selection,
+                                       selectionArgs);
+
+        List<Perspective> result = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            result.add(getPerspectiveFromCursor(cursor));
+        }
+
+        cursor.close();
+        db.close();
+        return result;
+    }
+
+    public List<Perspective> getPerspectives() {
+
+        return getPerspectives(null, null);
+    }
+
+    public Perspective getForecast() {
+
+        Perspective perspective = new Perspective();
+
+        perspective.id = "ProcessForecast";
+        perspective.filterDuration = "any";
+        perspective.filterFlagged = "any";
+        perspective.filterStatus = "due";
+
+        // Don't set `group` or `sort` because Forecast uses a custom grouping/sorting
+
+        perspective.name = "Forecast";
+        perspective.menuID = R.id.nav_forecast;
+        perspective.themeID = R.style.AppTheme_Red;
+        perspective.color = R.color.primary_red;
+        perspective.colorStateListID = R.color.state_list_red;
+
+        return perspective;
+    }
+
+    private Perspective getPerspectiveFromCursor(Cursor cursor) {
+
+        Perspective perspective = new Perspective();
+
+        // Base methods
+        perspective.id = dbHelper.getString(cursor, Base.COLUMN_ID.name);
+        perspective.added = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED.name);
+        perspective.modified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
+
+        // Entries methods
+        perspective.filterDuration =
+                dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_DURATION.name);
+        perspective.filterFlagged =
+                dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_FLAGGED.name);
+        perspective.filterStatus =
+                dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_STATUS.name);
+        perspective.group = dbHelper.getString(cursor, Perspectives.COLUMN_GROUP.name);
+        perspective.icon = dbHelper.getString(cursor, Perspectives.COLUMN_ICON.name);
+        perspective.name = dbHelper.getString(cursor, Perspectives.COLUMN_NAME.name);
+        perspective.sort = dbHelper.getString(cursor, Perspectives.COLUMN_SORT.name);
+        perspective.value = dbHelper.getString(cursor, Perspectives.COLUMN_VALUE.name);
+        perspective.viewMode = dbHelper.getString(cursor, Perspectives.COLUMN_VIEW_MODE.name);
+
+        switch (perspective.id) {
+            case "ProcessFlagged":
+                perspective.color = R.color.primary_orange;
+                perspective.colorStateListID = R.color.state_list_orange;
+                perspective.menuID = R.id.nav_flagged;
+                perspective.themeID = R.style.AppTheme_Orange;
+                break;
+            case "ProcessInbox":
+                perspective.color = R.color.primary_blue_grey;
+                perspective.colorStateListID = R.color.state_list_blue_grey;
+                perspective.menuID = R.id.nav_inbox;
+                perspective.themeID = R.style.AppTheme_BlueGrey;
+                break;
+            case "ProcessProjects":
+                perspective.color = R.color.primary_blue;
+                perspective.colorStateListID = R.color.state_list_blue;
+                perspective.menuID = R.id.nav_projects;
+                perspective.themeID = R.style.AppTheme_Blue;
+                break;
+            case "ProcessContexts":
+                perspective.menuID = R.id.nav_contexts;
+                // Fall through to default attributes
+            default:
+                perspective.color = R.color.primary;
+                perspective.colorStateListID = R.color.state_list_purple;
+                perspective.themeID = R.style.AppTheme;
+                break;
+        }
+
+        return perspective;
     }
 }
