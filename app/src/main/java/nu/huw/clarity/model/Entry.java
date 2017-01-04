@@ -75,7 +75,9 @@ public class Entry extends Base implements Comparable<Entry> {
 
     @Override public int compareTo(@NonNull Entry entry) {
 
-        if (headerRow || rank < entry.rank) {
+        // Checking is done this way, in case type casting to an int creates a problem
+
+        if (rank < entry.rank) {
             return -1;
         } else if (rank > entry.rank) {
             return 1;

@@ -22,8 +22,8 @@ public class Base implements Parcelable {
         }
     };
     public String id;
-    public Date   added;
-    public Date   modified;
+    public Date   dateAdded;
+    public Date   dateModified;
 
     public Base() {}
 
@@ -31,16 +31,16 @@ public class Base implements Parcelable {
     protected Base(Parcel in) {
 
         id = in.readString();
-        added = getDateOrNull(in.readLong());
-        modified = getDateOrNull(in.readLong());
+        dateAdded = getDateOrNull(in.readLong());
+        dateModified = getDateOrNull(in.readLong());
     }
 
     // Write the object data to the parcel
     @Override public void writeToParcel(Parcel out, int flags) {
 
         out.writeString(id);
-        out.writeLong(getTimeOrNull(added));
-        out.writeLong(getTimeOrNull(modified));
+        out.writeLong(getTimeOrNull(dateAdded));
+        out.writeLong(getTimeOrNull(dateModified));
     }
 
     @Override public int describeContents() {return 0;}

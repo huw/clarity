@@ -29,7 +29,7 @@ import java.util.List;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
-import nu.huw.clarity.db.DataModelHelper;
+import nu.huw.clarity.db.model.DataModelHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.ui.adapters.ListAdapter;
@@ -63,6 +63,19 @@ public class MainActivity extends AppCompatActivity
         @Override public void onReceive(Context context, Intent intent) {
 
             refreshMenu(drawer);
+
+            // Refresh fragment
+
+            newFragment = ListFragment.newInstance(perspective);
+
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in,
+                                   R.anim.fade_out);
+            ft.replace(R.id.fragment_container, newFragment);
+            ft.addToBackStack(null);
+            ft.commit();
+
+            currentFragment = newFragment;
         }
     };
 
@@ -73,7 +86,7 @@ public class MainActivity extends AppCompatActivity
 
         // Get some perspective
         DataModelHelper dmHelper = new DataModelHelper(getApplicationContext());
-        perspective = dmHelper.getBlankPerspective();
+        perspective = dmHelper.getPlaceholderPerspective();
         perspectiveList = dmHelper.getPerspectives();
 
         // Register sync receiver
@@ -148,7 +161,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (newPerspective == null) {
-            newPerspective = new DataModelHelper(getApplicationContext()).getForecast();
+            newPerspective = new DataModelHelper(getApplicationContext()).getForecastPerspective();
         }
         perspective = newPerspective;
     }

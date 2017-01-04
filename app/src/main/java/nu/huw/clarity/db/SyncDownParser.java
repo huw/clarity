@@ -403,8 +403,9 @@ public class SyncDownParser {
                         // These three fields could be null, so check for that
 
                         NSString filterDurationData = ((NSString) data.get("actionDurationFilter"));
-                        NSString filterFlaggedData  = ((NSString) data.get("actionDurationFilter"));
-                        NSString filterStatusData   = ((NSString) data.get("actionDurationFilter"));
+                        NSString filterFlaggedData  = ((NSString) data.get("actionFlaggedFilter"));
+                        NSString filterStatusData   =
+                                ((NSString) data.get("actionCompletionFilter"));
 
                         if (filterDurationData != null) {
                             String filterDuration = filterDurationData.getContent();

@@ -16,7 +16,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import nu.huw.clarity.R;
-import nu.huw.clarity.db.DataModelHelper;
 import nu.huw.clarity.db.DatabaseContract;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
@@ -28,7 +27,7 @@ import nu.huw.clarity.ui.misc.CheckCircle;
 public class DetailActivity extends AppCompatActivity
         implements DetailFragment.OnDetailInteractionListener {
 
-    private int   themeID;
+    private int themeID;
 
     private void setupToolbar(Toolbar toolbar, int themeID) {
 
@@ -69,16 +68,8 @@ public class DetailActivity extends AppCompatActivity
             // If we've passed an entry already, then just pick it up
 
             entry = intent.getParcelableExtra("ENTRY");
-        } else if (intent.hasExtra("ENTRY_ID") && intent.hasExtra("TABLE_NAME")) {
-
-            // If we've just passed an ID and a table name, read in the associated entry
-
-            String id        = intent.getStringExtra("ENTRY_ID");
-            String tableName = intent.getStringExtra("TABLE_NAME");
-            entry = (new DataModelHelper(getBaseContext())).getEntryFromID(id, tableName);
         } else {
-            throw new IllegalArgumentException(
-                    "Intent must contain 'ENTRY' or 'ENTRY_ID' and " + "'TABLE NAME'");
+            throw new IllegalArgumentException("Intent must contain 'ENTRY'");
         }
 
         setupToolbar((Toolbar) findViewById(R.id.toolbar_detail),

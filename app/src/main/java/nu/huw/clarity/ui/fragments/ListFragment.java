@@ -23,7 +23,7 @@ import java.util.List;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
-import nu.huw.clarity.db.DataModelHelper;
+import nu.huw.clarity.db.model.DataModelHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.ui.adapters.ListAdapter;

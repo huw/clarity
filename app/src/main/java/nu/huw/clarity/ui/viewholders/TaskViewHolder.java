@@ -100,12 +100,8 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
         // Check circle callback
         // Adapter will handle necessary logic for removal
         checkCircleView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-
-                if (checked) {
-                    adapter.removeItem(task);
-                }
-            }
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {}
         });
 
         this.entry = task;
