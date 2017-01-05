@@ -86,7 +86,7 @@ public class DetailActivity extends AppCompatActivity
             int hintID = R.string.prompt_name;
 
             if (entry instanceof Task) {
-                if (((Task) entry).project) {
+                if (((Task) entry).isProject) {
                     hintID = R.string.project;
                 } else {
                     hintID = R.string.task;

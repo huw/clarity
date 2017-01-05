@@ -9,7 +9,14 @@ import java.util.Date;
  */
 public class Comparators {
 
-    public static Comparator<Task> getComparator(Perspective perspective) {
+    private android.content.Context androidContext;
+
+    public Comparators(android.content.Context androidContext) {
+
+        this.androidContext = androidContext;
+    }
+
+    public Comparator<Task> getComparator(Perspective perspective) {
 
         if (perspective == null || perspective.sort == null) return null;
 
@@ -86,40 +93,6 @@ public class Comparators {
                     // Neither are null, compare normally
                     return d1.compareTo(d2);
                 }
-            }
-        }
-    }
-
-    public static class ContextComparator implements Comparator<Task> {
-
-        @Override public int compare(Task t1, Task t2) {
-
-            // Sort first by context name...
-
-            int compare = new StringComparator().compare(t1.contextName, t2.contextName);
-
-            // ...then rank
-            // Note that any two entry objects automatically compare by rank for easier sorting
-
-            if (compare != 0) {
-                return compare;
-            } else {
-                return t1.compareTo(t2);
-            }
-        }
-    }
-
-    public static class ProjectComparator implements Comparator<Task> {
-
-        @Override public int compare(Task t1, Task t2) {
-
-            // Sort first by project name, then rank
-            int compare = new StringComparator().compare(t1.projectName, t2.projectName);
-
-            if (compare != 0) {
-                return compare;
-            } else {
-                return t1.compareTo(t2);
             }
         }
     }
@@ -209,6 +182,76 @@ public class Comparators {
                 return 1;
             } else {
                 return -1;
+            }
+        }
+    }
+
+    public class ContextComparator implements Comparator<Task> {
+
+        @Override public int compare(Task t1, Task t2) {
+
+            // Check for nulls, and if none then compare by context name
+
+            if (t1.contextID == null) {
+                if (t2.contextID == null) {
+                    // Both are null and equal
+                    return 0;
+                } else {
+                    // Only s1 is null, so s2 is 'greater' than it
+                    return -1;
+                }
+            } else {
+                if (t2.contextID == null) {
+                    // Only s2 is null, so s2 is 'greater'
+                    return 1;
+                } else {
+
+                    // Neither are null, compare normally
+                    Context c1 = t1.getContext(androidContext);
+                    Context c2 = t2.getContext(androidContext);
+
+                    int compare = c1.compareTo(c2);
+                    if (compare != 0) {
+                        return compare;
+                    } else {
+                        return t1.compareTo(t2);
+                    }
+                }
+            }
+        }
+    }
+
+    public class ProjectComparator implements Comparator<Task> {
+
+        @Override public int compare(Task t1, Task t2) {
+
+            // Check for nulls, and if none then compare by project name
+
+            if (t1.projectID == null) {
+                if (t2.projectID == null) {
+                    // Both are null and equal
+                    return 0;
+                } else {
+                    // Only s1 is null, so s2 is 'greater' than it
+                    return -1;
+                }
+            } else {
+                if (t2.projectID == null) {
+                    // Only s2 is null, so s2 is 'greater'
+                    return 1;
+                } else {
+
+                    // Neither are null, compare normally
+                    Task p1 = t1.getProject(androidContext);
+                    Task p2 = t2.getProject(androidContext);
+
+                    int compare = p1.compareTo(p2);
+                    if (compare != 0) {
+                        return compare;
+                    } else {
+                        return t1.compareTo(t2);
+                    }
+                }
             }
         }
     }

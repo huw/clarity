@@ -3,6 +3,8 @@ package nu.huw.clarity.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import nu.huw.clarity.db.model.DataModelHelper;
+
 /**
  * A context, in OmniFocus, holds a number of tasks but is external from the tree. Every task
  * lists a context to which it belongs.
@@ -49,5 +51,14 @@ public class Context extends Entry {
         out.writeDouble(longitude);
         out.writeInt(onHold ? 1 : 0);
         out.writeDouble(radius);
+    }
+
+    public @Override Entry getParent(android.content.Context androidContext) {
+
+        if (parent == null) {
+            DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+            parent = dataModelHelper.getContextFromID(parentID);
+        }
+        return parent;
     }
 }

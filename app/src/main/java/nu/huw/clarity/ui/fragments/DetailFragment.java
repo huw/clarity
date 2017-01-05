@@ -60,7 +60,7 @@ public class DetailFragment extends Fragment {
         }
 
         if (entry instanceof Task) {
-            if (((Task) entry).project) {
+            if (((Task) entry).isProject) {
                 return bindProjectDetails(R.layout.fragment_project_detail, inflater, container);
             } else {
                 return bindTaskDetails(R.layout.fragment_task_detail, inflater, container);
@@ -94,7 +94,7 @@ public class DetailFragment extends Fragment {
     private View bindProjectDetails(int fragmentID, LayoutInflater inflater, ViewGroup container) {
 
         View       view  = inflater.inflate(fragmentID, container, false);
-        final Task entry = (Task) this.entry;
+        Task       entry = (Task) this.entry;
         DateFormat df    = android.text.format.DateFormat.getMediumDateFormat(getContext());
 
         // Project type field
@@ -120,9 +120,11 @@ public class DetailFragment extends Fragment {
         }
 
         // Context field
-        if (entry.contextName != null) {
+        if (entry.contextID != null) {
+            final Context context = entry.getContext(getContext());
+
             TextView tv = (TextView) view.findViewById(R.id.detail_context_name);
-            tv.setText(entry.contextName);
+            tv.setText(context.name);
             tv.setTextColor(PRIMARY_TEXT);
 
             ImageButton ib = (ImageButton) view.findViewById(R.id.detail_context_button);
@@ -130,7 +132,7 @@ public class DetailFragment extends Fragment {
             ib.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View view) {
 
-                    mListener.onContextClick(entry.context);
+                    mListener.onContextClick(context.id);
                 }
             });
         }
@@ -195,13 +197,15 @@ public class DetailFragment extends Fragment {
     private View bindTaskDetails(int fragmentID, LayoutInflater inflater, ViewGroup container) {
 
         View       view  = inflater.inflate(fragmentID, container, false);
-        final Task entry = (Task) this.entry;
+        Task       entry = (Task) this.entry;
         DateFormat df    = android.text.format.DateFormat.getMediumDateFormat(getContext());
 
         // Project field
-        if (entry.projectName != null) {
+        if (entry.projectID != null) {
+            final Task project = entry.getProject(getContext());
+
             TextView tv = (TextView) view.findViewById(R.id.detail_project_name);
-            tv.setText(entry.projectName);
+            tv.setText(project.name);
             tv.setTextColor(PRIMARY_TEXT);
 
             ImageButton ib = (ImageButton) view.findViewById(R.id.detail_project_button);
@@ -209,15 +213,18 @@ public class DetailFragment extends Fragment {
             ib.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View view) {
 
-                    mListener.onProjectClick(entry.projectID);
+                    mListener.onProjectClick(project.id);
                 }
             });
         }
 
         // Context field
-        if (entry.contextName != null) {
+        if (entry.contextID != null) {
+
+            final Context context = entry.getContext(getContext());
+
             TextView tv = (TextView) view.findViewById(R.id.detail_context_name);
-            tv.setText(entry.contextName);
+            tv.setText(context.name);
             tv.setTextColor(PRIMARY_TEXT);
 
             ImageButton ib = (ImageButton) view.findViewById(R.id.detail_context_button);
@@ -225,7 +232,7 @@ public class DetailFragment extends Fragment {
             ib.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View view) {
 
-                    mListener.onContextClick(entry.context);
+                    mListener.onContextClick(context.id);
                 }
             });
         }

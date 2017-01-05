@@ -3,6 +3,8 @@ package nu.huw.clarity.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import nu.huw.clarity.db.model.DataModelHelper;
+
 /**
  * Folder. Contains projects or other folders. Projects, by the way, cannot contain projects.
  */
@@ -25,5 +27,14 @@ public class Folder extends Entry {
     protected Folder(Parcel in) {
 
         super(in);
+    }
+
+    public @Override Entry getParent(android.content.Context androidContext) {
+
+        if (parent == null) {
+            DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+            parent = dataModelHelper.getFolderFromID(parentID);
+        }
+        return parent;
     }
 }

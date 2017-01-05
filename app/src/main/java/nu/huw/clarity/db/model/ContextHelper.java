@@ -17,6 +17,7 @@ class ContextHelper {
 
     private static final String NO_PARENT  = Contexts.COLUMN_PARENT_ID + " IS NULL";
     private static final String PARENT_ARG = Contexts.COLUMN_PARENT_ID + " = ?";
+    private static final String ID_ARG     = Contexts.COLUMN_ID + " = ?";
     private DatabaseHelper          dbHelper;
     private android.content.Context androidContext;
 
@@ -47,6 +48,25 @@ class ContextHelper {
 
             return getContextsFromSelection(PARENT_ARG, new String[]{parent.id});
         }
+    }
+
+    /**
+     * Get the context with the specified ID
+     *
+     * @param id ID of a context
+     */
+    Context getContextFromID(String id) {
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor =
+                dbHelper.query(db, Contexts.TABLE_NAME, Contexts.columns, ID_ARG, new String[]{id});
+
+        cursor.moveToFirst();
+        Context result = getContextFromCursor(cursor);
+
+        cursor.close();
+        db.close();
+        return result;
     }
 
     /**

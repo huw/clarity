@@ -99,7 +99,7 @@ public class DataModelHelper {
 
         // Sort items
 
-        Comparator<Task> comparator = Comparators.getComparator(perspective);
+        Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
         Collections.sort(tasks, comparator);
         Collections.sort(contexts);
 
@@ -138,7 +138,7 @@ public class DataModelHelper {
 
         // Sort items
 
-        Comparator<Task> comparator = Comparators.getComparator(perspective);
+        Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
         Collections.sort(tasks, comparator);
 
         // Convert and return
@@ -221,7 +221,7 @@ public class DataModelHelper {
         // Sort items
         // (should also be faster than SQL)
 
-        Comparator<Task> comparator = Comparators.getComparator(perspective);
+        Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
         Collections.sort(tasks, comparator);
 
         // Convert and return
@@ -355,5 +355,44 @@ public class DataModelHelper {
             perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
         }
         return perspectiveHelper.getPlaceholder();
+    }
+
+    /**
+     * Get the context with the specified ID
+     *
+     * @param id ID of a context
+     */
+    public Context getContextFromID(String id) {
+
+        if (id == null) throw new NullPointerException("Null ID provided");
+        if (contextHelper == null) contextHelper = new ContextHelper(dbHelper, androidContext);
+
+        return contextHelper.getContextFromID(id);
+    }
+
+    /**
+     * Get the folder with the specified ID
+     *
+     * @param id ID of a folder
+     */
+    public Folder getFolderFromID(String id) {
+
+        if (id == null) throw new NullPointerException("Null ID provided");
+        if (folderHelper == null) folderHelper = new FolderHelper(dbHelper);
+
+        return folderHelper.getFolderFromID(id);
+    }
+
+    /**
+     * Get the task with the specified ID
+     *
+     * @param id ID of a task
+     */
+    public Task getTaskFromID(String id) {
+
+        if (id == null) throw new NullPointerException("Null ID provided");
+        if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
+
+        return taskHelper.getTaskFromID(id);
     }
 }

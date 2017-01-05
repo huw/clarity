@@ -81,7 +81,9 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
 
         nameView.setText(task.name);
         dateView.setText(date);
-        contextView.setText(task.contextName);
+        if (task.contextID != null) {
+            contextView.setText(task.getContext(androidContext).name);
+        }
 
         // Check circle
         // Available tasks can have a flag, but they can't have colorised overdue/due soon

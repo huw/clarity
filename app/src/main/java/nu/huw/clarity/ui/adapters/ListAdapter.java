@@ -49,7 +49,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         Entry item = items.get(position);
 
         if (item instanceof Task) {
-            if (((Task) item).project) {
+            if (((Task) item).isProject) {
                 return 4;
             } else if (item.hasChildren) {
                 return 5;

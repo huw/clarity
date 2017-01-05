@@ -34,6 +34,7 @@ public class Entry extends Base implements Comparable<Entry> {
     public String  parentID;
     public long    rank;
     public boolean headerRow;
+    Entry parent;
 
     public Entry() {}
 
@@ -50,6 +51,7 @@ public class Entry extends Base implements Comparable<Entry> {
         countRemaining = in.readInt();
         hasChildren = in.readInt() != 0;
         name = in.readString();
+        parent = in.readParcelable(Entry.class.getClassLoader());
         parentID = in.readString();
         rank = in.readLong();
         headerRow = in.readInt() != 0;
@@ -68,6 +70,7 @@ public class Entry extends Base implements Comparable<Entry> {
         out.writeInt(countRemaining);
         out.writeInt(hasChildren ? 1 : 0);
         out.writeString(name);
+        out.writeParcelable(parent, 0);
         out.writeString(parentID);
         out.writeLong(rank);
         out.writeInt(headerRow ? 1 : 0);
@@ -84,5 +87,10 @@ public class Entry extends Base implements Comparable<Entry> {
         }
 
         return 0;
+    }
+
+    public Entry getParent(android.content.Context androidContext) {
+
+        throw new UnsupportedOperationException("Subclass must override getParent()");
     }
 }

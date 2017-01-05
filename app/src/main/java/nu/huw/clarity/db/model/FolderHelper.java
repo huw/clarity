@@ -16,6 +16,7 @@ class FolderHelper {
 
     private static final String NO_PARENT  = Folders.COLUMN_PARENT_ID + " IS NULL";
     private static final String PARENT_ARG = Folders.COLUMN_PARENT_ID + " = ?";
+    private static final String ID_ARG     = Folders.COLUMN_ID + " = ?";
     private DatabaseHelper dbHelper;
 
     FolderHelper(DatabaseHelper dbHelper) {
@@ -36,6 +37,25 @@ class FolderHelper {
         } else {
             return getFoldersFromSelection(PARENT_ARG, new String[]{parent.id});
         }
+    }
+
+    /**
+     * Get the folder with the specified ID
+     *
+     * @param id ID of a folder
+     */
+    Folder getFolderFromID(String id) {
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor =
+                dbHelper.query(db, Folders.TABLE_NAME, Folders.columns, ID_ARG, new String[]{id});
+
+        cursor.moveToFirst();
+        Folder result = getFolderFromCursor(cursor);
+
+        cursor.close();
+        db.close();
+        return result;
     }
 
     /**

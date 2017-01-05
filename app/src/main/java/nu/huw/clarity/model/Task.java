@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import java.util.Date;
 
+import nu.huw.clarity.db.model.DataModelHelper;
+
 /**
  * A 'Task' is any item in the OmniFocus tree that isn't a folder. Projects are also tasks.
  */
@@ -24,8 +26,7 @@ public class Task extends Entry {
     public boolean blocked;
     public boolean blockedByDefer;
     public boolean completeWithChildren;
-    public String  context;
-    public String  contextName;
+    public String  contextID;
     public Date    dateCompleted;
     public Date    dateDefer;
     public Date    dateDeferEffective;
@@ -37,13 +38,12 @@ public class Task extends Entry {
     public boolean flagged;
     public boolean flaggedEffective;
     public boolean inInbox;
+    public boolean isProject;
     public String  next;
     public String  notePlaintext;
     public String  noteXML;
     public boolean overdue;
-    public boolean project;
     public String  projectID;
-    public String  projectName;
     public Date    lastReview;
     public Date    nextReview;
     public Date    reviewInterval;
@@ -51,6 +51,8 @@ public class Task extends Entry {
     public String  repetitionMethod;
     public String  repetitionRule;
     public String  type;
+    Context context;
+    Task    project;
 
     public Task() {}
 
@@ -60,8 +62,8 @@ public class Task extends Entry {
         blocked = in.readInt() != 0;
         blockedByDefer = in.readInt() != 0;
         completeWithChildren = in.readInt() != 0;
-        context = in.readString();
-        contextName = in.readString();
+        context = in.readParcelable(Context.class.getClassLoader());
+        contextID = in.readString();
         dateCompleted = getDateOrNull(in.readLong());
         dateDefer = getDateOrNull(in.readLong());
         dateDeferEffective = getDateOrNull(in.readLong());
@@ -73,13 +75,13 @@ public class Task extends Entry {
         flagged = in.readInt() != 0;
         flaggedEffective = in.readInt() != 0;
         inInbox = in.readInt() != 0;
+        isProject = in.readInt() != 0;
         next = in.readString();
         notePlaintext = in.readString();
         noteXML = in.readString();
         overdue = in.readInt() != 0;
-        project = in.readInt() != 0;
+        project = in.readParcelable(Task.class.getClassLoader());
         projectID = in.readString();
-        projectName = in.readString();
         lastReview = getDateOrNull(in.readLong());
         nextReview = getDateOrNull(in.readLong());
         reviewInterval = getDateOrNull(in.readLong());
@@ -100,8 +102,8 @@ public class Task extends Entry {
         out.writeInt(blocked ? 1 : 0);
         out.writeInt(blockedByDefer ? 1 : 0);
         out.writeInt(completeWithChildren ? 1 : 0);
-        out.writeString(context);
-        out.writeString(contextName);
+        out.writeParcelable(context, 0);
+        out.writeString(contextID);
         out.writeLong(getTimeOrNull(dateCompleted));
         out.writeLong(getTimeOrNull(dateDefer));
         out.writeLong(getTimeOrNull(dateDeferEffective));
@@ -113,13 +115,13 @@ public class Task extends Entry {
         out.writeInt(flagged ? 1 : 0);
         out.writeInt(flaggedEffective ? 1 : 0);
         out.writeInt(inInbox ? 1 : 0);
+        out.writeInt(isProject ? 1 : 0);
         out.writeString(next);
         out.writeString(notePlaintext);
         out.writeString(noteXML);
         out.writeInt(overdue ? 1 : 0);
-        out.writeInt(project ? 1 : 0);
+        out.writeParcelable(project, 0);
         out.writeString(projectID);
-        out.writeString(projectName);
         out.writeLong(getTimeOrNull(lastReview));
         out.writeLong(getTimeOrNull(nextReview));
         out.writeLong(getTimeOrNull(reviewInterval));
@@ -127,5 +129,44 @@ public class Task extends Entry {
         out.writeString(repetitionMethod);
         out.writeString(repetitionRule);
         out.writeString(type);
+    }
+
+    public @Override Entry getParent(android.content.Context androidContext) {
+
+        if (parent == null) {
+
+            DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+            if (isProject) {
+
+                // Parent is a folder
+                parent = dataModelHelper.getFolderFromID(parentID);
+            } else {
+
+                // Parent is a task or project
+                parent = dataModelHelper.getTaskFromID(parentID);
+            }
+        }
+
+        return parent;
+    }
+
+    public Context getContext(android.content.Context androidContext) {
+
+        if (context == null) {
+            DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+            context = dataModelHelper.getContextFromID(contextID);
+        }
+
+        return context;
+    }
+
+    public Task getProject(android.content.Context androidContext) {
+
+        if (project == null) {
+            DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+            project = dataModelHelper.getTaskFromID(projectID);
+        }
+
+        return project;
     }
 }

@@ -20,6 +20,7 @@ class TaskHelper {
     private static final String NO_CONTEXT     = Tasks.COLUMN_CONTEXT + " IS NULL";
     private static final String PARENT_ARG     = Tasks.COLUMN_PARENT_ID + " = ?";
     private static final String CONTEXT_ARG    = Tasks.COLUMN_CONTEXT + " = ?";
+    private static final String ID_ARG         = Tasks.COLUMN_ID + " = ?";
     private static final String IS_PROJECT     = Tasks.COLUMN_PROJECT + " =  1";
     private static final String IS_NOT_PROJECT = Tasks.COLUMN_PROJECT + " =  0";
     private static final String IN_INBOX       = Tasks.COLUMN_INBOX + " = 1";
@@ -98,6 +99,25 @@ class TaskHelper {
     }
 
     /**
+     * Get the task with the specified ID
+     *
+     * @param id ID of a task
+     */
+    Task getTaskFromID(String id) {
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor =
+                dbHelper.query(db, Tasks.TABLE_NAME, Tasks.columns, ID_ARG, new String[]{id});
+
+        cursor.moveToFirst();
+        Task result = getTaskFromCursor(cursor);
+
+        cursor.close();
+        db.close();
+        return result;
+    }
+
+    /**
      * Gets all tasks matching a given SQL selection
      *
      * @param selection     SQL selection matching a list of tasks
@@ -150,7 +170,7 @@ class TaskHelper {
         task.blockedByDefer = dbHelper.getBoolean(cursor, Tasks.COLUMN_BLOCKED_BY_DEFER.name);
         task.completeWithChildren =
                 dbHelper.getBoolean(cursor, Tasks.COLUMN_COMPLETE_WITH_CHILDREN.name);
-        task.context = dbHelper.getString(cursor, Tasks.COLUMN_CONTEXT.name);
+        task.contextID = dbHelper.getString(cursor, Tasks.COLUMN_CONTEXT.name);
         task.dateCompleted = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_COMPLETED.name);
         task.dateDefer = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DEFER.name);
         task.dateDeferEffective = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name);
@@ -162,11 +182,11 @@ class TaskHelper {
         task.flagged = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED.name);
         task.flaggedEffective = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED_EFFECTIVE.name);
         task.inInbox = dbHelper.getBoolean(cursor, Tasks.COLUMN_INBOX.name);
+        task.isProject = dbHelper.getBoolean(cursor, Tasks.COLUMN_PROJECT.name);
         task.next = dbHelper.getString(cursor, Tasks.COLUMN_NEXT.name);
         task.notePlaintext = dbHelper.getString(cursor, Tasks.COLUMN_NOTE_PLAINTEXT.name);
         task.noteXML = dbHelper.getString(cursor, Tasks.COLUMN_NOTE_XML.name);
         task.overdue = dbHelper.getBoolean(cursor, Tasks.COLUMN_OVERDUE.name);
-        task.project = dbHelper.getBoolean(cursor, Tasks.COLUMN_PROJECT.name);
         task.projectID = dbHelper.getString(cursor, Tasks.COLUMN_PROJECT_ID.name);
         task.lastReview = dbHelper.getDate(cursor, Tasks.COLUMN_PROJECT_LAST_REVIEW.name);
         task.nextReview = dbHelper.getDate(cursor, Tasks.COLUMN_PROJECT_NEXT_REVIEW.name);
