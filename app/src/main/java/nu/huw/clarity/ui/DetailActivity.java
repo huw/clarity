@@ -21,7 +21,7 @@ import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Task;
-import nu.huw.clarity.ui.fragments.DetailFragment;
+import nu.huw.clarity.ui.fragment.DetailFragment;
 import nu.huw.clarity.ui.misc.CheckCircle;
 
 public class DetailActivity extends AppCompatActivity

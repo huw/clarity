@@ -1,4 +1,4 @@
-package nu.huw.clarity.ui.viewholders;
+package nu.huw.clarity.ui.viewholder;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -7,13 +7,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Task;
-import nu.huw.clarity.ui.adapters.ListAdapter;
+import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.ui.adapter.ListAdapter;
 
 /**
  * A view holder for a folder, using R.layout.fragment_folder
  */
-public class ProjectViewHolder extends ListAdapter.ViewHolder {
+public class FolderViewHolder extends ListAdapter.ViewHolder {
 
     public final TextView nameView;
     public final TextView remainingView;
@@ -22,7 +22,7 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
     public final TextView dueSoonDivider;
     public final TextView overdueDivider;
 
-    public ProjectViewHolder(View view, ListAdapter adapter) {
+    public FolderViewHolder(View view, ListAdapter adapter) {
 
         super(view, adapter);
         nameView = (TextView) view.findViewById(R.id.name);
@@ -33,9 +33,9 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
         overdueDivider = (TextView) view.findViewById(R.id.divider_overdue);
     }
 
-    public void bind(Task project, Context androidContext) {
+    public void bind(Folder folder, Context androidContext) {
 
-        this.entry = project;
+        this.entry = folder;
         int remaining = this.entry.countRemaining;
         int dueSoon   = this.entry.countDueSoon;
         int overdue   = this.entry.countOverdue;
@@ -69,9 +69,9 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
             overdueDivider.setVisibility(View.GONE);
         }
 
-        // Bold header row
+        // Bold header rows
 
-        if (project.headerRow) {
+        if (folder.headerRow) {
             nameView.setTypeface(null, Typeface.BOLD);
         }
 

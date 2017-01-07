@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.OmniSyncLoginTask;
-import nu.huw.clarity.ui.fragments.ErrorDialogFragment;
+import nu.huw.clarity.ui.fragment.ErrorDialogFragment;
 
 public class LoginActivity extends AppCompatActivity
         implements ErrorDialogFragment.onErrorDismissListener {

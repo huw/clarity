@@ -1,8 +1,6 @@
 package nu.huw.clarity.ui;
 
 import android.accounts.Account;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
@@ -32,24 +30,15 @@ import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.model.DataModelHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
-import nu.huw.clarity.ui.adapters.ListAdapter;
-import nu.huw.clarity.ui.fragments.ListFragment;
-import nu.huw.clarity.ui.viewholders.TaskViewHolder;
+import nu.huw.clarity.ui.adapter.ListAdapter;
+import nu.huw.clarity.ui.fragment.ListFragment;
+import nu.huw.clarity.ui.viewholder.TaskViewHolder;
 
 public class MainActivity extends AppCompatActivity
         implements ListFragment.OnListFragmentInteractionListener {
 
-    static final         int    LOG_IN_FIRST_REQUEST = 1;
+    private static final int    LOG_IN_FIRST_REQUEST = 1;
     private static final String TAG                  = MainActivity.class.getSimpleName();
-    /**
-     * Okay, this is really bad practice but from what I've found it's basically the only way
-     * forward.
-     *
-     * You can't use contexts in a base class, which is problematic because I need to access an
-     * AccountManager to create HttpClients. Instead, I've set a static variable here for the
-     * application's context, so I can access AccountManager stuff. This is called from any class
-     * which needs to get a basic context for the app.
-     */
     private Toolbar           toolbar;
     private DrawerLayout      drawerLayout;
     private NavigationView    drawer;
@@ -63,19 +52,6 @@ public class MainActivity extends AppCompatActivity
         @Override public void onReceive(Context context, Intent intent) {
 
             refreshMenu(drawer);
-
-            // Refresh fragment
-
-            newFragment = ListFragment.newInstance(perspective);
-
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in,
-                                   R.anim.fade_out);
-            ft.replace(R.id.fragment_container, newFragment);
-            ft.addToBackStack(null);
-            ft.commit();
-
-            currentFragment = newFragment;
         }
     };
 
@@ -112,7 +88,7 @@ public class MainActivity extends AppCompatActivity
 
         // Add list fragment
 
-        currentFragment = ListFragment.newInstance(perspective);
+        currentFragment = ListFragment.newInstance(perspective, null);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, currentFragment)
                                    .commit();
     }
@@ -207,7 +183,7 @@ public class MainActivity extends AppCompatActivity
                 registerSyncs();    // Also requests a new sync
 
                 if (currentFragment instanceof ListFragment) {
-                    ((ListFragment) currentFragment).showProgress();
+                    ((ListFragment) currentFragment).checkForSyncs();
                 }
             }
         }
@@ -348,31 +324,6 @@ public class MainActivity extends AppCompatActivity
         toolbarAnimation.start();
     }
 
-    /**
-     * Show/hide the progress spinner for the fragment switcher
-     */
-    private void showProgress(final boolean show) {
-
-        // This uses the animation controls to fade in the progress spinner.
-        // It also fades out the UI first. If you're interested in following
-        // the logic, the spinner doesn't need a `setVisibility()` immediately
-        // because its initial state is blank.
-
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-        final View progressView = findViewById(R.id.fragment_progress);
-
-        if (progressView != null) {
-            progressView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override public void onAnimationEnd(Animator animation) {
-
-                                progressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                            }
-                        });
-        }
-    }
-
     private void registerSyncs() {
 
         Account account   = new AccountManagerHelper(getApplicationContext()).getAccount();
@@ -419,7 +370,7 @@ public class MainActivity extends AppCompatActivity
             changeColors(oldPerspective);
             setTitle(menuItem.getTitle());
 
-            newFragment = ListFragment.newInstance(perspective);
+            newFragment = ListFragment.newInstance(perspective, null);
             isChangingFragment = true;
             currentFragment = new Fragment();
 
@@ -428,8 +379,6 @@ public class MainActivity extends AppCompatActivity
                                    R.anim.fade_out);
             ft.replace(R.id.fragment_container, currentFragment);
             ft.commit();
-
-            showProgress(true);
 
             getDrawerLayout().closeDrawer(GravityCompat.START);
             return true;
@@ -447,7 +396,7 @@ public class MainActivity extends AppCompatActivity
                 ft.replace(R.id.fragment_container, newFragment);
                 ft.commit();
 
-                showProgress(false);
+                // Note: 'showProgess(false)' is called after the data has loaded in ListFragment
 
                 currentFragment = newFragment;
                 isChangingFragment = false;

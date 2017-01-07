@@ -252,8 +252,7 @@ public class RecursiveColumnUpdater {
 
                 if (folderCounts.containsKey(parentID)) {
                     for (int j = 0; j < childCounts.length; j++) {
-                        folderCounts.get(parentID)[j] =
-                                folderCounts.get(parentID)[j] + childCounts[j];
+                        folderCounts.get(parentID)[j] += childCounts[j];
                     }
                 } else {
                     folderCounts.put(parentID, childCounts);
@@ -368,9 +367,12 @@ public class RecursiveColumnUpdater {
         // when the cascade isn't conditional).
 
         if (flagged.equals("1")) {
+            childValues.put(Tasks.COLUMN_FLAGGED.name, flagged);
             childValues.put(Tasks.COLUMN_FLAGGED_EFFECTIVE.name, flagged);
         }
+        childValues.put(Tasks.COLUMN_DATE_DEFER.name, dateDefer);
         childValues.put(Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name, dateDefer);
+        childValues.put(Tasks.COLUMN_DATE_DUE.name, dateDue);
         childValues.put(Tasks.COLUMN_DATE_DUE_EFFECTIVE.name, dateDue);
         childValues.put(Tasks.COLUMN_PROJECT_ID.name, projectID);
         childValues.put(Tasks.COLUMN_PROJECT_STATUS.name, status);
@@ -702,6 +704,7 @@ public class RecursiveColumnUpdater {
 
         if (!activeEffective) {
             ContentValues childValues = new ContentValues();
+            childValues.put(Contexts.COLUMN_ACTIVE.name, false);
             childValues.put(Contexts.COLUMN_ACTIVE_EFFECTIVE.name, false);
             db.update(Contexts.TABLE_NAME, childValues, Contexts.COLUMN_PARENT_ID.name + "=?",
                       new String[]{id});

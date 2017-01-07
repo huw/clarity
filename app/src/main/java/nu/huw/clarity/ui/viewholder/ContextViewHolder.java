@@ -1,4 +1,4 @@
-package nu.huw.clarity.ui.viewholders;
+package nu.huw.clarity.ui.viewholder;
 
 import android.content.res.Resources;
 import android.graphics.Typeface;
@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
-import nu.huw.clarity.ui.adapters.ListAdapter;
+import nu.huw.clarity.ui.adapter.ListAdapter;
 
 /**
  * A view holder for a context, using R.layout.fragment_context

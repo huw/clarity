@@ -1,4 +1,4 @@
-package nu.huw.clarity.ui.viewholders;
+package nu.huw.clarity.ui.viewholder;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Task;
-import nu.huw.clarity.ui.adapters.ListAdapter;
+import nu.huw.clarity.ui.adapter.ListAdapter;
 
 /**
  * A view holder for a folder, using R.layout.fragment_folder

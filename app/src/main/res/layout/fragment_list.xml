@@ -19,7 +19,7 @@
             android:fadeScrollbars="true"
             android:scrollbars="vertical"
             app:layoutManager="LinearLayoutManager"
-            tools:context=".ui.fragments.ListFragment"
+            tools:context=".ui.fragment.ListFragment"
             tools:listitem="@layout/fragment_task"/>
 
     </android.support.v4.widget.SwipeRefreshLayout>
@@ -61,4 +61,14 @@
             android:textSize="@dimen/subhead_size"/>
 
     </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/list_progress"
+        style="@style/Base.Widget.AppCompat.ProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"/>
+
 </RelativeLayout>

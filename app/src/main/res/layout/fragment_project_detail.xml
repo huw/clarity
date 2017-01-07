@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.fragments.DetailFragment"
+    tools:context=".ui.fragment.DetailFragment"
     >
 
     <include layout="@layout/detail_project_type"/>

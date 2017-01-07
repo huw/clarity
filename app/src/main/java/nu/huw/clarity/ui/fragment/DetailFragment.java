@@ -1,4 +1,4 @@
-package nu.huw.clarity.ui.fragments;
+package nu.huw.clarity.ui.fragment;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
