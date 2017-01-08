@@ -2,10 +2,8 @@ package nu.huw.clarity.db.model;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
@@ -120,31 +118,31 @@ class ContextHelper {
         Context context = new Context();
 
         // Base methods
-        context.id = dbHelper.getString(cursor, Base.COLUMN_ID.name);
-        context.dateAdded = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED.name);
-        context.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
+        context.id = dbHelper.getString(cursor, Base.COLUMN_ID);
+        context.dateAdded = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED);
+        context.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED);
 
         // Entries methods
-        context.active = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE.name);
-        context.activeEffective = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE_EFFECTIVE.name);
-        context.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE.name);
-        context.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN.name);
-        context.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED.name);
-        context.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON.name);
-        context.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE.name);
-        context.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING.name);
-        context.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN.name);
-        context.name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
-        context.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID.name);
-        context.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK.name);
+        context.active = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE);
+        context.activeEffective = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE_EFFECTIVE);
+        context.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE);
+        context.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN);
+        context.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED);
+        context.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON);
+        context.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE);
+        context.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING);
+        context.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN);
+        context.name = dbHelper.getString(cursor, Entries.COLUMN_NAME);
+        context.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID);
+        context.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK);
 
         // Context methods
-        context.altitude = dbHelper.getLong(cursor, Contexts.COLUMN_ALTITUDE.name);
-        context.latitude = dbHelper.getLong(cursor, Contexts.COLUMN_LATITUDE.name);
-        context.locationName = dbHelper.getString(cursor, Contexts.COLUMN_LOCATION_NAME.name);
-        context.longitude = dbHelper.getLong(cursor, Contexts.COLUMN_LONGITUDE.name);
-        context.onHold = dbHelper.getBoolean(cursor, Contexts.COLUMN_ON_HOLD.name);
-        context.radius = dbHelper.getLong(cursor, Contexts.COLUMN_RADIUS.name);
+        context.altitude = dbHelper.getLong(cursor, Contexts.COLUMN_ALTITUDE);
+        context.latitude = dbHelper.getLong(cursor, Contexts.COLUMN_LATITUDE);
+        context.locationName = dbHelper.getString(cursor, Contexts.COLUMN_LOCATION_NAME);
+        context.longitude = dbHelper.getLong(cursor, Contexts.COLUMN_LONGITUDE);
+        context.onHold = dbHelper.getBoolean(cursor, Contexts.COLUMN_ON_HOLD);
+        context.radius = dbHelper.getLong(cursor, Contexts.COLUMN_RADIUS);
 
         return context;
     }

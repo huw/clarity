@@ -5,17 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-
 import com.dd.plist.NSDictionary;
 import com.dd.plist.NSString;
 import com.dd.plist.PropertyListParser;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -23,7 +15,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,7 +29,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
@@ -46,6 +36,11 @@ import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseContract.Perspectives;
 import nu.huw.clarity.db.DatabaseContract.Settings;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * Converts a contents.xml into a usable object
@@ -215,8 +210,8 @@ public class SyncDownParser {
 
                 SQLiteDatabase db = mDBHelper.getReadableDatabase();
 
-                String[] columns = {Base.COLUMN_ID.name};
-                String selection = Base.COLUMN_ID.name + "=?";
+                String[] columns = {Base.COLUMN_ID};
+                String selection = Base.COLUMN_ID + "=?";
                 String[] selectionArgs = {id};
 
                 Cursor cursor =
@@ -273,7 +268,7 @@ public class SyncDownParser {
              */
             case "context":
                 if (table.equals(Tasks.TABLE_NAME)) {
-                    name = Tasks.COLUMN_CONTEXT.name;
+                    name = Tasks.COLUMN_CONTEXT;
                     Node attr = attributes.getNamedItem("idref");
                     if (attr != null) {
                         value = attr.getTextContent();
@@ -284,7 +279,7 @@ public class SyncDownParser {
 
             case "folder":
             case "task":
-                name = DatabaseContract.Entries.COLUMN_PARENT_ID.name;
+                name = DatabaseContract.Entries.COLUMN_PARENT_ID;
                 Node attr = attributes.getNamedItem("idref");
                 if (attr != null) {
                     value = attr.getTextContent();
@@ -295,12 +290,12 @@ public class SyncDownParser {
              * Base
              */
             case "added":
-                name = Base.COLUMN_DATE_ADDED.name;
+                name = Base.COLUMN_DATE_ADDED;
                 value = convertToMilliseconds(value);
                 break;
 
             case "modified":
-                name = Base.COLUMN_DATE_MODIFIED.name;
+                name = Base.COLUMN_DATE_MODIFIED;
                 value = convertToMilliseconds(value);
                 break;
 
@@ -308,15 +303,15 @@ public class SyncDownParser {
              * Entry
              */
             case "name":
-                name = DatabaseContract.Entries.COLUMN_NAME.name;
+                name = DatabaseContract.Entries.COLUMN_NAME;
                 break;
 
             case "rank":
-                name = DatabaseContract.Entries.COLUMN_RANK.name;
+                name = DatabaseContract.Entries.COLUMN_RANK;
                 break;
 
             case "hidden":
-                name = DatabaseContract.Entries.COLUMN_ACTIVE.name;
+                name = DatabaseContract.Entries.COLUMN_ACTIVE;
                 value = value.equals("true") ? "0" : "1"; // Invert and convert
                 break;
 
@@ -324,7 +319,7 @@ public class SyncDownParser {
              * Attachment
              */
             case "preview-image":
-                name = Attachments.COLUMN_PNG_PREVIEW.name;
+                name = Attachments.COLUMN_PNG_PREVIEW;
                 break;
 
             /*
@@ -360,15 +355,15 @@ public class SyncDownParser {
                     radius = radiusAttr.getTextContent();
                 }
 
-                values.put(Contexts.COLUMN_LOCATION_NAME.name, locationName);
-                values.put(Contexts.COLUMN_ALTITUDE.name, altitude);
-                values.put(Contexts.COLUMN_LATITUDE.name, latitude);
-                values.put(Contexts.COLUMN_LONGITUDE.name, longitude);
-                values.put(Contexts.COLUMN_RADIUS.name, radius);
+                values.put(Contexts.COLUMN_LOCATION_NAME, locationName);
+                values.put(Contexts.COLUMN_ALTITUDE, altitude);
+                values.put(Contexts.COLUMN_LATITUDE, latitude);
+                values.put(Contexts.COLUMN_LONGITUDE, longitude);
+                values.put(Contexts.COLUMN_RADIUS, radius);
                 break;
 
             case "prohibits-next-action":
-                name = Contexts.COLUMN_ON_HOLD.name;
+                name = Contexts.COLUMN_ON_HOLD;
                 value = value.equals("true") ? "1" : "0";
                 break;
 
@@ -381,7 +376,7 @@ public class SyncDownParser {
 
                     // Parse as perspective
 
-                    name = Perspectives.COLUMN_VALUE.name;
+                    name = Perspectives.COLUMN_VALUE;
 
                     try {
                         byte[] tagBytes = stringOf(node).getBytes();
@@ -409,24 +404,24 @@ public class SyncDownParser {
 
                         if (filterDurationData != null) {
                             String filterDuration = filterDurationData.getContent();
-                            values.put(Perspectives.COLUMN_FILTER_DURATION.name, filterDuration);
+                            values.put(Perspectives.COLUMN_FILTER_DURATION, filterDuration);
                         }
 
                         if (filterFlaggedData != null) {
                             String filterFlagged = filterFlaggedData.getContent();
-                            values.put(Perspectives.COLUMN_FILTER_FLAGGED.name, filterFlagged);
+                            values.put(Perspectives.COLUMN_FILTER_FLAGGED, filterFlagged);
                         }
 
                         if (filterStatusData != null) {
                             String filterStatus = filterStatusData.getContent();
-                            values.put(Perspectives.COLUMN_FILTER_STATUS.name, filterStatus);
+                            values.put(Perspectives.COLUMN_FILTER_STATUS, filterStatus);
                         }
 
-                        values.put(Perspectives.COLUMN_NAME.name, perspectiveName);
-                        values.put(Perspectives.COLUMN_ICON.name, icon);
-                        values.put(Perspectives.COLUMN_VIEW_MODE.name, viewMode);
-                        values.put(Perspectives.COLUMN_GROUP.name, group);
-                        values.put(Perspectives.COLUMN_SORT.name, sort);
+                        values.put(Perspectives.COLUMN_NAME, perspectiveName);
+                        values.put(Perspectives.COLUMN_ICON, icon);
+                        values.put(Perspectives.COLUMN_VIEW_MODE, viewMode);
+                        values.put(Perspectives.COLUMN_GROUP, group);
+                        values.put(Perspectives.COLUMN_SORT, sort);
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to parse perspective", e);
                     }
@@ -434,7 +429,7 @@ public class SyncDownParser {
 
                     // Parse as setting
 
-                    name = Settings.COLUMN_VALUE.name;
+                    name = Settings.COLUMN_VALUE;
                 }
                 break;
 
@@ -449,42 +444,42 @@ public class SyncDownParser {
                 // As the "singleton" tag will always come first, we can test to see if
                 // we've already added the 'type' column, and only proceed if we haven't.
 
-                if (!values.containsKey(Tasks.COLUMN_TYPE.name)) {
-                    name = Tasks.COLUMN_TYPE.name;
+                if (!values.containsKey(Tasks.COLUMN_TYPE)) {
+                    name = Tasks.COLUMN_TYPE;
                 }
                 break;
 
             case "completed-by-children":
-                name = Tasks.COLUMN_COMPLETE_WITH_CHILDREN.name;
+                name = Tasks.COLUMN_COMPLETE_WITH_CHILDREN;
                 value = value.equals("true") ? "1" : "0";
                 break;
 
             case "start":
-                name = Tasks.COLUMN_DATE_DEFER.name;
+                name = Tasks.COLUMN_DATE_DEFER;
                 value = convertToMilliseconds(value);
                 break;
 
             case "due":
-                name = Tasks.COLUMN_DATE_DUE.name;
+                name = Tasks.COLUMN_DATE_DUE;
                 value = convertToMilliseconds(value);
                 break;
 
             case "completed":
-                name = Tasks.COLUMN_DATE_COMPLETED.name;
+                name = Tasks.COLUMN_DATE_COMPLETED;
                 value = convertToMilliseconds(value);
                 break;
 
             case "estimated-minutes":
-                name = Tasks.COLUMN_ESTIMATED_TIME.name;
+                name = Tasks.COLUMN_ESTIMATED_TIME;
                 break;
 
             case "flagged":
-                name = Tasks.COLUMN_FLAGGED.name;
+                name = Tasks.COLUMN_FLAGGED;
                 value = value.equals("true") ? "1" : "0";
                 break;
 
             case "inbox":
-                name = Tasks.COLUMN_INBOX.name;
+                name = Tasks.COLUMN_INBOX;
                 value = value.equals("false") ? "0" : "1";
                 break;
 
@@ -493,11 +488,11 @@ public class SyncDownParser {
                 break;
 
             case "repetition-rule":
-                name = Tasks.COLUMN_REPETITION_RULE.name;
+                name = Tasks.COLUMN_REPETITION_RULE;
                 break;
 
             case "repetition-method":
-                name = Tasks.COLUMN_REPETITION_METHOD.name;
+                name = Tasks.COLUMN_REPETITION_METHOD;
                 break;
 
             /*
@@ -505,7 +500,7 @@ public class SyncDownParser {
              */
             case "project":
                 if (node.hasChildNodes()) {
-                    name = Tasks.COLUMN_PROJECT.name;
+                    name = Tasks.COLUMN_PROJECT;
                     value = "1";
                 }
 
@@ -524,27 +519,27 @@ public class SyncDownParser {
 
             case "singleton":
                 if (value.equals("true")) {
-                    name = Tasks.COLUMN_TYPE.name;
+                    name = Tasks.COLUMN_TYPE;
                     value = "single action";
                 }
                 break;
 
             case "last-review":
-                name = Tasks.COLUMN_PROJECT_LAST_REVIEW.name;
+                name = Tasks.COLUMN_PROJECT_LAST_REVIEW;
                 value = convertToMilliseconds(value);
                 break;
 
             case "next-review":
-                name = Tasks.COLUMN_PROJECT_NEXT_REVIEW.name;
+                name = Tasks.COLUMN_PROJECT_NEXT_REVIEW;
                 value = convertToMilliseconds(value);
                 break;
 
             case "review-interval":
-                name = Tasks.COLUMN_PROJECT_REPEAT_REVIEW.name;
+                name = Tasks.COLUMN_PROJECT_REPEAT_REVIEW;
                 break;
 
             case "status":
-                name = Tasks.COLUMN_PROJECT_STATUS.name;
+                name = Tasks.COLUMN_PROJECT_STATUS;
                 break;
         }
 

@@ -2,10 +2,8 @@ package nu.huw.clarity.db.model;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Entries;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
@@ -149,52 +147,52 @@ class TaskHelper {
         Task task = new Task();
 
         // Base methods
-        task.id = dbHelper.getString(cursor, Base.COLUMN_ID.name);
-        task.dateAdded = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED.name);
-        task.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
+        task.id = dbHelper.getString(cursor, Base.COLUMN_ID);
+        task.dateAdded = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED);
+        task.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED);
 
         // Entries methods
-        task.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE.name);
-        task.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN.name);
-        task.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED.name);
-        task.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON.name);
-        task.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE.name);
-        task.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING.name);
-        task.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN.name);
-        task.name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
-        task.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID.name);
-        task.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK.name);
+        task.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE);
+        task.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN);
+        task.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED);
+        task.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON);
+        task.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE);
+        task.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING);
+        task.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN);
+        task.name = dbHelper.getString(cursor, Entries.COLUMN_NAME);
+        task.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID);
+        task.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK);
 
         // Task methods
-        task.blocked = dbHelper.getBoolean(cursor, Tasks.COLUMN_BLOCKED.name);
-        task.blockedByDefer = dbHelper.getBoolean(cursor, Tasks.COLUMN_BLOCKED_BY_DEFER.name);
+        task.blocked = dbHelper.getBoolean(cursor, Tasks.COLUMN_BLOCKED);
+        task.blockedByDefer = dbHelper.getBoolean(cursor, Tasks.COLUMN_BLOCKED_BY_DEFER);
         task.completeWithChildren =
-                dbHelper.getBoolean(cursor, Tasks.COLUMN_COMPLETE_WITH_CHILDREN.name);
-        task.contextID = dbHelper.getString(cursor, Tasks.COLUMN_CONTEXT.name);
-        task.dateCompleted = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_COMPLETED.name);
-        task.dateDefer = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DEFER.name);
-        task.dateDeferEffective = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DEFER_EFFECTIVE.name);
-        task.dateDue = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DUE.name);
-        task.dateDueEffective = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DUE_EFFECTIVE.name);
-        task.dueSoon = dbHelper.getBoolean(cursor, Tasks.COLUMN_DUE_SOON.name);
-        task.dropped = dbHelper.getBoolean(cursor, Tasks.COLUMN_DROPPED.name);
-        task.estimatedTime = dbHelper.getInt(cursor, Tasks.COLUMN_ESTIMATED_TIME.name);
-        task.flagged = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED.name);
-        task.flaggedEffective = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED_EFFECTIVE.name);
-        task.inInbox = dbHelper.getBoolean(cursor, Tasks.COLUMN_INBOX.name);
-        task.isProject = dbHelper.getBoolean(cursor, Tasks.COLUMN_PROJECT.name);
-        task.next = dbHelper.getString(cursor, Tasks.COLUMN_NEXT.name);
-        task.notePlaintext = dbHelper.getString(cursor, Tasks.COLUMN_NOTE_PLAINTEXT.name);
-        task.noteXML = dbHelper.getString(cursor, Tasks.COLUMN_NOTE_XML.name);
-        task.overdue = dbHelper.getBoolean(cursor, Tasks.COLUMN_OVERDUE.name);
-        task.projectID = dbHelper.getString(cursor, Tasks.COLUMN_PROJECT_ID.name);
-        task.lastReview = dbHelper.getDate(cursor, Tasks.COLUMN_PROJECT_LAST_REVIEW.name);
-        task.nextReview = dbHelper.getDate(cursor, Tasks.COLUMN_PROJECT_NEXT_REVIEW.name);
-        task.reviewInterval = dbHelper.getDate(cursor, Tasks.COLUMN_PROJECT_REPEAT_REVIEW.name);
-        task.status = dbHelper.getString(cursor, Tasks.COLUMN_PROJECT_STATUS.name);
-        task.repetitionMethod = dbHelper.getString(cursor, Tasks.COLUMN_REPETITION_METHOD.name);
-        task.repetitionRule = dbHelper.getString(cursor, Tasks.COLUMN_REPETITION_RULE.name);
-        task.type = dbHelper.getString(cursor, Tasks.COLUMN_TYPE.name);
+            dbHelper.getBoolean(cursor, Tasks.COLUMN_COMPLETE_WITH_CHILDREN);
+        task.contextID = dbHelper.getString(cursor, Tasks.COLUMN_CONTEXT);
+        task.dateCompleted = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_COMPLETED);
+        task.dateDefer = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DEFER);
+        task.dateDeferEffective = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DEFER_EFFECTIVE);
+        task.dateDue = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DUE);
+        task.dateDueEffective = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DUE_EFFECTIVE);
+        task.dueSoon = dbHelper.getBoolean(cursor, Tasks.COLUMN_DUE_SOON);
+        task.dropped = dbHelper.getBoolean(cursor, Tasks.COLUMN_DROPPED);
+        task.estimatedTime = dbHelper.getInt(cursor, Tasks.COLUMN_ESTIMATED_TIME);
+        task.flagged = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED);
+        task.flaggedEffective = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED_EFFECTIVE);
+        task.inInbox = dbHelper.getBoolean(cursor, Tasks.COLUMN_INBOX);
+        task.isProject = dbHelper.getBoolean(cursor, Tasks.COLUMN_PROJECT);
+        task.next = dbHelper.getString(cursor, Tasks.COLUMN_NEXT);
+        task.notePlaintext = dbHelper.getString(cursor, Tasks.COLUMN_NOTE_PLAINTEXT);
+        task.noteXML = dbHelper.getString(cursor, Tasks.COLUMN_NOTE_XML);
+        task.overdue = dbHelper.getBoolean(cursor, Tasks.COLUMN_OVERDUE);
+        task.projectID = dbHelper.getString(cursor, Tasks.COLUMN_PROJECT_ID);
+        task.lastReview = dbHelper.getDate(cursor, Tasks.COLUMN_PROJECT_LAST_REVIEW);
+        task.nextReview = dbHelper.getDate(cursor, Tasks.COLUMN_PROJECT_NEXT_REVIEW);
+        task.reviewInterval = dbHelper.getDate(cursor, Tasks.COLUMN_PROJECT_REPEAT_REVIEW);
+        task.status = dbHelper.getString(cursor, Tasks.COLUMN_PROJECT_STATUS);
+        task.repetitionMethod = dbHelper.getString(cursor, Tasks.COLUMN_REPETITION_METHOD);
+        task.repetitionRule = dbHelper.getString(cursor, Tasks.COLUMN_REPETITION_RULE);
+        task.type = dbHelper.getString(cursor, Tasks.COLUMN_TYPE);
 
         return task;
     }

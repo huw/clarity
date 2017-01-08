@@ -2,10 +2,8 @@ package nu.huw.clarity.db.model;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Entries;
 import nu.huw.clarity.db.DatabaseContract.Folders;
@@ -90,23 +88,23 @@ class FolderHelper {
         Folder folder = new Folder();
 
         // Base methods
-        folder.id = dbHelper.getString(cursor, Base.COLUMN_ID.name);
-        folder.dateAdded = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED.name);
-        folder.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
+        folder.id = dbHelper.getString(cursor, Base.COLUMN_ID);
+        folder.dateAdded = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED);
+        folder.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED);
 
         // Entries methods
-        folder.active = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE.name);
-        folder.activeEffective = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE_EFFECTIVE.name);
-        folder.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE.name);
-        folder.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN.name);
-        folder.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED.name);
-        folder.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON.name);
-        folder.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE.name);
-        folder.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING.name);
-        folder.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN.name);
-        folder.name = dbHelper.getString(cursor, Entries.COLUMN_NAME.name);
-        folder.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID.name);
-        folder.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK.name);
+        folder.active = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE);
+        folder.activeEffective = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE_EFFECTIVE);
+        folder.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE);
+        folder.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN);
+        folder.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED);
+        folder.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON);
+        folder.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE);
+        folder.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING);
+        folder.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN);
+        folder.name = dbHelper.getString(cursor, Entries.COLUMN_NAME);
+        folder.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID);
+        folder.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK);
 
         return folder;
     }

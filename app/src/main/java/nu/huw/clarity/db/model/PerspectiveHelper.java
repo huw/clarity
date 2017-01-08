@@ -2,11 +2,9 @@ package nu.huw.clarity.db.model;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Perspectives;
@@ -95,24 +93,24 @@ class PerspectiveHelper {
         Perspective perspective = new Perspective();
 
         // Base methods
-        perspective.id = dbHelper.getString(cursor, Base.COLUMN_ID.name);
-        perspective.dateAdded = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED.name);
-        perspective.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED.name);
+        perspective.id = dbHelper.getString(cursor, Base.COLUMN_ID);
+        perspective.dateAdded = dbHelper.getDate(cursor, Base.COLUMN_DATE_ADDED);
+        perspective.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED);
 
         // Perspectives methods
         perspective.filterDuration =
-                dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_DURATION.name);
+            dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_DURATION);
         perspective.filterFlagged =
-                dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_FLAGGED.name);
+            dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_FLAGGED);
         perspective.filterStatus =
-                dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_STATUS.name);
-        perspective.group = dbHelper.getString(cursor, Perspectives.COLUMN_GROUP.name);
-        perspective.name = dbHelper.getString(cursor, Perspectives.COLUMN_NAME.name);
-        perspective.sort = dbHelper.getString(cursor, Perspectives.COLUMN_SORT.name);
-        perspective.value = dbHelper.getString(cursor, Perspectives.COLUMN_VALUE.name);
-        perspective.viewMode = dbHelper.getString(cursor, Perspectives.COLUMN_VIEW_MODE.name);
+            dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_STATUS);
+        perspective.group = dbHelper.getString(cursor, Perspectives.COLUMN_GROUP);
+        perspective.name = dbHelper.getString(cursor, Perspectives.COLUMN_NAME);
+        perspective.sort = dbHelper.getString(cursor, Perspectives.COLUMN_SORT);
+        perspective.value = dbHelper.getString(cursor, Perspectives.COLUMN_VALUE);
+        perspective.viewMode = dbHelper.getString(cursor, Perspectives.COLUMN_VIEW_MODE);
 
-        String iconName = dbHelper.getString(cursor, Perspectives.COLUMN_ICON.name);
+        String iconName = dbHelper.getString(cursor, Perspectives.COLUMN_ICON);
 
         switch (iconName) {
             case "ProcessFlagged":

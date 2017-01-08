@@ -2,7 +2,6 @@ package nu.huw.clarity.db.model;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Attachment;
@@ -47,14 +46,14 @@ class AttachmentHelper {
 
         Attachment attachment = new Attachment();
 
-        attachment.id = dbHelper.getString(cursor, Attachments.COLUMN_ID.name);
-        attachment.name = dbHelper.getString(cursor, Attachments.COLUMN_NAME.name);
-        attachment.parentID = dbHelper.getString(cursor, Attachments.COLUMN_PARENT_ID.name);
-        attachment.path = dbHelper.getString(cursor, Attachments.COLUMN_PATH.name);
-        // attachment.preview = dbHelper.getString(cursor, Attachments.COLUMN_PNG_PREVIEW.name);
+        attachment.id = dbHelper.getString(cursor, Attachments.COLUMN_ID);
+        attachment.name = dbHelper.getString(cursor, Attachments.COLUMN_NAME);
+        attachment.parentID = dbHelper.getString(cursor, Attachments.COLUMN_PARENT_ID);
+        attachment.path = dbHelper.getString(cursor, Attachments.COLUMN_PATH);
+        // attachment.preview = dbHelper.getString(cursor, Attachments.COLUMN_PNG_PREVIEW);
         // TODO
-        attachment.dateAdded = dbHelper.getDate(cursor, Attachments.COLUMN_DATE_ADDED.name);
-        attachment.dateModified = dbHelper.getDate(cursor, Attachments.COLUMN_DATE_MODIFIED.name);
+        attachment.dateAdded = dbHelper.getDate(cursor, Attachments.COLUMN_DATE_ADDED);
+        attachment.dateModified = dbHelper.getDate(cursor, Attachments.COLUMN_DATE_MODIFIED);
 
         return attachment;
     }
