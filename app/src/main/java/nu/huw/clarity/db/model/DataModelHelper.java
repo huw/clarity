@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Comparators;
 import nu.huw.clarity.model.Context;
@@ -252,7 +251,7 @@ public class DataModelHelper {
 
                 // 'due' means available, which means no blocked/deferred/on hold items as well
                 if (task.dateCompleted != null || task.dropped || task.blocked ||
-                    task.blockedByDefer || !task.active || !task.activeEffective) {
+                    task.blockedByDefer) {
                     return false;
                 }
                 break;

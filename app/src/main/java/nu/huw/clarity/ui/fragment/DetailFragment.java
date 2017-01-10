@@ -11,9 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
 import java.text.DateFormat;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
@@ -108,7 +106,7 @@ public class DetailFragment extends Fragment {
         ((TextView) view.findViewById(R.id.detail_project_type_value)).setText(typeStringID);
 
         // Project status field
-        if (!entry.active || !entry.activeEffective) {
+        if (entry.dropped) {
             ((TextView) view.findViewById(R.id.detail_status_value))
                     .setText(R.string.status_dropped);
         }
@@ -298,7 +296,7 @@ public class DetailFragment extends Fragment {
         View view = inflater.inflate(fragmentID, container, false);
 
         // Status
-        if (!entry.active || !entry.activeEffective) {
+        if (((Context) entry).droppedEffective) {
             ((TextView) view.findViewById(R.id.detail_status_value))
                     .setText(R.string.status_dropped);
         }
@@ -309,12 +307,6 @@ public class DetailFragment extends Fragment {
     private View bindFolderDetails(int fragmentID, LayoutInflater inflater, ViewGroup container) {
 
         View view = inflater.inflate(fragmentID, container, false);
-
-        // Status
-        if (!entry.active || !entry.activeEffective) {
-            ((TextView) view.findViewById(R.id.detail_status_value))
-                    .setText(R.string.status_dropped);
-        }
 
         return view;
     }

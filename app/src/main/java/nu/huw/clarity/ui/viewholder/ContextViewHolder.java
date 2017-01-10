@@ -5,7 +5,6 @@ import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.ui.adapter.ListAdapter;
@@ -74,7 +73,7 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
 
         // If inactive, then fade this out
 
-        if (!context.id.equals("NO_CONTEXT") && (!context.active || !context.activeEffective) &&
+        if (!context.id.equals("NO_CONTEXT") && context.droppedEffective &&
             !context.headerRow) {
 
             nameView.setTextColor(

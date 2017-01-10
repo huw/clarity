@@ -21,8 +21,6 @@ public class Entry extends Base implements Comparable<Entry> {
             return new Entry[size];
         }
     };
-    public boolean active;
-    public boolean activeEffective;
     public int     countAvailable;
     public int     countChildren;
     public int     countCompleted;
@@ -41,8 +39,6 @@ public class Entry extends Base implements Comparable<Entry> {
     protected Entry(Parcel in) {
 
         super(in);
-        active = in.readInt() != 0;
-        activeEffective = in.readInt() != 0;
         countAvailable = in.readInt();
         countChildren = in.readInt();
         countCompleted = in.readInt();
@@ -60,8 +56,6 @@ public class Entry extends Base implements Comparable<Entry> {
     @Override public void writeToParcel(Parcel out, int flags) {
 
         super.writeToParcel(out, flags);
-        out.writeInt(active ? 1 : 0);
-        out.writeInt(activeEffective ? 1 : 0);
         out.writeInt(countAvailable);
         out.writeInt(countChildren);
         out.writeInt(countCompleted);

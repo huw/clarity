@@ -21,7 +21,7 @@ import nu.huw.clarity.db.DatabaseContract.Tasks;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    public static final  int    DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 4;
     public static final  String DATABASE_NAME    = "OmniFocus";
     private static final String TAG              = DatabaseHelper.class.getSimpleName();
 

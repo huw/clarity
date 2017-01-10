@@ -157,8 +157,6 @@ class TaskHelper {
         task.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED);
         task.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON);
         task.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE);
-        task.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING);
-        task.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN);
         task.name = dbHelper.getString(cursor, Entries.COLUMN_NAME);
         task.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID);
         task.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK);

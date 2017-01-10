@@ -310,11 +310,6 @@ public class SyncDownParser {
                 name = DatabaseContract.Entries.COLUMN_RANK;
                 break;
 
-            case "hidden":
-                name = DatabaseContract.Entries.COLUMN_ACTIVE;
-                value = value.equals("true") ? "0" : "1"; // Invert and convert
-                break;
-
             /*
              * Attachment
              */

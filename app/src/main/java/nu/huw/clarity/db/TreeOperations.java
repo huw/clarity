@@ -8,9 +8,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import nu.huw.clarity.BuildConfig;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
+import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
 
 /**
@@ -46,14 +52,39 @@ public class TreeOperations {
   }
 
   /**
-   * Update the 'blocked' column for all tasks with an inactive context
-   * TODO: Active and ActiveEffective?
+   * Update the database columns for an entire subtree, based on its root node's ID. This uses the
+   * other functions we've devised for the purpose.
    *
-   * @param contextID If passed, will only update 'blocked' for that context
+   * @param parentID ID of the root note. If null, the entire tree will be updated.
+   */
+  public void updateSubtree(@Nullable String parentID) {
+
+    Log.v(TAG, "Updating attributes for contexts");
+    updateAttributesForContext(parentID);
+    Log.v(TAG, "Updating attributes for projects/tasks");
+    updateAttributesForSubtree(parentID);
+    Log.v(TAG, "Updating counts for everything");
+    updateCountsFromTop();
+
+  }
+
+  /**
+   * Fill down the 'dropped' attributes on contexts, then update the 'blocked' attribute on all
+   * tasks that reference that context, if the context is on hold (not dropped). For more on the
+   * logic, see {@link #updateAttributesForSubtree(SQLiteDatabase, String, String, String, String,
+   * String, String, String) updateAttributesForSubtree()}.
+   *
+   * @param contextID If passed, will only update for that context
    */
   public void updateAttributesForContext(@Nullable String contextID) {
 
     SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+    // Fill down the 'dropped' attribute first
+
+    updateAttributesForContext(db, contextID, null);
+
+    // Then run a quick update on all their tasks
 
     if (contextID == null) {
       db.execSQL("UPDATE " + Tasks.TABLE_NAME + " SET " + Tasks.COLUMN_BLOCKED + "='1' WHERE "
@@ -67,6 +98,45 @@ public class TreeOperations {
     }
 
     db.close();
+  }
+
+  /**
+   * All logic for this subroutine is in {@link #updateAttributesForSubtree(SQLiteDatabase, String,
+   * String, String, String, String, String, String) updateAttributesForSubtree()}, refer to that
+   * method first. This essentially fills down the 'dropped' attribute recursively.
+   */
+  private void updateAttributesForContext(@NonNull SQLiteDatabase db, @Nullable String contextID,
+      @Nullable String parentDropped) {
+
+    String[] columns = new String[]{Contexts.COLUMN_ID, Contexts.COLUMN_DROPPED};
+
+    Cursor results;
+    if (contextID == null) {
+      results = db
+          .query(Contexts.TABLE_NAME, columns, Contexts.COLUMN_PARENT_ID + " IS NULL", null, null,
+              null, null);
+    } else {
+      results = db.query(Contexts.TABLE_NAME, columns, Contexts.COLUMN_PARENT_ID + "=?",
+          new String[]{contextID}, null, null, null);
+    }
+
+    while (results.moveToNext()) {
+
+      String childID = results.getString(0);
+      String childDropped = results.getString(1);
+      ContentValues childValues = new ContentValues();
+
+      if (childDropped.equals("0")) {
+        childDropped = parentDropped;
+      }
+
+      childValues.put(Contexts.COLUMN_DROPPED_EFFECTIVE, childDropped);
+      db.update(Contexts.TABLE_NAME, childValues, Contexts.COLUMN_ID + "=?", new String[]{childID});
+
+      updateAttributesForContext(db, childID, childDropped);
+    }
+
+    results.close();
   }
 
   /**
@@ -171,22 +241,22 @@ public class TreeOperations {
         childDateDue = parentDateDue;
       }
 
-      if (childFlagged == null) {
+      if (childFlagged.equals("0")) {
         childFlagged = parentFlagged;
       }
 
-      if (childType == null) {
-        childType = parentType;
-      }
-
-      // blocked
+      // blocked/dropped
       // Note that some of this is handled by the context updater function above,
       // and more of it is handled by the 'next task' subroutine below
 
-      if (projectStatus != null &&
-          (projectStatus.equals("inactive") || projectStatus.equals("dropped"))) {
+      if (projectStatus != null && projectStatus.equals("inactive")) {
         childValues.put(Tasks.COLUMN_BLOCKED, true);
         childBlocked = true;
+      }
+
+      if (projectStatus != null && projectStatus.equals("dropped")) {
+        childValues.put(Tasks.COLUMN_DROPPED, true);
+        childBlocked = true; // doesn't matter if we use this, not passed on
       }
 
       // blockedByDefer is handled by a separate function:
@@ -207,7 +277,6 @@ public class TreeOperations {
       childValues.put(Tasks.COLUMN_DATE_DEFER_EFFECTIVE, childDateDefer);
       childValues.put(Tasks.COLUMN_DATE_DUE_EFFECTIVE, childDateDue);
       childValues.put(Tasks.COLUMN_FLAGGED_EFFECTIVE, childFlagged);
-      childValues.put(Tasks.COLUMN_TYPE, childType);
       childValues.put(Tasks.COLUMN_PROJECT_ID, projectID);
       childValues.put(Tasks.COLUMN_PROJECT_STATUS, projectStatus);
 
@@ -260,6 +329,358 @@ public class TreeOperations {
     }
 
     // Don't close the database here because recursion, instead close it in the parent function
+  }
+
+  /**
+   * Recursively update the counts of children for everything (Projects, Folders, Contexts, Nested
+   * Tasks) using a bunch of crazy SQL magic.
+   *
+   * But seriously, this does the following: - Simple SQL queries to get the children of each
+   * project - Semi-recursive SQL queries to get the children of each context - Semi-recursive SQL
+   * queries to get the children of each folder - Recursive SQL queries to get the children of each
+   * nested task (P.S.: Not in that order.)
+   *
+   * This is an effort, and it sucks because we don't have access to useful SQLite statements since
+   * we have to support API 19. But in the end, it works somehow. I'm not bothered to figure it out,
+   * just know that it does a good job. I am just re-using old code so forgive how hacky it is.
+   */
+  public void updateCountsFromTop() {
+
+    SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+    // PROJECTS
+
+    String[] projectColumns = new String[]{Tasks.COLUMN_ID, Tasks.COLUMN_PARENT_ID};
+    Cursor projects = dbHelper
+        .query(db, Tasks.TABLE_NAME, projectColumns, Tasks.COLUMN_PROJECT + "='1'");
+
+    HashMap<String, Long[]> folderCounts = new HashMap<>();
+
+    while (projects.moveToNext()) {
+
+      String id = projects.getString(0);
+      updateProjectCounts(db, id);
+
+      long countChildren = DatabaseUtils
+          .queryNumEntries(db, Tasks.TABLE_NAME, Tasks.COLUMN_PROJECT_ID + "=?",
+              new String[]{id});
+      long countAvailable = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+          Tasks.COLUMN_PROJECT_ID + "=? AND " + Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND "
+              + Tasks.COLUMN_BLOCKED + "=0 AND " + Tasks.COLUMN_BLOCKED_BY_DEFER + "=0 AND "
+              + Tasks.COLUMN_DROPPED + "=0",
+          new String[]{id});
+      long countCompleted = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+          Tasks.COLUMN_PROJECT_ID + "=? AND (" + Tasks.COLUMN_DATE_COMPLETED + " IS NOT NULL OR "
+              + Tasks.COLUMN_DROPPED + "=1)",
+          new String[]{id});
+      long countDueSoon = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+          Tasks.COLUMN_PROJECT_ID + "=? AND " + Tasks.COLUMN_DUE_SOON + "=1",
+          new String[]{id});
+      long countOverdue = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+          Tasks.COLUMN_PROJECT_ID + "=? AND " + Tasks.COLUMN_OVERDUE + "=1",
+          new String[]{id});
+
+      ContentValues values = new ContentValues();
+
+      // There's no point wasting resources on a call which is going to zero out columns
+      // which are already set to zero. This is much more efficient if we only update the
+      // columns which have counts.
+
+      if (countChildren > 0) {
+        values.put(Tasks.COLUMN_COUNT_CHILDREN, countChildren);
+      }
+      if (countAvailable > 0) {
+        values.put(Tasks.COLUMN_COUNT_AVAILABLE, countAvailable);
+      }
+      if (countCompleted > 0) {
+        values.put(Tasks.COLUMN_COUNT_COMPLETED, countCompleted);
+      }
+      if (countDueSoon > 0) {
+        values.put(Tasks.COLUMN_COUNT_DUE_SOON, countDueSoon);
+      }
+      if (countOverdue > 0) {
+        values.put(Tasks.COLUMN_COUNT_OVERDUE, countOverdue);
+      }
+
+      // And if none of them have counts (an empty project, for some reason), don't update
+      // anything.
+
+      if (values.size() > 0) {
+        db.update(Tasks.TABLE_NAME, values, Tasks.COLUMN_ID + "=?", new String[]{id});
+      }
+
+      String parentID = projects.getString(1);
+      if (parentID != null) {
+
+        Long[] childCounts = {countChildren, countAvailable, countCompleted, countDueSoon,
+            countOverdue};
+
+        if (folderCounts.containsKey(parentID)) {
+          for (int j = 0; j < childCounts.length; j++) {
+            folderCounts.get(parentID)[j] += childCounts[j];
+          }
+        } else {
+          folderCounts.put(parentID, childCounts);
+        }
+      }
+    }
+
+    projects.close();
+
+    // FOLDERS
+    // We need a LinkedList because we're adding and removing objects. This is really hacky
+    // because I did it at like half past midnight and I really wanted to sleep. So I kinda
+    // understand how it works, but at the same time, I don't. It _is_ pretty fast though,
+    // somehow.
+
+    List<Object> array = new LinkedList<>(Arrays.asList(folderCounts.keySet().toArray()));
+    while (!array.isEmpty()) {
+      String id = (String) array.get(0);
+
+      // This bit just gets the ID of the folder's parent
+      Cursor cursor = dbHelper.query(db, Folders.TABLE_NAME, new String[]{Folders.COLUMN_PARENT_ID},
+          Folders.COLUMN_ID + " = ?", new String[]{id});
+      if (cursor != null && cursor.moveToFirst()) {
+        String parentID = dbHelper.getString(cursor, Folders.COLUMN_PARENT_ID);
+
+        Long[] childCounts = folderCounts.get(id);
+
+        // Add up the child counts for the folder
+
+        if (folderCounts.containsKey(parentID)) {
+          for (int j = 0; j < childCounts.length; j++) {
+            folderCounts.get(parentID)[j] += childCounts[j];
+          }
+        } else {
+
+          // If this folder isn't in our HashMap yet, add it. But also add an extra
+          // iteration to this loop.
+
+          if (parentID != null) {
+            folderCounts.put(parentID, childCounts);
+            array.add(parentID);
+          }
+        }
+      }
+
+      if (cursor != null) {
+        cursor.close();
+      }
+
+      // Could probably be better handled than this, but it works.
+      array.remove(0);
+    }
+
+    // Simply add each Folder's new counts to the database.
+
+    for (String id : folderCounts.keySet()) {
+      Long[] childCounts = folderCounts.get(id);
+      ContentValues values = new ContentValues();
+
+      values.put(Tasks.COLUMN_COUNT_CHILDREN, childCounts[0]);
+      values.put(Tasks.COLUMN_COUNT_AVAILABLE, childCounts[1]);
+      values.put(Tasks.COLUMN_COUNT_COMPLETED, childCounts[2]);
+      values.put(Tasks.COLUMN_COUNT_DUE_SOON, childCounts[3]);
+      values.put(Tasks.COLUMN_COUNT_OVERDUE, childCounts[4]);
+
+      db.update(Folders.TABLE_NAME, values, Folders.COLUMN_ID + " = ?", new String[]{id});
+    }
+
+    // CONTEXTS
+    // See the function below (which is conveniently recursive)
+
+    updateContextCounts(db, null);
+
+    db.close();
+  }
+
+  /**
+   * Recursive helper task used by {@link #updateCountsFromTop()}. Based on {@link
+   * #updateProjectCounts(SQLiteDatabase, String)}
+   */
+  private void updateContextCounts(@NonNull SQLiteDatabase db, @Nullable String id) {
+
+    String[] columns = new String[]{Tasks.COLUMN_ID, Tasks.COLUMN_COUNT_AVAILABLE,
+        Tasks.COLUMN_COUNT_CHILDREN, Tasks.COLUMN_COUNT_COMPLETED, Tasks.COLUMN_COUNT_DUE_SOON,
+        Tasks.COLUMN_COUNT_OVERDUE};
+
+    Cursor children;
+    if (id == null) {
+      children = db
+          .query(Contexts.TABLE_NAME, columns, Contexts.COLUMN_PARENT_ID + " IS NULL", null, null,
+              null, null);
+    } else {
+      children = dbHelper.query(db, Contexts.TABLE_NAME, columns, Contexts.COLUMN_PARENT_ID + "=?",
+          new String[]{id});
+    }
+
+    int countChildren, countCompleted, countDueSoon, countOverdue, countAvailable;
+    countChildren = countCompleted = countDueSoon = countOverdue = countAvailable = 0;
+
+    ContentValues values = new ContentValues();
+
+    while (children.moveToNext()) {
+
+      String childID = children.getString(0);
+      updateContextCounts(db, childID);
+
+      // Add counts for children
+
+      countChildren += children.getLong(2);
+      countAvailable += children.getLong(1);
+      countCompleted += children.getLong(3);
+      countDueSoon += children.getLong(4);
+      countOverdue += children.getLong(5);
+
+      // Add count for this context's tasks
+
+      countChildren += DatabaseUtils
+          .queryNumEntries(db, Tasks.TABLE_NAME, Tasks.COLUMN_CONTEXT + "=?",
+              new String[]{childID});
+      countAvailable += DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+          Tasks.COLUMN_CONTEXT + "=? AND " + Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND "
+              + Tasks.COLUMN_BLOCKED + "=0 AND " + Tasks.COLUMN_BLOCKED_BY_DEFER + "=0 AND "
+              + Tasks.COLUMN_DROPPED + "=0",
+          new String[]{childID});
+      countCompleted += DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+          Tasks.COLUMN_CONTEXT + "=? AND (" + Tasks.COLUMN_DATE_COMPLETED + " IS NOT NULL OR "
+              + Tasks.COLUMN_DROPPED + "=1)",
+          new String[]{childID});
+      countDueSoon += DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+          Tasks.COLUMN_CONTEXT + "=? AND " + Tasks.COLUMN_DUE_SOON + "=1",
+          new String[]{childID});
+      countOverdue += DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+          Tasks.COLUMN_CONTEXT + "=? AND " + Tasks.COLUMN_OVERDUE + "=1",
+          new String[]{childID});
+    }
+
+    children.close();
+
+    // Child counts
+    if (countChildren > 0) {
+      values.put(Contexts.COLUMN_COUNT_CHILDREN, countChildren);
+    }
+    if (countAvailable > 0) {
+      values.put(Contexts.COLUMN_COUNT_AVAILABLE, countAvailable);
+    }
+    if (countCompleted > 0) {
+      values.put(Contexts.COLUMN_COUNT_COMPLETED, countCompleted);
+    }
+    if (countDueSoon > 0) {
+      values.put(Contexts.COLUMN_COUNT_DUE_SOON, countDueSoon);
+    }
+    if (countOverdue > 0) {
+      values.put(Contexts.COLUMN_COUNT_OVERDUE, countOverdue);
+    }
+
+    // Update
+    if (values.size() > 0) {
+      db.update(Contexts.TABLE_NAME, values, Contexts.COLUMN_ID + "=?", new String[]{id});
+    }
+  }
+
+  /**
+   * Recursive helper task used by {@link #updateCountsFromTop()}. Also old, also hacky. Please
+   * forgive.
+   */
+  private void updateProjectCounts(@NonNull SQLiteDatabase db, @NonNull String id) {
+
+    String[] columns = new String[]{Tasks.COLUMN_ID, Tasks.COLUMN_BLOCKED,
+        Tasks.COLUMN_BLOCKED_BY_DEFER, Tasks.COLUMN_DATE_COMPLETED, Tasks.COLUMN_DROPPED,
+        Tasks.COLUMN_DUE_SOON, Tasks.COLUMN_OVERDUE, Tasks.COLUMN_COUNT_AVAILABLE,
+        Tasks.COLUMN_COUNT_CHILDREN, Tasks.COLUMN_COUNT_COMPLETED, Tasks.COLUMN_COUNT_DUE_SOON,
+        Tasks.COLUMN_COUNT_OVERDUE};
+
+    Cursor children = dbHelper
+        .query(db, Tasks.TABLE_NAME, columns, Tasks.COLUMN_PARENT_ID + "=?", new String[]{id});
+
+    int countChildren, countCompleted, countDueSoon, countOverdue, countAvailable;
+    countChildren = countCompleted = countDueSoon = countOverdue = countAvailable = 0;
+
+    ContentValues values = new ContentValues();
+
+    while (children.moveToNext()) {
+
+      String childID = children.getString(0);
+
+      // Descend the call stack until we hit the bottom, then build our way back up.
+
+      // Please, if you're reading this from the future, forgive me for the terrible code.
+      // It's lonely and dark in here and I really have no idea what I'm doing or how I'm
+      // supposed to handle this properly. Databases are confusing and weird and I'd rather
+      // build my own sync service that uses some kind of hierarchical JSON but I don't
+      // have much choice.
+
+      updateProjectCounts(db, childID);
+
+      // Initialise variables on the way up to save memory
+
+      boolean childBlocked = children.getInt(1) > 0;
+      boolean childBlockedByDefer = children.getInt(2) > 0;
+      boolean childCompleted = children.getString(3) != null;
+      boolean childDropped = children.getInt(4) > 0;
+      int childDueSoon = children.getInt(5);
+      int childOverdue = children.getInt(6);
+
+      long childCountChildren = children.getLong(8);
+      long childCountAvailable = children.getLong(7);
+      long childCountCompleted = children.getLong(9);
+      long childCountDueSoon = children.getLong(10);
+      long childCountOverdue = children.getLong(11);
+
+      // All of the code past the recursive call will happen on the way back out, or up the
+      // tree. Once each call returns, this code runs on the level above where the code was
+      // just calling to.
+      //
+      // Here, the level above is able to access the counts for children _of each of its
+      // children_. It gets really meta and confusing. Took me like 3-4 hours to work out
+      // (but, to be fair, this was more bug-fixing than algorithms).
+
+      // Add count for self (where applicable)
+
+      countChildren += 1;
+      countDueSoon += childDueSoon;
+      countOverdue += childOverdue;
+
+      if (childCompleted || childDropped) {
+        countCompleted += 1;
+      }
+
+      if (!childCompleted && !childBlocked && !childBlockedByDefer && !childDropped) {
+        countAvailable += 1;
+      }
+
+      // Add counts for children
+      countChildren += childCountChildren;
+      countAvailable += childCountAvailable;
+      countCompleted += childCountCompleted;
+      countDueSoon += childCountDueSoon;
+      countOverdue += childCountOverdue;
+    }
+
+    children.close();
+
+    // Child counts
+    if (countChildren > 0) {
+      values.put(Tasks.COLUMN_COUNT_CHILDREN, countChildren);
+    }
+    if (countAvailable > 0) {
+      values.put(Tasks.COLUMN_COUNT_AVAILABLE, countAvailable);
+    }
+    if (countCompleted > 0) {
+      values.put(Tasks.COLUMN_COUNT_COMPLETED, countCompleted);
+    }
+    if (countDueSoon > 0) {
+      values.put(Tasks.COLUMN_COUNT_DUE_SOON, countDueSoon);
+    }
+    if (countOverdue > 0) {
+      values.put(Tasks.COLUMN_COUNT_OVERDUE, countOverdue);
+    }
+
+    // Update
+    if (values.size() > 0) {
+      db.update(Tasks.TABLE_NAME, values, Tasks.COLUMN_ID + "=?", new String[]{id});
+    }
   }
 
   /**

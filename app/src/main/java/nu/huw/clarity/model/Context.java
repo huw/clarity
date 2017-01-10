@@ -2,7 +2,6 @@ package nu.huw.clarity.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import nu.huw.clarity.db.model.DataModelHelper;
 
 /**
@@ -11,54 +10,64 @@ import nu.huw.clarity.db.model.DataModelHelper;
  */
 public class Context extends Entry {
 
-    public static final Parcelable.Creator<Context> CREATOR = new Parcelable.Creator<Context>() {
-        public Context createFromParcel(Parcel in) {
+  public static final Parcelable.Creator<Context> CREATOR = new Parcelable.Creator<Context>() {
+    public Context createFromParcel(Parcel in) {
 
-            return new Context(in);
-        }
-
-        public Context[] newArray(int size) {
-
-            return new Context[size];
-        }
-    };
-    public double  altitude;
-    public double  latitude;
-    public String  locationName;
-    public double  longitude;
-    public boolean onHold;
-    public double  radius;
-
-    public Context() {}
-
-    protected Context(Parcel in) {
-
-        super(in);
-        altitude = in.readDouble();
-        latitude = in.readDouble();
-        locationName = in.readString();
-        longitude = in.readDouble();
-        onHold = in.readInt() != 0;
-        radius = in.readDouble();
+      return new Context(in);
     }
 
-    @Override public void writeToParcel(Parcel out, int flags) {
+    public Context[] newArray(int size) {
 
-        super.writeToParcel(out, flags);
-        out.writeDouble(altitude);
-        out.writeDouble(latitude);
-        out.writeString(locationName);
-        out.writeDouble(longitude);
-        out.writeInt(onHold ? 1 : 0);
-        out.writeDouble(radius);
+      return new Context[size];
     }
+  };
+  public double altitude;
+  public boolean dropped;
+  public boolean droppedEffective;
+  public double latitude;
+  public String locationName;
+  public double longitude;
+  public boolean onHold;
+  public double radius;
 
-    public @Override Entry getParent(android.content.Context androidContext) {
+  public Context() {
+  }
 
-        if (parent == null) {
-            DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
-            parent = dataModelHelper.getContextFromID(parentID);
-        }
-        return parent;
+  protected Context(Parcel in) {
+
+    super(in);
+    altitude = in.readDouble();
+    dropped = in.readInt() > 0;
+    droppedEffective = in.readInt() > 0;
+    latitude = in.readDouble();
+    locationName = in.readString();
+    longitude = in.readDouble();
+    onHold = in.readInt() > 0;
+    radius = in.readDouble();
+  }
+
+  @Override
+  public void writeToParcel(Parcel out, int flags) {
+
+    super.writeToParcel(out, flags);
+    out.writeDouble(altitude);
+    out.writeInt(dropped ? 1 : 0);
+    out.writeInt(droppedEffective ? 1 : 0);
+    out.writeDouble(latitude);
+    out.writeString(locationName);
+    out.writeDouble(longitude);
+    out.writeInt(onHold ? 1 : 0);
+    out.writeDouble(radius);
+  }
+
+  public
+  @Override
+  Entry getParent(android.content.Context androidContext) {
+
+    if (parent == null) {
+      DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+      parent = dataModelHelper.getContextFromID(parentID);
     }
+    return parent;
+  }
 }

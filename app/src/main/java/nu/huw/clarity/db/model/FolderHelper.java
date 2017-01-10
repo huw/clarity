@@ -93,15 +93,11 @@ class FolderHelper {
         folder.dateModified = dbHelper.getDate(cursor, Base.COLUMN_DATE_MODIFIED);
 
         // Entries methods
-        folder.active = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE);
-        folder.activeEffective = dbHelper.getBoolean(cursor, Entries.COLUMN_ACTIVE_EFFECTIVE);
         folder.countAvailable = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_AVAILABLE);
         folder.countChildren = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_CHILDREN);
         folder.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED);
         folder.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON);
         folder.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE);
-        folder.countRemaining = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_REMAINING);
-        folder.hasChildren = dbHelper.getBoolean(cursor, Entries.COLUMN_HAS_CHILDREN);
         folder.name = dbHelper.getString(cursor, Entries.COLUMN_NAME);
         folder.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID);
         folder.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK);

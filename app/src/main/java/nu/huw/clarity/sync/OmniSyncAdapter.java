@@ -10,21 +10,6 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.jackrabbit.webdav.DavConstants;
-import org.apache.jackrabbit.webdav.DavException;
-import org.apache.jackrabbit.webdav.MultiStatusResponse;
-import org.apache.jackrabbit.webdav.client.methods.DavMethod;
-import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
-import org.apache.jackrabbit.webdav.property.DavProperty;
-import org.apache.jackrabbit.webdav.property.DavPropertyName;
-import org.apache.jackrabbit.webdav.property.DavPropertySet;
-import org.apache.jackrabbit.webdav.version.DeltaVConstants;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,12 +23,24 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.crypto.OmniSyncDecrypter;
-import nu.huw.clarity.db.RecursiveColumnUpdater;
 import nu.huw.clarity.db.SyncDownParser;
+import nu.huw.clarity.db.TreeOperations;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.DavMethod;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.property.DavProperty;
+import org.apache.jackrabbit.webdav.property.DavPropertyName;
+import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.version.DeltaVConstants;
 
 /**
  * Connect to Android's syncing services
@@ -204,7 +201,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
 
             // Now that everything has been added to the database, recursively update the db tree.
 
-            new RecursiveColumnUpdater(getContext()).updateTree();
+            new TreeOperations(getContext()).updateSubtree(null);
 
             Log.i(TAG, "Database tree updated");
         } catch (Exception e) {
