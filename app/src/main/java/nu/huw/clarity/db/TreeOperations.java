@@ -71,8 +71,7 @@ public class TreeOperations {
   /**
    * Fill down the 'dropped' attributes on contexts, then update the 'blocked' attribute on all
    * tasks that reference that context, if the context is on hold (not dropped). For more on the
-   * logic, see {@link #updateAttributesForSubtree(SQLiteDatabase, String, String, String, String,
-   * String, String, String) updateAttributesForSubtree()}.
+   * logic, see {@link #updateAttributesForSubtree(SQLiteDatabase, String, boolean, String, String, String, String, String, String)}  updateAttributesForSubtree()}.
    *
    * @param contextID If passed, will only update for that context
    */
@@ -101,9 +100,7 @@ public class TreeOperations {
   }
 
   /**
-   * All logic for this subroutine is in {@link #updateAttributesForSubtree(SQLiteDatabase, String,
-   * String, String, String, String, String, String) updateAttributesForSubtree()}, refer to that
-   * method first. This essentially fills down the 'dropped' attribute recursively.
+   * All logic for this subroutine is in {@link #updateAttributesForSubtree(SQLiteDatabase, String, boolean, String, String, String, String, String, String)}  updateAttributesForSubtree()}, refer to thatmethod first. This essentially fills down the 'dropped' attribute recursively.
    */
   private void updateAttributesForContext(@NonNull SQLiteDatabase db, @Nullable String contextID,
       @Nullable String parentDropped) {
@@ -156,7 +153,7 @@ public class TreeOperations {
    */
   public void updateAttributesForSubtree(@Nullable String parentID) {
     SQLiteDatabase db = dbHelper.getWritableDatabase();
-    updateAttributesForSubtree(db, parentID, null, null, null, null, null, null);
+    updateAttributesForSubtree(db, parentID, false, null, null, null, null, null, null);
     db.close();
   }
 
@@ -170,10 +167,10 @@ public class TreeOperations {
    * so it looks like we're stuck with this.
    */
   private void updateAttributesForSubtree(@NonNull SQLiteDatabase db,
-      @Nullable final String parentID, @Nullable final String parentDateDefer,
-      @Nullable final String parentDateDue, @Nullable final String parentFlagged,
-      @Nullable final String parentType, @Nullable String projectID,
-      @Nullable String projectStatus) {
+      @Nullable final String parentID, final boolean parentBlocked,
+      @Nullable final String parentDateDefer, @Nullable final String parentDateDue,
+      @Nullable final String parentFlagged, @Nullable final String parentType,
+      @Nullable String projectID, @Nullable String projectStatus) {
 
     // Used to track which task is next for this parent
     // This is done using a standard algorithm to find the minimum rank, with some small
@@ -185,7 +182,7 @@ public class TreeOperations {
     // Iterate through all children of the parent, or all projects if null
 
     String[] columns = new String[]{Tasks.COLUMN_ID, Tasks.COLUMN_BLOCKED,
-        Tasks.COLUMN_BLOCKED_BY_DEFER, Tasks.COLUMN_DATE_COMPLETED, Tasks.COLUMN_DATE_DEFER,
+        Tasks.COLUMN_DEFERRED, Tasks.COLUMN_DATE_COMPLETED, Tasks.COLUMN_DATE_DEFER,
         Tasks.COLUMN_DATE_DUE, Tasks.COLUMN_FLAGGED, Tasks.COLUMN_PROJECT,
         Tasks.COLUMN_PROJECT_STATUS, Tasks.COLUMN_RANK, Tasks.COLUMN_TYPE};
 
@@ -214,13 +211,15 @@ public class TreeOperations {
 
       String childID = results.getString(0);
       boolean childBlocked = results.getInt(1) > 0;
-      boolean childBlockedByDefer = results.getInt(2) > 0;
+      boolean childDeferred = results.getInt(2) > 0;
       String childDateCompleted = results.getString(3);
       String childDateDefer = results.getString(4);
       String childDateDue = results.getString(5);
       String childFlagged = results.getString(6);
       long childRank = results.getLong(9);
       String childType = results.getString(10);
+
+      boolean childDropped = false;
 
       // Update each of the child's attributes appropriately
 
@@ -245,6 +244,13 @@ public class TreeOperations {
         childFlagged = parentFlagged;
       }
 
+      if (parentBlocked) {
+
+        // If the parent is blocked, then so is the child
+
+        childBlocked = true;
+      }
+
       // blocked/dropped
       // Note that some of this is handled by the context updater function above,
       // and more of it is handled by the 'next task' subroutine below
@@ -256,14 +262,14 @@ public class TreeOperations {
 
       if (projectStatus != null && projectStatus.equals("dropped")) {
         childValues.put(Tasks.COLUMN_DROPPED, true);
-        childBlocked = true; // doesn't matter if we use this, not passed on
+        childDropped = true; // doesn't matter if we use this, not passed on
       }
 
       // blockedByDefer is handled by a separate function:
 
       if (childDateDefer != null) {
-        if (getBlockedByDefer(Long.valueOf(childDateDefer))) childBlockedByDefer = true;
-        childValues.put(Tasks.COLUMN_BLOCKED_BY_DEFER, childBlockedByDefer);
+        if (getDeferred(Long.valueOf(childDateDefer))) childDeferred = true;
+        childValues.put(Tasks.COLUMN_DEFERRED, childDeferred);
       }
 
       // dueSoon and overdue are also handled by a separate function:
@@ -274,6 +280,7 @@ public class TreeOperations {
 
       // Now save the appropriate values from the parent/project/child into the database
 
+      childValues.put(Tasks.COLUMN_BLOCKED, childBlocked);
       childValues.put(Tasks.COLUMN_DATE_DEFER_EFFECTIVE, childDateDefer);
       childValues.put(Tasks.COLUMN_DATE_DUE_EFFECTIVE, childDateDue);
       childValues.put(Tasks.COLUMN_FLAGGED_EFFECTIVE, childFlagged);
@@ -286,13 +293,14 @@ public class TreeOperations {
       // using the while loop we're in now. Then it updates all of them. Then it goes into that
       // task's children and does the whole thing over again. Simple.
 
-      updateAttributesForSubtree(db, childID, childDateDefer, childDateDue, childFlagged, childType,
+      updateAttributesForSubtree(db, childID, childBlocked, childDateDefer, childDateDue,
+          childFlagged, childType,
           projectID, projectStatus);
 
       // The 'next' task in a _sequential_ project is the _first_ _incomplete_, _unblocked_ task.
 
       if (childRank < nextRank && parentType != null && parentType.equals("sequential")
-          && childDateCompleted == null && !childBlocked && !childBlockedByDefer) {
+          && childDateCompleted == null && !childBlocked && !childDeferred && !childDropped) {
         nextID = childID;
         nextRank = childRank;
       }
@@ -366,7 +374,7 @@ public class TreeOperations {
               new String[]{id});
       long countAvailable = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
           Tasks.COLUMN_PROJECT_ID + "=? AND " + Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND "
-              + Tasks.COLUMN_BLOCKED + "=0 AND " + Tasks.COLUMN_BLOCKED_BY_DEFER + "=0 AND "
+              + Tasks.COLUMN_BLOCKED + "=0 AND " + Tasks.COLUMN_DEFERRED + "=0 AND "
               + Tasks.COLUMN_DROPPED + "=0",
           new String[]{id});
       long countCompleted = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
@@ -539,7 +547,7 @@ public class TreeOperations {
               new String[]{childID});
       countAvailable += DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
           Tasks.COLUMN_CONTEXT + "=? AND " + Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND "
-              + Tasks.COLUMN_BLOCKED + "=0 AND " + Tasks.COLUMN_BLOCKED_BY_DEFER + "=0 AND "
+              + Tasks.COLUMN_BLOCKED + "=0 AND " + Tasks.COLUMN_DEFERRED + "=0 AND "
               + Tasks.COLUMN_DROPPED + "=0",
           new String[]{childID});
       countCompleted += DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
@@ -586,7 +594,7 @@ public class TreeOperations {
   private void updateProjectCounts(@NonNull SQLiteDatabase db, @NonNull String id) {
 
     String[] columns = new String[]{Tasks.COLUMN_ID, Tasks.COLUMN_BLOCKED,
-        Tasks.COLUMN_BLOCKED_BY_DEFER, Tasks.COLUMN_DATE_COMPLETED, Tasks.COLUMN_DROPPED,
+        Tasks.COLUMN_DEFERRED, Tasks.COLUMN_DATE_COMPLETED, Tasks.COLUMN_DROPPED,
         Tasks.COLUMN_DUE_SOON, Tasks.COLUMN_OVERDUE, Tasks.COLUMN_COUNT_AVAILABLE,
         Tasks.COLUMN_COUNT_CHILDREN, Tasks.COLUMN_COUNT_COMPLETED, Tasks.COLUMN_COUNT_DUE_SOON,
         Tasks.COLUMN_COUNT_OVERDUE};
@@ -689,7 +697,7 @@ public class TreeOperations {
    * @param defer Time in milliseconds since the UNIX epoch
    * @return Whether the task should be blocked by its defer date
    */
-  private boolean getBlockedByDefer(long defer) {
+  private boolean getDeferred(long defer) {
 
     if (defer == 0) {
       throw new NullPointerException("Date passed cannot be null");

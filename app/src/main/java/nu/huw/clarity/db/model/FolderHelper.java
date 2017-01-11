@@ -98,6 +98,7 @@ class FolderHelper {
         folder.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED);
         folder.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON);
         folder.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE);
+      folder.countRemaining = folder.countChildren - folder.countCompleted;
         folder.name = dbHelper.getString(cursor, Entries.COLUMN_NAME);
         folder.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID);
         folder.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK);

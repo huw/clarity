@@ -2,7 +2,6 @@ package nu.huw.clarity.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import java.util.Date;
 
 /**
@@ -45,7 +44,7 @@ public class Base implements Parcelable {
 
     @Override public int describeContents() {return 0;}
 
-    protected long getTimeOrNull(Date d) {
+    long getTimeOrNull(Date d) {
 
         if (d == null) {
             return -1;
@@ -54,7 +53,7 @@ public class Base implements Parcelable {
         }
     }
 
-    protected Date getDateOrNull(long l) {
+    Date getDateOrNull(long l) {
 
         if (l == -1) {
             return null;

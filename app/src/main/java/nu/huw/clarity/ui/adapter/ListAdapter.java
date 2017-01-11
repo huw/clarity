@@ -4,10 +4,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
@@ -61,7 +59,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         if (item instanceof Task) {
             if (((Task) item).isProject) {
                 return PROJECT_VIEW_TYPE;
-            } else if (item.hasChildren) {
+            } else if (((Task) item).isParent()) {
                 return NESTED_TASK_VIEW_TYPE;
             }
         } else if (item instanceof Context) {

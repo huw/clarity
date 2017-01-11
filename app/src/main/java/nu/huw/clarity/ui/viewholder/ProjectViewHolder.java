@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.view.View;
 import android.widget.TextView;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapter.ListAdapter;
@@ -36,9 +35,9 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
     public void bind(Task project, Context androidContext) {
 
         this.entry = project;
-        int remaining = this.entry.countRemaining;
-        int dueSoon   = this.entry.countDueSoon;
-        int overdue   = this.entry.countOverdue;
+      long remaining = this.entry.countRemaining;
+      long dueSoon = this.entry.countDueSoon;
+      long overdue = this.entry.countOverdue;
 
         Resources res = androidContext.getResources();
 

@@ -6,10 +6,8 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapter.ListAdapter;
@@ -55,7 +53,7 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
         int color      = R.color.secondary_text_light;
         int background = 0;
 
-        if (!task.isAvailable()) {
+      if (!task.isRemaining()) {
 
             // If the task isn't available, then show the user by changing its colours.
 
@@ -91,7 +89,7 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
         checkCircleView.setChecked(task.dateCompleted != null);
         checkCircleView.setFlagged(task.flagged);
 
-        if (task.isAvailable()) {
+      if (task.isRemaining()) {
             checkCircleView.setOverdue(task.overdue);
             checkCircleView.setDueSoon(task.dueSoon);
         } else {

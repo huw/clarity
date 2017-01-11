@@ -35,9 +35,9 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
     public void bind(Context context, android.content.Context androidContext) {
 
         this.entry = context;
-        int available = this.entry.countAvailable;
-        int dueSoon   = this.entry.countDueSoon;
-        int overdue   = this.entry.countOverdue;
+      long available = this.entry.countAvailable;
+      long dueSoon = this.entry.countDueSoon;
+      long overdue = this.entry.countOverdue;
 
         Resources res = androidContext.getResources();
 

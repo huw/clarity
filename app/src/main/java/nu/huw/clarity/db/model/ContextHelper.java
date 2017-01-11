@@ -1,6 +1,7 @@
 package nu.huw.clarity.db.model;
 
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
 import nu.huw.clarity.db.DatabaseContract.Entries;
+import nu.huw.clarity.db.DatabaseContract.Tasks;
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Context;
 
@@ -89,19 +91,32 @@ class ContextHelper {
     return result;
   }
 
-  // TODO: Fix after dynamically calculating child counts
+  /**
+   * Gets a context object representing the tasks with no listed context. It opens a database
+   * connection to find the numbers of tasks without this context.
+   *
+   * @return A context object representing the tasks with no context
+   */
   private Context getNoContext() {
 
     SQLiteDatabase db = dbHelper.getReadableDatabase();
     Context noContext = new Context();
 
     noContext.name = androidContext.getString(R.string.no_context);
-        /*noContext.countAvailable = (int) DatabaseUtils
-                .queryNumEntries(db, Tasks.TABLE_NAME, NO_CONTEXT + AND + AVAILABLE);
-        noContext.countDueSoon = (int) DatabaseUtils
-                .queryNumEntries(db, Tasks.TABLE_NAME, NO_CONTEXT + AND + DUE_SOON);
-        noContext.countOverdue = (int) DatabaseUtils
-                .queryNumEntries(db, Tasks.TABLE_NAME, NO_CONTEXT + AND + OVERDUE);*/
+    noContext.countChildren = DatabaseUtils
+        .queryNumEntries(db, Tasks.TABLE_NAME, Tasks.COLUMN_CONTEXT + " IS NULL");
+    noContext.countAvailable = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+        Tasks.COLUMN_CONTEXT + " IS NULL AND " + Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND "
+            + Tasks.COLUMN_BLOCKED + "=0 AND " + Tasks.COLUMN_DEFERRED + "=0 AND "
+            + Tasks.COLUMN_DROPPED + "=0");
+    noContext.countCompleted = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+        Tasks.COLUMN_CONTEXT + " IS NULL AND (" + Tasks.COLUMN_DATE_COMPLETED + " IS NOT NULL OR "
+            + Tasks.COLUMN_DROPPED + "=1)");
+    noContext.countDueSoon = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+        Tasks.COLUMN_CONTEXT + " IS NULL AND " + Tasks.COLUMN_DUE_SOON + "=1");
+    noContext.countOverdue = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,
+        Tasks.COLUMN_CONTEXT + " IS NULL AND " + Tasks.COLUMN_OVERDUE + "=1");
+    noContext.countRemaining = noContext.countChildren - noContext.countCompleted;
     noContext.id = "NO_CONTEXT";
 
     db.close();
@@ -128,6 +143,7 @@ class ContextHelper {
     context.countCompleted = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_COMPLETED);
     context.countDueSoon = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_DUE_SOON);
     context.countOverdue = dbHelper.getInt(cursor, Entries.COLUMN_COUNT_OVERDUE);
+    context.countRemaining = context.countChildren - context.countCompleted;
     context.name = dbHelper.getString(cursor, Entries.COLUMN_NAME);
     context.parentID = dbHelper.getString(cursor, Entries.COLUMN_PARENT_ID);
     context.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK);

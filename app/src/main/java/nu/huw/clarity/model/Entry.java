@@ -21,13 +21,12 @@ public class Entry extends Base implements Comparable<Entry> {
             return new Entry[size];
         }
     };
-    public int     countAvailable;
-    public int     countChildren;
-    public int     countCompleted;
-    public int     countDueSoon;
-    public int     countOverdue;
-    public int     countRemaining;
-    public boolean hasChildren;
+  public long countAvailable;
+  public long countChildren;
+  public long countCompleted;
+  public long countDueSoon;
+  public long countOverdue;
+  public long countRemaining;
     public String  name;
     public String  parentID;
     public long    rank;
@@ -39,13 +38,11 @@ public class Entry extends Base implements Comparable<Entry> {
     protected Entry(Parcel in) {
 
         super(in);
-        countAvailable = in.readInt();
-        countChildren = in.readInt();
-        countCompleted = in.readInt();
-        countDueSoon = in.readInt();
-        countOverdue = in.readInt();
-        countRemaining = in.readInt();
-        hasChildren = in.readInt() != 0;
+      countAvailable = in.readLong();
+      countChildren = in.readLong();
+      countCompleted = in.readLong();
+      countDueSoon = in.readLong();
+      countOverdue = in.readLong();
         name = in.readString();
         parent = in.readParcelable(Entry.class.getClassLoader());
         parentID = in.readString();
@@ -56,13 +53,11 @@ public class Entry extends Base implements Comparable<Entry> {
     @Override public void writeToParcel(Parcel out, int flags) {
 
         super.writeToParcel(out, flags);
-        out.writeInt(countAvailable);
-        out.writeInt(countChildren);
-        out.writeInt(countCompleted);
-        out.writeInt(countDueSoon);
-        out.writeInt(countOverdue);
-        out.writeInt(countRemaining);
-        out.writeInt(hasChildren ? 1 : 0);
+      out.writeLong(countAvailable);
+      out.writeLong(countChildren);
+      out.writeLong(countCompleted);
+      out.writeLong(countDueSoon);
+      out.writeLong(countOverdue);
         out.writeString(name);
         out.writeParcelable(parent, 0);
         out.writeString(parentID);

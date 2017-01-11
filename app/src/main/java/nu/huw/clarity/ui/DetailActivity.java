@@ -14,7 +14,6 @@ import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract;
 import nu.huw.clarity.model.Context;
@@ -124,7 +123,7 @@ public class DetailActivity extends AppCompatActivity
             // attribute. This applies to the red clashing with forecast, and orange clashing
             // with flagged (in both cases the intended colour should be pretty obvious)
 
-            if (task.isAvailable()) {
+          if (task.isRemaining()) {
                 checkCircleView.setOverdue(task.overdue && themeID != R.style.AppTheme_Red);
                 checkCircleView.setDueSoon(task.dueSoon);
             } else {

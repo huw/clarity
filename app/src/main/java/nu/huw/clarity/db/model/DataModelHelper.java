@@ -19,379 +19,370 @@ import nu.huw.clarity.model.Task;
  */
 public class DataModelHelper {
 
-    private static final String TAG = DataModelHelper.class.getSimpleName();
-    private DatabaseHelper          dbHelper;
-    private android.content.Context androidContext;
-    private ContextHelper           contextHelper;
-    private FolderHelper            folderHelper;
-    private PerspectiveHelper       perspectiveHelper;
-    private TaskHelper              taskHelper;
+  private static final String TAG = DataModelHelper.class.getSimpleName();
+  private DatabaseHelper dbHelper;
+  private android.content.Context androidContext;
+  private ContextHelper contextHelper;
+  private FolderHelper folderHelper;
+  private PerspectiveHelper perspectiveHelper;
+  private TaskHelper taskHelper;
 
-    public DataModelHelper(android.content.Context context) {
+  public DataModelHelper(android.content.Context context) {
 
-        dbHelper = new DatabaseHelper(context);
-        this.androidContext = context;
+    dbHelper = new DatabaseHelper(context);
+    this.androidContext = context;
+  }
+
+  /**
+   * Logic for using perspectives to get entries
+   *
+   * @param perspective The perspective used for filtering/sorting entries
+   * @param parent The parent entry (nullable) to determine what to retrieve
+   * @return A list with items that are at least Entries. May be a List<Task> or List<Context>.
+   */
+  public List<Entry> getEntriesFromPerspective(Perspective perspective, Entry parent) {
+
+    // This is just a switch to pick the items
+    // Actual processing with the perspective occurs in the individual functions
+
+    switch (perspective.id) {
+
+      case "ProcessContexts":
+        return getContexts(perspective, parent);
+      case "ProcessInbox":
+        return getInbox(perspective);
+      case "ProcessProjects":
+        return getProjects(perspective, parent);
+      case "ProcessFlagged":
+      default:
+        return getTasks(perspective, (Task) parent);
+    }
+  }
+
+  /**
+   * Given an inbox perspective, this function will get a list of inbox entries suitable for
+   * display in a list.
+   *
+   * @param perspective Perspective for filtering/organising entries, must be an inbox perspective.
+   * @return List of inbox entries
+   */
+  List<Entry> getContexts(Perspective perspective, Entry parent) {
+
+    // If the parent is a project or task, then it can only have task children
+    if (parent instanceof Task) return getTasks(perspective, (Task) parent);
+
+    // Get items
+    // We want to display a list of sorted tasks beneath the contexts, so we get each
+    // separately and sort them separately, then join them back up at the end.
+
+    if (contextHelper == null) contextHelper = new ContextHelper(dbHelper, androidContext);
+    if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
+    List<Context> contexts = new ArrayList<>();
+    List<Task> tasks = new ArrayList<>();
+    List<Entry> entries = new ArrayList<>();
+
+    contexts.addAll(contextHelper.getContextsFromParent((Context) parent));
+    tasks.addAll(taskHelper.getTasksFromContext((Context) parent));
+
+    // Filter items
+    // In this case, only tasks need to be filtered
+
+    for (Task task : tasks) {
+      if (filterTask(perspective, task)) {
+        entries.add(task);
+      }
     }
 
-    /**
-     * Logic for using perspectives to get entries
-     *
-     * @param perspective The perspective used for filtering/sorting entries
-     * @param parent      The parent entry (nullable) to determine what to retrieve
-     *
-     * @return A list with items that are at least Entries. May be a List<Task> or List<Context>.
-     */
-    public List<Entry> getEntriesFromPerspective(Perspective perspective, Entry parent) {
+    // Sort items
 
-        // This is just a switch to pick the items
-        // Actual processing with the perspective occurs in the individual functions
+    Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
+    Collections.sort(tasks, comparator);
+    Collections.sort(contexts);
 
-        switch (perspective.id) {
+    // Convert and return
 
-            case "ProcessContexts":
-                return getContexts(perspective, parent);
-            case "ProcessInbox":
-                return getInbox(perspective);
-            case "ProcessProjects":
-                return getProjects(perspective, parent);
-            case "ProcessFlagged":
-            default:
-                return getTasks(perspective, (Task) parent);
-        }
+    entries.addAll(contexts);
+    entries.addAll(tasks);
+
+    return entries;
+  }
+
+  /**
+   * Given an inbox perspective, this function will get a list of inbox entries suitable for
+   * display in a list.
+   *
+   * @param perspective Perspective for filtering/organising entries, must be an inbox perspective.
+   * @return List of inbox entries
+   */
+  List<Entry> getInbox(Perspective perspective) {
+
+    // Get items
+
+    if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
+    List<Task> candidates = taskHelper.getTasksInInbox();
+    List<Task> tasks = new ArrayList<>();
+
+    // Filter items
+
+    for (Task task : candidates) {
+      if (filterTask(perspective, task)) {
+        tasks.add(task);
+      }
     }
 
-    /**
-     * Given an inbox perspective, this function will get a list of inbox entries suitable for
-     * display in a list.
-     *
-     * @param perspective Perspective for filtering/organising entries, must be an inbox
-     *                    perspective.
-     *
-     * @return List of inbox entries
-     */
-    List<Entry> getContexts(Perspective perspective, Entry parent) {
+    // Sort items
 
-        // If the parent is a project or task, then it can only have task children
-        if (parent instanceof Task) return getTasks(perspective, (Task) parent);
+    Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
+    Collections.sort(tasks, comparator);
 
-        // Get items
-        // We want to display a list of sorted tasks beneath the contexts, so we get each
-        // separately and sort them separately, then join them back up at the end.
+    // Convert and return
 
-        if (contextHelper == null) contextHelper = new ContextHelper(dbHelper, androidContext);
-        if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
-        List<Context> contexts = new ArrayList<>();
-        List<Task>    tasks    = new ArrayList<>();
-        List<Entry>   entries  = new ArrayList<>();
+    return new ArrayList<Entry>(tasks);
+  }
 
-        contexts.addAll(contextHelper.getContextsFromParent((Context) parent));
-        tasks.addAll(taskHelper.getTasksFromContext((Context) parent));
+  /**
+   * Given a perspective for filtering, and a parent to determine what entries to retrieve, this
+   * function will get a list of entries suitable for display in a list.
+   *
+   * @param perspective Perspective for filtering/organising entries
+   * @param parent Nullable, parent of requested entries
+   * @return List of entries corresponding to parent and perspective
+   */
+  List<Entry> getProjects(Perspective perspective, Entry parent) {
 
-        // Filter items
-        // In this case, only tasks need to be filtered
+    // If the parent is a project or task, then it can only have task children
+    if (parent instanceof Task) return getTasks(perspective, (Task) parent);
 
-        for (Task task : tasks) {
-            if (filterTask(perspective, task)) {
-                entries.add(task);
-            }
-        }
+    // Get items
 
-        // Sort items
+    if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
+    if (folderHelper == null) folderHelper = new FolderHelper(dbHelper);
+    List<Entry> candidates = new ArrayList<>();
+    List<Entry> entries = new ArrayList<>();
 
-        Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
-        Collections.sort(tasks, comparator);
-        Collections.sort(contexts);
+    candidates.addAll(taskHelper.getProjectsFromParent((Folder) parent));
+    candidates.addAll(folderHelper.getFoldersFromParent((Folder) parent));
 
-        // Convert and return
+    // Filter items
 
-        entries.addAll(contexts);
-        entries.addAll(tasks);
-
-        return entries;
+    for (Entry entry : candidates) {
+      if ((entry instanceof Task && filterTask(perspective, (Task) entry)) ||
+          entry instanceof Folder) {
+        entries.add(entry);
+      }
     }
 
-    /**
-     * Given an inbox perspective, this function will get a list of inbox entries suitable for
-     * display in a list.
-     *
-     * @param perspective Perspective for filtering/organising entries, must be an inbox
-     *                    perspective.
-     *
-     * @return List of inbox entries
-     */
-    List<Entry> getInbox(Perspective perspective) {
+    // Sort items
 
-        // Get items
+    Collections.sort(entries);
+    return entries;
+  }
 
-        if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
-        List<Task> candidates = taskHelper.getTasksInInbox();
-        List<Task> tasks      = new ArrayList<>();
+  /**
+   * Given a perspective for filtering, and a parent to determine what tasks to retrieve, this
+   * function will get a list of entries suitable for display in a list.
+   *
+   * @param perspective Perspective for filtering/organising tasks
+   * @param parent Nullable, parent of requested tasks
+   * @return List of tasks corresponding to parent and perspective
+   */
+  List<Entry> getTasks(Perspective perspective, Task parent) {
 
-        // Filter items
+    // Get items
+    // If no parent is specified, get all tasks
 
-        for (Task task : candidates) {
-            if (filterTask(perspective, task)) {
-                tasks.add(task);
-            }
-        }
+    if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
+    List<Task> candidates = new ArrayList<>();
+    List<Task> tasks = new ArrayList<>();
 
-        // Sort items
-
-        Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
-        Collections.sort(tasks, comparator);
-
-        // Convert and return
-
-        return new ArrayList<Entry>(tasks);
+    if (parent == null) {
+      candidates.addAll(taskHelper.getAllTasks());
+    } else {
+      candidates.addAll(taskHelper.getTasksFromParent(parent));
     }
 
-    /**
-     * Given a perspective for filtering, and a parent to determine what entries to retrieve, this
-     * function will get a list of entries suitable for display in a list.
-     *
-     * @param perspective Perspective for filtering/organising entries
-     * @param parent      Nullable, parent of requested entries
-     *
-     * @return List of entries corresponding to parent and perspective
-     */
-    List<Entry> getProjects(Perspective perspective, Entry parent) {
+    // Filter items
+    // (supposed to be faster than SQL, is definitely easier)
 
-        // If the parent is a project or task, then it can only have task children
-        if (parent instanceof Task) return getTasks(perspective, (Task) parent);
-
-        // Get items
-
-        if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
-        if (folderHelper == null) folderHelper = new FolderHelper(dbHelper);
-        List<Entry> candidates = new ArrayList<>();
-        List<Entry> entries    = new ArrayList<>();
-
-        candidates.addAll(taskHelper.getProjectsFromParent((Folder) parent));
-        candidates.addAll(folderHelper.getFoldersFromParent((Folder) parent));
-
-        // Filter items
-
-        for (Entry entry : candidates) {
-            if ((entry instanceof Task && filterTask(perspective, (Task) entry)) ||
-                entry instanceof Folder) {
-                entries.add(entry);
-            }
-        }
-
-        // Sort items
-
-        Collections.sort(entries);
-        return entries;
+    for (Task task : candidates) {
+      if (filterTask(perspective, task)) {
+        tasks.add(task);
+      }
     }
 
-    /**
-     * Given a perspective for filtering, and a parent to determine what tasks to retrieve, this
-     * function will get a list of entries suitable for display in a list.
-     *
-     * @param perspective Perspective for filtering/organising tasks
-     * @param parent      Nullable, parent of requested tasks
-     *
-     * @return List of tasks corresponding to parent and perspective
-     */
-    List<Entry> getTasks(Perspective perspective, Task parent) {
+    // Sort items
+    // (should also be faster than SQL)
 
-        // Get items
-        // If no parent is specified, get all tasks
+    Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
+    Collections.sort(tasks, comparator);
 
-        if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
-        List<Task> candidates = new ArrayList<>();
-        List<Task> tasks      = new ArrayList<>();
+    // Convert and return
 
-        if (parent == null) {
-            candidates.addAll(taskHelper.getAllTasks());
-        } else {
-            candidates.addAll(taskHelper.getTasksFromParent(parent));
-        }
+    return new ArrayList<Entry>(tasks);
+  }
 
-        // Filter items
-        // (supposed to be faster than SQL, is definitely easier)
+  /**
+   * Using the given perspective, returns whether a task is suitable for that perspective.
+   *
+   * @param perspective Any complete Perspective object
+   * @param task Any complete Task object
+   * @return True if task is appropriate for the perspective
+   */
+  private boolean filterTask(Perspective perspective, Task task) {
 
-        for (Task task : candidates) {
-            if (filterTask(perspective, task)) {
-                tasks.add(task);
-            }
-        }
+    // FILTER BY STATUS
 
-        // Sort items
-        // (should also be faster than SQL)
+    switch (perspective.filterStatus) {
+      case "complete":
 
-        Comparator<Task> comparator = new Comparators(androidContext).getComparator(perspective);
-        Collections.sort(tasks, comparator);
+        // Only completed tasks
+        if (!task.isCompleted()) return false;
 
-        // Convert and return
+        break;
+      case "incomplete":
 
-        return new ArrayList<Entry>(tasks);
+        // 'incomplete' means remaining, which means no completed or dropped items
+        if (!task.isRemaining()) return false;
+
+        break;
+      case "due":
+
+        // 'due' means available, which means no blocked/deferred/on hold items as well
+        if (!task.isAvailable()) return false;
+
+        break;
     }
 
-    /**
-     * Using the given perspective, returns whether a task is suitable for that perspective.
-     *
-     * @param perspective Any complete Perspective object
-     * @param task        Any complete Task object
-     *
-     * @return True if task is appropriate for the perspective
-     */
-    private boolean filterTask(Perspective perspective, Task task) {
+    // FILTER BY FLAGGED
 
-        // FILTER BY STATUS
+    switch (perspective.filterFlagged) {
+      case "flagged":
 
-        switch (perspective.filterStatus) {
-            case "incomplete":
+        // Remove if not flagged
+        if (!task.flaggedEffective) return false;
 
-                // 'incomplete' means remaining, which means no completed or dropped items
-                if (task.dateCompleted != null || task.dropped) return false;
+        break;
+      case "unflagged":
 
-                break;
-            case "due":
+        if (task.flaggedEffective) return false;
 
-                // 'due' means available, which means no blocked/deferred/on hold items as well
-                if (task.dateCompleted != null || task.dropped || task.blocked ||
-                    task.blockedByDefer) {
-                    return false;
-                }
-                break;
-            case "complete":
+        break;
+      case "due":
 
-                // Only completed tasks
-                if (task.dateCompleted == null) return false;
-                break;
-        }
+        if (!(task.dueSoon || task.overdue)) return false;
 
-        // FILTER BY FLAGGED
+        break;
+      case "due-or-flagged":
 
-        switch (perspective.filterFlagged) {
-            case "flagged":
-
-                // Remove if not flagged or flagged effective
-                if (!(task.flagged || task.flaggedEffective)) return false;
-
-                break;
-            case "unflagged":
-
-                if (task.flagged || task.flaggedEffective) return false;
-
-                break;
-            case "due":
-
-                if (!(task.dueSoon || task.overdue)) return false;
-
-                break;
-            case "due-or-flagged":
-
-                // Remove if neither due nor flagged
-                if (!(task.dueSoon || task.overdue || task.flagged || task.flaggedEffective)) {
-                    return false;
-                }
-
-                break;
-            case "due-and-flagged":
-
-                // Remove if not (due soon or overdue) and (flagged or flagged effective)
-                if (!((task.dueSoon || task.overdue) && (task.flagged || task.flaggedEffective))) {
-                    return false;
-                }
-
-                break;
-            case "due-and-unflagged":
-
-                // Remove if (not (due soon or overdue)) and (flagged or flagged effective)
-                if (!(task.dueSoon || task.overdue) && (task.flagged || task.flaggedEffective)) {
-                    return false;
-                }
-                break;
+        // Remove if neither due nor flagged
+        if (!(task.dueSoon || task.overdue || task.flaggedEffective)) {
+          return false;
         }
 
-        // FILTER BY DURATION
-        // TODO
+        break;
+      case "due-and-flagged":
 
-        return true;
-    }
-
-    /**
-     * This function will get a list of perspectives from the database
-     */
-    public List<Perspective> getPerspectives() {
-
-        // Get items
-
-        if (perspectiveHelper == null) {
-            perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
+        // Remove if not (due soon or overdue) and (flagged or flagged effective)
+        if (!((task.dueSoon || task.overdue) && task.flaggedEffective)) {
+          return false;
         }
-        List<Perspective> perspectives = new ArrayList<>();
-        perspectives.addAll(perspectiveHelper.getPerspectivesFromSelection(null, null));
-        perspectives.add(perspectiveHelper.getForecast());
 
-        // Filter TODO
-        // Sort TODO
+        break;
+      case "due-and-unflagged":
 
-        // Convert and return
-
-        return perspectives;
-    }
-
-    /**
-     * Get the special Forecast perspective
-     */
-    public Perspective getForecastPerspective() {
-
-        if (perspectiveHelper == null) {
-            perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
+        // Remove if (not (due soon or overdue)) and (flagged or flagged effective)
+        if (!(task.dueSoon || task.overdue) && task.flaggedEffective) {
+          return false;
         }
-        return perspectiveHelper.getForecast();
+        break;
     }
 
-    /**
-     * Get a blank placeholder perspective
-     */
-    public Perspective getPlaceholderPerspective() {
+    // FILTER BY DURATION
+    // TODO
 
-        if (perspectiveHelper == null) {
-            perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
-        }
-        return perspectiveHelper.getPlaceholder();
+    return true;
+  }
+
+  /**
+   * This function will get a list of perspectives from the database
+   */
+  public List<Perspective> getPerspectives() {
+
+    // Get items
+
+    if (perspectiveHelper == null) {
+      perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
     }
+    List<Perspective> perspectives = new ArrayList<>();
+    perspectives.addAll(perspectiveHelper.getPerspectivesFromSelection(null, null));
+    perspectives.add(perspectiveHelper.getForecast());
 
-    /**
-     * Get the context with the specified ID
-     *
-     * @param id ID of a context
-     */
-    public Context getContextFromID(String id) {
+    // Filter TODO
+    // Sort TODO
 
-        if (id == null) throw new NullPointerException("Null ID provided");
-        if (contextHelper == null) contextHelper = new ContextHelper(dbHelper, androidContext);
+    // Convert and return
 
-        return contextHelper.getContextFromID(id);
+    return perspectives;
+  }
+
+  /**
+   * Get the special Forecast perspective
+   */
+  public Perspective getForecastPerspective() {
+
+    if (perspectiveHelper == null) {
+      perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
     }
+    return perspectiveHelper.getForecast();
+  }
 
-    /**
-     * Get the folder with the specified ID
-     *
-     * @param id ID of a folder
-     */
-    public Folder getFolderFromID(String id) {
+  /**
+   * Get a blank placeholder perspective
+   */
+  public Perspective getPlaceholderPerspective() {
 
-        if (id == null) throw new NullPointerException("Null ID provided");
-        if (folderHelper == null) folderHelper = new FolderHelper(dbHelper);
-
-        return folderHelper.getFolderFromID(id);
+    if (perspectiveHelper == null) {
+      perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
     }
+    return perspectiveHelper.getPlaceholder();
+  }
 
-    /**
-     * Get the task with the specified ID
-     *
-     * @param id ID of a task
-     */
-    public Task getTaskFromID(String id) {
+  /**
+   * Get the context with the specified ID
+   *
+   * @param id ID of a context
+   */
+  public Context getContextFromID(String id) {
 
-        if (id == null) throw new NullPointerException("Null ID provided");
-        if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
+    if (id == null) throw new NullPointerException("Null ID provided");
+    if (contextHelper == null) contextHelper = new ContextHelper(dbHelper, androidContext);
 
-        return taskHelper.getTaskFromID(id);
-    }
+    return contextHelper.getContextFromID(id);
+  }
+
+  /**
+   * Get the folder with the specified ID
+   *
+   * @param id ID of a folder
+   */
+  public Folder getFolderFromID(String id) {
+
+    if (id == null) throw new NullPointerException("Null ID provided");
+    if (folderHelper == null) folderHelper = new FolderHelper(dbHelper);
+
+    return folderHelper.getFolderFromID(id);
+  }
+
+  /**
+   * Get the task with the specified ID
+   *
+   * @param id ID of a task
+   */
+  public Task getTaskFromID(String id) {
+
+    if (id == null) throw new NullPointerException("Null ID provided");
+    if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
+
+    return taskHelper.getTaskFromID(id);
+  }
 }
