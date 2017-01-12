@@ -175,7 +175,7 @@ class TaskHelper {
         task.dateDueEffective = dbHelper.getDate(cursor, Tasks.COLUMN_DATE_DUE_EFFECTIVE);
         task.dueSoon = dbHelper.getBoolean(cursor, Tasks.COLUMN_DUE_SOON);
         task.dropped = dbHelper.getBoolean(cursor, Tasks.COLUMN_DROPPED);
-        task.estimatedTime = dbHelper.getInt(cursor, Tasks.COLUMN_ESTIMATED_TIME);
+      task.estimatedTime = dbHelper.getDuration(cursor, Tasks.COLUMN_ESTIMATED_TIME);
         task.flagged = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED);
         task.flaggedEffective = dbHelper.getBoolean(cursor, Tasks.COLUMN_FLAGGED_EFFECTIVE);
         task.inInbox = dbHelper.getBoolean(cursor, Tasks.COLUMN_INBOX);

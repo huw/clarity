@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +17,8 @@ import nu.huw.clarity.BuildConfig;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
 import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
+import org.threeten.bp.Instant;
+import org.threeten.bp.temporal.ChronoUnit;
 
 /**
  * There are a few columns of the SQLite Database that are generated after the sync has completed.
@@ -268,14 +269,14 @@ public class TreeOperations {
       // blockedByDefer is handled by a separate function:
 
       if (childDateDefer != null) {
-        if (getDeferred(Long.valueOf(childDateDefer))) childDeferred = true;
+        if (getDeferred(childDateDefer)) childDeferred = true;
         childValues.put(Tasks.COLUMN_DEFERRED, childDeferred);
       }
 
       // dueSoon and overdue are also handled by a separate function:
 
       if (childDateCompleted == null && childDateDue != null) {
-        childValues.putAll(getDueValues(Long.valueOf(childDateDue)));
+        childValues.putAll(getDueValues(childDateDue));
       }
 
       // Now save the appropriate values from the parent/project/child into the database
@@ -694,48 +695,41 @@ public class TreeOperations {
   /**
    * Given a number from the column Tasks.DATE_DEFER, determine whether that date is in the future.
    *
-   * @param defer Time in milliseconds since the UNIX epoch
+   * @param deferString ISO 8601 timestamp
    * @return Whether the task should be blocked by its defer date
    */
-  private boolean getDeferred(long defer) {
+  private boolean getDeferred(@NonNull String deferString) {
 
-    if (defer == 0) {
-      throw new NullPointerException("Date passed cannot be null");
-    }
+    Instant now = Instant.now();
+    Instant defer = Instant.parse(deferString);
 
-    ContentValues values = new ContentValues();
-    long now = new Date().getTime();
-
-    return defer > now;
+    return defer.isAfter(now);
   }
 
   /**
-   * Given a number from the column Tasks.DATE_DUE, return a set of ContentValues that can be used
+   * Given a date from the column Tasks.DATE_DUE, return a set of ContentValues that can be used
    * to update a database row for that due date.
    * TODO: Determine the 'due soon' date based on user settings
    *
-   * @param due Time in milliseconds since the UNIX epoch
+   * @param dueString ISO 8601 timestamp
    * @return Values for the columns Tasks.OVERDUE or Tasks.DUE_SOON. May be empty.
    */
-  private ContentValues getDueValues(long due) {
-
-    if (due == 0) {
-      throw new NullPointerException("Date passed cannot be null");
-    }
+  private ContentValues getDueValues(@NonNull String dueString) {
 
     ContentValues values = new ContentValues();
-    long now = new Date().getTime();
+    Instant now = Instant.now();
+    Instant due = Instant.parse(dueString);
 
     // This used to be done with date objects, but what's the point?
     // We're comparing accurate representations using integers. May as well use math.
     // So this pretty simply decides if the task is overdue, then subtracts 7 days
     // and updates dueSoon if the new 'due' is before now.
 
-    if (now > due) {
+    if (now.isAfter(due)) {
       values.put(Tasks.COLUMN_OVERDUE, true);
     } else {
-      due -= DAY_IN_MILLISECONDS * 7;
-      values.put(Tasks.COLUMN_DUE_SOON, now > due);
+      due.minus(7, ChronoUnit.DAYS);
+      values.put(Tasks.COLUMN_DUE_SOON, now.isAfter(due));
     }
 
     return values;

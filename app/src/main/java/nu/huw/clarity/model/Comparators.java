@@ -1,8 +1,9 @@
 package nu.huw.clarity.model;
 
+import android.support.annotation.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
+import org.threeten.bp.LocalDateTime;
 
 /**
  * Holds comparators for sorting collections of entries
@@ -73,9 +74,10 @@ public class Comparators {
     /**
      * Compares two nullable dates, such that the non-null date takes precedence
      */
-    public static class DateComparator implements Comparator<Date> {
+    public static class DateComparator implements Comparator<LocalDateTime> {
 
-        @Override public int compare(Date d1, Date d2) {
+        @Override
+        public int compare(@Nullable LocalDateTime d1, @Nullable LocalDateTime d2) {
 
             if (d1 == null) {
                 if (d2 == null) {

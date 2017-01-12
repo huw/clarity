@@ -2,63 +2,90 @@ package nu.huw.clarity.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import java.util.Date;
+import android.support.annotation.Nullable;
+import org.threeten.bp.Duration;
+import org.threeten.bp.Instant;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.ZoneId;
 
 /**
  * A basic class for any OmniFocus element. Everything will implement the fields in this class.
  */
 public class Base implements Parcelable {
 
-    public static final Parcelable.Creator<Base> CREATOR = new Parcelable.Creator<Base>() {
-        public Base createFromParcel(Parcel in) {
+  public static final Parcelable.Creator<Base> CREATOR = new Parcelable.Creator<Base>() {
+    public Base createFromParcel(Parcel in) {
 
-            return new Base(in);
-        }
-
-        public Base[] newArray(int size) {
-
-            return new Base[size];
-        }
-    };
-    public String id;
-    public Date   dateAdded;
-    public Date   dateModified;
-
-    public Base() {}
-
-    // Constructor for parcels
-    protected Base(Parcel in) {
-
-        id = in.readString();
-        dateAdded = getDateOrNull(in.readLong());
-        dateModified = getDateOrNull(in.readLong());
+      return new Base(in);
     }
 
-    // Write the object data to the parcel
-    @Override public void writeToParcel(Parcel out, int flags) {
+    public Base[] newArray(int size) {
 
-        out.writeString(id);
-        out.writeLong(getTimeOrNull(dateAdded));
-        out.writeLong(getTimeOrNull(dateModified));
+      return new Base[size];
     }
+  };
+  public String id;
+  public LocalDateTime dateAdded;
+  public LocalDateTime dateModified;
 
-    @Override public int describeContents() {return 0;}
+  public Base() {
+  }
 
-    long getTimeOrNull(Date d) {
+  // Constructor for parcels
+  protected Base(Parcel in) {
 
-        if (d == null) {
-            return -1;
-        } else {
-            return d.getTime();
-        }
+    id = in.readString();
+    dateAdded = getDate(in.readString());
+    dateModified = getDate(in.readString());
+  }
+
+  // Write the object data to the parcel
+  @Override
+  public void writeToParcel(Parcel out, int flags) {
+
+    out.writeString(id);
+    out.writeString(getTimeString(dateAdded));
+    out.writeString(getTimeString(dateModified));
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  String getTimeString(@Nullable LocalDateTime d) {
+
+    if (d == null) {
+      return null;
+    } else {
+      return d.atZone(ZoneId.systemDefault()).toInstant().toString();
     }
+  }
 
-    Date getDateOrNull(long l) {
+  String getTimeString(@Nullable Duration d) {
 
-        if (l == -1) {
-            return null;
-        } else {
-            return new Date(l);
-        }
+    if (d == null) {
+      return null;
+    } else {
+      return d.toString();
     }
+  }
+
+  LocalDateTime getDate(@Nullable String s) {
+
+    if (s == null) {
+      return null;
+    } else {
+      return LocalDateTime.ofInstant(Instant.parse(s), ZoneId.systemDefault());
+    }
+  }
+
+  Duration getDuration(@Nullable String s) {
+
+    if (s == null) {
+      return null;
+    } else {
+      return Duration.parse(s);
+    }
+  }
 }
