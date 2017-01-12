@@ -43,7 +43,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
     if (task.dateDue != null) {
       date = "Due " + task.dateDue.format(dateTimeFormatter);
     } else if (task.dateDueEffective != null) {
-      date = "Due " + task.dateDue.format(dateTimeFormatter);
+      date = "Due " + task.dateDueEffective.format(dateTimeFormatter);
       this.dateView.setTypeface(null, Typeface.ITALIC);
     }
 

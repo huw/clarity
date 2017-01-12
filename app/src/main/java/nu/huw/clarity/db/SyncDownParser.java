@@ -429,8 +429,6 @@ public class SyncDownParser {
           }
         }
 
-        Log.d(TAG, value);
-
         break;
 
       /*
@@ -468,7 +466,9 @@ public class SyncDownParser {
 
       case "estimated-minutes":
         name = Tasks.COLUMN_ESTIMATED_TIME;
-        value = Duration.ofMinutes(Long.valueOf(value)).toString();
+        if (!value.isEmpty()) {
+          value = Duration.ofMinutes(Long.valueOf(value)).toString();
+        }
         break;
 
       case "flagged":

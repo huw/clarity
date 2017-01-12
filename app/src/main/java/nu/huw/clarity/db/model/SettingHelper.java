@@ -2,6 +2,7 @@ package nu.huw.clarity.db.model;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
 import nu.huw.clarity.db.DatabaseContract.Settings;
 import nu.huw.clarity.db.DatabaseHelper;
 
@@ -23,6 +24,7 @@ public class SettingHelper {
    *
    * @param id ID of a context
    */
+  @Nullable
   String getSettingFromID(String id) {
 
     SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -30,8 +32,10 @@ public class SettingHelper {
     Cursor cursor =
         dbHelper.query(db, Settings.TABLE_NAME, columns, ID_ARG, new String[]{id});
 
-    cursor.moveToFirst();
-    String result = cursor.getString(0);
+    String result = null;
+    if (cursor.moveToFirst()) {
+      result = dbHelper.getString(cursor, Settings.COLUMN_VALUE);
+    }
 
     cursor.close();
     db.close();

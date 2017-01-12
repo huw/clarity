@@ -1,11 +1,12 @@
 package nu.huw.clarity.db.model;
 
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import nu.huw.clarity.BuildConfig;
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Comparators;
 import nu.huw.clarity.model.Context;
@@ -13,6 +14,7 @@ import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
+import org.threeten.bp.Duration;
 
 /**
  * Like DatabaseHelper, DataModelHelper contains a number of helper classes for interacting with
@@ -24,6 +26,10 @@ public class DataModelHelper {
   private static final String TAG = DataModelHelper.class.getSimpleName();
   private static final String[] DEFAULT_PERSPECTIVE_ORDER = new String[]{"ProcessForecast",
       "ProcessInbox", "ProcessProjects", "ProcessFlagged", "ProcessNearby", "ProcessReview"};
+  private static final Duration DURATION_5M = Duration.ofMinutes(5);
+  private static final Duration DURATION_15M = Duration.ofMinutes(15);
+  private static final Duration DURATION_30M = Duration.ofMinutes(30);
+  private static final Duration DURATION_1H = Duration.ofHours(1);
   private DatabaseHelper dbHelper;
   private android.content.Context androidContext;
   private ContextHelper contextHelper;
@@ -302,7 +308,29 @@ public class DataModelHelper {
     }
 
     // FILTER BY DURATION
-    // TODO
+
+    if (task.estimatedTime != null) {
+      switch (perspective.filterDuration) {
+        case "5m":
+          // If the comparator returns a positive integer, then the task is longer than 5 minutes
+          if (task.estimatedTime.compareTo(DURATION_5M) > 0) return false;
+          break;
+        case "15m":
+          if (task.estimatedTime.compareTo(DURATION_15M) > 0) return false;
+          break;
+        case "30m":
+          if (task.estimatedTime.compareTo(DURATION_30M) > 0) return false;
+          break;
+        case "1h":
+          if (task.estimatedTime.compareTo(DURATION_1H) > 0) return false;
+          break;
+        case "long":
+          if (task.estimatedTime.compareTo(DURATION_1H) <= 0) return false;
+          break;
+        case "unestimated":
+          return false; // Will always be estimated if estimatedTime != null
+      }
+    }
 
     return true;
   }
@@ -313,7 +341,11 @@ public class DataModelHelper {
    * @param defaultSet If true, only get the default set of perspectives acccording to the iOS app,
    * which are: Forecast, Inbox, Projects, Contexts, Flagged, Nearby & Review
    */
-  public List<Perspective> getPerspectives(final boolean defaultSet) {
+  public List<Perspective> getPerspectives(boolean defaultSet) {
+
+    if (BuildConfig.DEBUG) {
+      defaultSet = false;
+    }
 
     // Get items
 
@@ -327,11 +359,9 @@ public class DataModelHelper {
 
     // Filter + Sort
 
-    String[] perspectiveOrder;
-    if (defaultSet) {
+    String[] perspectiveOrder = getPerspectiveOrder();
+    if (defaultSet || perspectiveOrder == null) {
       perspectiveOrder = DEFAULT_PERSPECTIVE_ORDER;
-    } else {
-      perspectiveOrder = getPerspectiveOrder();
     }
     List<Perspective> results = new ArrayList<>();
 
@@ -379,9 +409,14 @@ public class DataModelHelper {
   /**
    * Get a string array representing the raw order of perspectives in the sidebar
    */
-  @NonNull
+  @Nullable
   public String[] getPerspectiveOrder() {
-    return getSettingFromID("PerspectiveOrder_v2").split(",");
+    String str = getSettingFromID("PerspectiveOrder_v2");
+    if (str != null) {
+      return str.split(",");
+    } else {
+      return null;
+    }
   }
 
   /**
