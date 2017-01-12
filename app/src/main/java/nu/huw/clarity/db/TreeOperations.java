@@ -17,8 +17,9 @@ import nu.huw.clarity.BuildConfig;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
 import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
+import nu.huw.clarity.model.Settings;
+import org.threeten.bp.Duration;
 import org.threeten.bp.Instant;
-import org.threeten.bp.temporal.ChronoUnit;
 
 /**
  * There are a few columns of the SQLite Database that are generated after the sync has completed.
@@ -36,9 +37,9 @@ import org.threeten.bp.temporal.ChronoUnit;
  */
 public class TreeOperations {
 
-  public static final int DAY_IN_MILLISECONDS = 86400000;
   private static final String TAG = TreeOperations.class.getSimpleName();
   private DatabaseHelper dbHelper;
+  private Duration DUE_SOON_DURATION;
 
   public TreeOperations(Context context) {
 
@@ -50,6 +51,7 @@ public class TreeOperations {
     }
 
     dbHelper = new DatabaseHelper(context);
+    DUE_SOON_DURATION = new Settings(context).getDueSoonDuration();
   }
 
   /**
@@ -72,7 +74,8 @@ public class TreeOperations {
   /**
    * Fill down the 'dropped' attributes on contexts, then update the 'blocked' attribute on all
    * tasks that reference that context, if the context is on hold (not dropped). For more on the
-   * logic, see {@link #updateAttributesForSubtree(SQLiteDatabase, String, boolean, String, String, String, String, String, String)}  updateAttributesForSubtree()}.
+   * logic, see {@link #updateAttributesForSubtree(SQLiteDatabase, String, boolean, String, String,
+   * String, String, String, String)}  updateAttributesForSubtree()}.
    *
    * @param contextID If passed, will only update for that context
    */
@@ -101,7 +104,9 @@ public class TreeOperations {
   }
 
   /**
-   * All logic for this subroutine is in {@link #updateAttributesForSubtree(SQLiteDatabase, String, boolean, String, String, String, String, String, String)}  updateAttributesForSubtree()}, refer to thatmethod first. This essentially fills down the 'dropped' attribute recursively.
+   * All logic for this subroutine is in {@link #updateAttributesForSubtree(SQLiteDatabase, String,
+   * boolean, String, String, String, String, String, String)}  updateAttributesForSubtree()}, refer
+   * to thatmethod first. This essentially fills down the 'dropped' attribute recursively.
    */
   private void updateAttributesForContext(@NonNull SQLiteDatabase db, @Nullable String contextID,
       @Nullable String parentDropped) {
@@ -360,8 +365,9 @@ public class TreeOperations {
     // PROJECTS
 
     String[] projectColumns = new String[]{Tasks.COLUMN_ID, Tasks.COLUMN_PARENT_ID};
-    Cursor projects = dbHelper
-        .query(db, Tasks.TABLE_NAME, projectColumns, Tasks.COLUMN_PROJECT + "='1'");
+    Cursor projects = db
+        .query(Tasks.TABLE_NAME, projectColumns, Tasks.COLUMN_PROJECT + "='1'", null, null, null,
+            null);
 
     HashMap<String, Long[]> folderCounts = new HashMap<>();
 
@@ -447,10 +453,10 @@ public class TreeOperations {
       String id = (String) array.get(0);
 
       // This bit just gets the ID of the folder's parent
-      Cursor cursor = dbHelper.query(db, Folders.TABLE_NAME, new String[]{Folders.COLUMN_PARENT_ID},
-          Folders.COLUMN_ID + " = ?", new String[]{id});
+      Cursor cursor = db.query(Folders.TABLE_NAME, new String[]{Folders.COLUMN_PARENT_ID},
+          Folders.COLUMN_ID + " = ?", new String[]{id}, null, null, null);
       if (cursor != null && cursor.moveToFirst()) {
-        String parentID = dbHelper.getString(cursor, Folders.COLUMN_PARENT_ID);
+        String parentID = cursor.getString(0);
 
         Long[] childCounts = folderCounts.get(id);
 
@@ -519,8 +525,8 @@ public class TreeOperations {
           .query(Contexts.TABLE_NAME, columns, Contexts.COLUMN_PARENT_ID + " IS NULL", null, null,
               null, null);
     } else {
-      children = dbHelper.query(db, Contexts.TABLE_NAME, columns, Contexts.COLUMN_PARENT_ID + "=?",
-          new String[]{id});
+      children = db.query(Contexts.TABLE_NAME, columns, Contexts.COLUMN_PARENT_ID + "=?",
+          new String[]{id}, null, null, null);
     }
 
     int countChildren, countCompleted, countDueSoon, countOverdue, countAvailable;
@@ -600,8 +606,9 @@ public class TreeOperations {
         Tasks.COLUMN_COUNT_CHILDREN, Tasks.COLUMN_COUNT_COMPLETED, Tasks.COLUMN_COUNT_DUE_SOON,
         Tasks.COLUMN_COUNT_OVERDUE};
 
-    Cursor children = dbHelper
-        .query(db, Tasks.TABLE_NAME, columns, Tasks.COLUMN_PARENT_ID + "=?", new String[]{id});
+    Cursor children = db
+        .query(Tasks.TABLE_NAME, columns, Tasks.COLUMN_PARENT_ID + "=?", new String[]{id}, null,
+            null, null);
 
     int countChildren, countCompleted, countDueSoon, countOverdue, countAvailable;
     countChildren = countCompleted = countDueSoon = countOverdue = countAvailable = 0;
@@ -728,7 +735,7 @@ public class TreeOperations {
     if (now.isAfter(due)) {
       values.put(Tasks.COLUMN_OVERDUE, true);
     } else {
-      due.minus(7, ChronoUnit.DAYS);
+      due.minus(DUE_SOON_DURATION);
       values.put(Tasks.COLUMN_DUE_SOON, now.isAfter(due));
     }
 

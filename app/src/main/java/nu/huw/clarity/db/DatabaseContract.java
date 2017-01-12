@@ -124,7 +124,7 @@ public class DatabaseContract {
   public static abstract class Settings extends Base {
 
     public static final String TABLE_NAME = "Settings";
-    public static final String COLUMN_VALUE = "valueData"; // Keys and values for the setting and type TODO: Expand
+    public static final String COLUMN_VALUE = "valueData";
     public static final String[] columns = {COLUMN_ID, COLUMN_DATE_ADDED, COLUMN_DATE_MODIFIED,
         COLUMN_VALUE};
     public static final String CREATE = String.format(

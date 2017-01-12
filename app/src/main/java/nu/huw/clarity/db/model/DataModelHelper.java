@@ -25,10 +25,10 @@ public class DataModelHelper {
   private ContextHelper contextHelper;
   private FolderHelper folderHelper;
   private PerspectiveHelper perspectiveHelper;
+  private SettingHelper settingHelper;
   private TaskHelper taskHelper;
 
   public DataModelHelper(android.content.Context context) {
-
     dbHelper = new DatabaseHelper(context);
     this.androidContext = context;
   }
@@ -371,6 +371,19 @@ public class DataModelHelper {
     if (folderHelper == null) folderHelper = new FolderHelper(dbHelper);
 
     return folderHelper.getFolderFromID(id);
+  }
+
+  /**
+   * Get the setting with the specified ID
+   *
+   * @param id ID of a setting
+   */
+  public String getSettingFromID(String id) {
+
+    if (id == null) throw new NullPointerException("Null ID provided");
+    if (settingHelper == null) settingHelper = new SettingHelper(dbHelper);
+
+    return settingHelper.getSettingFromID(id);
   }
 
   /**
