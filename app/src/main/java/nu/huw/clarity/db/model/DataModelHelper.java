@@ -1,8 +1,10 @@
 package nu.huw.clarity.db.model;
 
+import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Comparators;
@@ -20,6 +22,8 @@ import nu.huw.clarity.model.Task;
 public class DataModelHelper {
 
   private static final String TAG = DataModelHelper.class.getSimpleName();
+  private static final String[] DEFAULT_PERSPECTIVE_ORDER = new String[]{"ProcessForecast",
+      "ProcessInbox", "ProcessProjects", "ProcessFlagged", "ProcessNearby", "ProcessReview"};
   private DatabaseHelper dbHelper;
   private android.content.Context androidContext;
   private ContextHelper contextHelper;
@@ -305,24 +309,49 @@ public class DataModelHelper {
 
   /**
    * This function will get a list of perspectives from the database
+   *
+   * @param defaultSet If true, only get the default set of perspectives acccording to the iOS app,
+   * which are: Forecast, Inbox, Projects, Contexts, Flagged, Nearby & Review
    */
-  public List<Perspective> getPerspectives() {
+  public List<Perspective> getPerspectives(final boolean defaultSet) {
 
     // Get items
 
     if (perspectiveHelper == null) {
       perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
     }
-    List<Perspective> perspectives = new ArrayList<>();
-    perspectives.addAll(perspectiveHelper.getPerspectivesFromSelection(null, null));
-    perspectives.add(perspectiveHelper.getForecast());
+    HashMap<String, Perspective> perspectives = perspectiveHelper
+        .getPerspectivesFromSelection(null, null);
+    Perspective forecast = perspectiveHelper.getForecast();
+    perspectives.put(forecast.id, forecast);
 
-    // Filter TODO
-    // Sort TODO
+    // Filter + Sort
 
-    // Convert and return
+    String[] perspectiveOrder;
+    if (defaultSet) {
+      perspectiveOrder = DEFAULT_PERSPECTIVE_ORDER;
+    } else {
+      perspectiveOrder = getPerspectiveOrder();
+    }
+    List<Perspective> results = new ArrayList<>();
 
-    return perspectives;
+    for (String id : perspectiveOrder) {
+
+      // Since we have all of our perspectives in a HashMap indexed by ID, we can use the IDs stored
+      // in settings to filter and sort our list. So we've found all the IDs in order, and we
+      // iterate through them and change them (since OmniFocus has small problems), then add them to
+      // the new list from the HashMap
+
+      id = id.replaceAll("(Process[a-zA-Z]+)\\.v2", "$1"); // Strip the '.v2' if necessary
+      if (id.equals("ProcessFlaggedItems")) id = "ProcessFlagged"; // ProcessFlagged has a problem
+
+      Perspective perspective = perspectives.get(id);
+      if (perspective != null) results.add(perspective);
+    }
+
+    // Return
+
+    return results;
   }
 
   /**
@@ -345,6 +374,14 @@ public class DataModelHelper {
       perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
     }
     return perspectiveHelper.getPlaceholder();
+  }
+
+  /**
+   * Get a string array representing the raw order of perspectives in the sidebar
+   */
+  @NonNull
+  public String[] getPerspectiveOrder() {
+    return getSettingFromID("PerspectiveOrder_v2").split(",");
   }
 
   /**

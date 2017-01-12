@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity
     // Get some perspective
     DataModelHelper dmHelper = new DataModelHelper(getApplicationContext());
     perspective = dmHelper.getPlaceholderPerspective();
-    perspectiveList = dmHelper.getPerspectives();
+    perspectiveList = dmHelper.getPerspectives(false);
 
     // Register sync receiver
     syncIntentFilter =
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity
     // We have a default menu for before the sync finishes, but as soon as that's done we
     // build the menu appropriately based on the user's own perspective choices.
 
-    perspectiveList = new DataModelHelper(getApplicationContext()).getPerspectives();
+    perspectiveList = new DataModelHelper(getApplicationContext()).getPerspectives(false);
 
     Menu menu = navigationView.getMenu();
     menu.clear();
