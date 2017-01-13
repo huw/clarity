@@ -98,13 +98,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     int type = holder.getItemViewType();
     Entry entry = entries.get(position);
 
-    if (type != Entry.VT_TASK) {
-
-      // Is header row if first item
-      // and not a task
-
-      entry.headerRow = position == 0;
-    }
+    entry.headerRow = entry == parentEntry; // if parent, then make it a header row
 
     switch (type) {
       case Entry.VT_TASK:

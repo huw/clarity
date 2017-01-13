@@ -31,7 +31,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
   public void bind(Task task, Context androidContext, Perspective perspective) {
 
-    long count = task.getCount(perspective.filterStatus);
+    long count = task.getCount(perspective);
 
     Resources res = androidContext.getResources();
 
@@ -75,7 +75,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
     // Remaining items count
 
-    int countStringID = task.getCountString(count, perspective.filterStatus);
+    int countStringID = task.getCountString(count, perspective);
     String countString = res.getString(countStringID, count);
 
     // Bold header row

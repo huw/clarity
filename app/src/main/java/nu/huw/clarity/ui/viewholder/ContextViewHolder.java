@@ -37,7 +37,7 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
       Perspective perspective) {
 
     this.entry = context;
-    long count = this.entry.getCount(perspective.filterStatus);
+    long count = this.entry.getCount(perspective);
     long dueSoonCount = this.entry.countDueSoon;
     long overdueCount = this.entry.countOverdue;
 
@@ -47,7 +47,7 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
     // (or language-dependent equivalent). If there are, then use the proper Android string
     // formatting tools to allow international users to properly read the string.
 
-    int countStringID = this.entry.getCountString(count, perspective.filterStatus);
+    int countStringID = this.entry.getCountString(count, perspective);
     String countString = res.getString(countStringID, count);
 
     // For Due Soon or Overdue items, we only display the little card (and divider) if there

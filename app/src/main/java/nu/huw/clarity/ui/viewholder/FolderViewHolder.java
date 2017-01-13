@@ -36,7 +36,7 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
   public void bind(Folder folder, Context androidContext, Perspective perspective) {
 
     this.entry = folder;
-    long count = this.entry.getCount(perspective.filterStatus);
+    long count = this.entry.getCount(perspective);
     long dueSoonCount = this.entry.countDueSoon;
     long overdueCount = this.entry.countOverdue;
 
@@ -44,7 +44,7 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
 
     // Remaining item count
 
-    int countStringID = this.entry.getCountString(count, perspective.filterStatus);
+    int countStringID = this.entry.getCountString(count, perspective);
     String countString = res.getString(countStringID, count);
 
     // Due soon / overdue badges

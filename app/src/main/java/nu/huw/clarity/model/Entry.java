@@ -101,9 +101,9 @@ public class Entry extends Base implements Comparable<Entry> {
   /**
    * Return the correct count of children given a string representing a perspective's status filter
    */
-  public long getCount(@Nullable String filterStatus) {
-    if (filterStatus == null) return countChildren;
-    switch (filterStatus) {
+  public long getCount(@Nullable Perspective perspective) {
+    if (perspective == null || perspective.filterStatus == null) return countChildren;
+    switch (perspective.filterStatus) {
       case "complete":
         return countCompleted;
       case "incomplete":
@@ -115,10 +115,11 @@ public class Entry extends Base implements Comparable<Entry> {
     }
   }
 
-  @StringRes
-  public int getCountString(long count, @Nullable String filterStatus) {
-    if (filterStatus == null) return count > 0 ? R.string.children : R.string.no_children;
-    switch (filterStatus) {
+  @StringRes public int getCountString(long count, @Nullable Perspective perspective) {
+    if (perspective == null || perspective.filterStatus == null) {
+      return count > 0 ? R.string.children : R.string.no_children;
+    }
+    switch (perspective.filterStatus) {
       case "complete":
         return count > 0 ? R.string.completed : R.string.no_completed;
       case "incomplete":
