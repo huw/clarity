@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <group
+    android:id="@+id/menugroup_main_drawer"
+    android:checkableBehavior="single">
+    <item
+      android:id="@+id/menuitem_main_forecast"
+      android:icon="@drawable/ic_forecast_red"
+      android:title="@string/forecast"/>
+    <item
+      android:id="@+id/menuitem_main_inbox"
+      android:icon="@drawable/ic_inbox_bluegrey"
+      android:title="@string/inbox"/>
+    <item
+      android:id="@+id/menuitem_main_projects"
+      android:icon="@drawable/ic_projects_blue"
+      android:title="@string/projects"/>
+    <item
+      android:id="@+id/menuitem_main_context"
+      android:icon="@drawable/ic_contexts_purple"
+      android:title="@string/contexts"/>
+    <item
+      android:id="@+id/menuitem_main_flagged"
+      android:icon="@drawable/ic_flag_orange"
+      android:title="@string/flagged"/>
+  </group>
+
+</menu>

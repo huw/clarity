@@ -1,86 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/detail_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/primary"
-    android:fitsSystemWindows="true"
-    tools:context="nu.huw.clarity.ui.DetailActivity"
-    >
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/relativelayout_detail_container"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/primary"
+  android:fitsSystemWindows="true"
+  tools:context="nu.huw.clarity.ui.DetailActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/barlayout_detail"
+  <android.support.design.widget.AppBarLayout
+    android:id="@+id/barlayout_detail"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primary"
+    android:focusableInTouchMode="true"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+    <android.support.v7.widget.Toolbar
+      android:id="@+id/toolbar_detail"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"/>
+
+    <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingStart="@dimen/horizontal_margin"
+      android:paddingEnd="@dimen/horizontal_margin">
+
+      <android.support.design.widget.TextInputLayout
+        android:id="@+id/textinputlayout_detail_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary"
-        android:focusableInTouchMode="true"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        >
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/checkcircle_detail"
+        android:theme="@style/WhiteAccent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar_detail"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
-            />
+        <android.support.design.widget.TextInputEditText
+          android:id="@+id/textinputedittext_detail_name"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:ellipsize="end"
+          android:hint="@string/prompt_name"
+          android:inputType="textMultiLine"
+          android:maxLines="3"
+          tools:text="This is a much longer name, that might cause this thing to take up multiple lines. But I'm not sure what's going to happen with it."/>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/horizontal_margin"
-            android:paddingStart="@dimen/horizontal_margin">
+      </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/detail_name_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/checkcircle"
-                android:theme="@style/WhiteAccent">
+      <nu.huw.clarity.ui.misc.CheckCircle
+        android:id="@id/checkcircle_detail"
+        android:layout_width="@dimen/check_circle_size"
+        android:layout_height="@dimen/check_circle_size"
+        android:layout_marginStart="@dimen/horizontal_margin"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:button="@drawable/widget_check_circle_light"
+        android:checked="false"/>
 
-                <android.support.design.widget.TextInputEditText
-                    android:id="@+id/detail_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:hint="@string/prompt_name"
-                    android:inputType="textMultiLine"
-                    android:maxLines="3"
-                    tools:text="This is a much longer name, that might cause this thing to take up multiple lines. But I'm not sure what's going to happen with it."
-                    />
+    </RelativeLayout>
 
-            </android.support.design.widget.TextInputLayout>
-
-            <nu.huw.clarity.ui.misc.CheckCircle
-                android:id="@id/checkcircle"
-                android:layout_width="@dimen/check_circle_size"
-                android:layout_height="@dimen/check_circle_size"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="@dimen/horizontal_margin"
-                android:button="@drawable/check_circle_light"
-                android:checked="false"
-                />
-
-        </RelativeLayout>
-
-        <!--<android.support.design.widget.TabLayout
-            android:id="@+id/detail_tabs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />-->
-
-    </android.support.design.widget.AppBarLayout>
-
-    <ScrollView
-        android:id="@+id/detail_fragment_container"
+    <!--<android.support.design.widget.TabLayout
+        android:id="@+id/detail_tabs"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/barlayout_detail"
-        android:background="@android:color/background_light"
-        />
+        android:layout_height="wrap_content"
+        />-->
+
+  </android.support.design.widget.AppBarLayout>
+
+  <ScrollView
+    android:id="@+id/scrollview_detail_fragmentcontainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_below="@id/barlayout_detail"
+    android:background="@android:color/background_light"/>
 
 </RelativeLayout>

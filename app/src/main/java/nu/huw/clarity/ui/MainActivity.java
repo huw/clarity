@@ -89,7 +89,8 @@ public class MainActivity extends AppCompatActivity
     // Add list fragment
 
     currentFragment = ListFragment.newInstance(perspective, null);
-    getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, currentFragment)
+    getSupportFragmentManager().beginTransaction()
+        .add(R.id.framelayout_main_container, currentFragment)
         .commit();
   }
 
@@ -154,7 +155,7 @@ public class MainActivity extends AppCompatActivity
     menu.clear();
 
     for (Perspective menuItem : perspectiveList) {
-      menu.add(R.id.checkable_group, menuItem.menuID, Menu.NONE, menuItem.name);
+      menu.add(R.id.menugroup_main_drawer, menuItem.menuID, Menu.NONE, menuItem.name);
       menu.findItem(menuItem.menuID).setIcon(menuItem.icon).setCheckable(true);
     }
 
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
 
-    getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+    getMenuInflater().inflate(R.menu.toolbar, menu);
     return true;
   }
 
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity
 
     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
     ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
-    ft.replace(R.id.fragment_container, newFragment);
+    ft.replace(R.id.framelayout_main_container, newFragment);
     ft.addToBackStack(null);
     ft.commit();
 
@@ -243,7 +244,7 @@ public class MainActivity extends AppCompatActivity
   private Toolbar getToolbar() {
 
     if (toolbar == null) {
-      Toolbar tb = (Toolbar) findViewById(R.id.toolbar_list);
+      Toolbar tb = (Toolbar) findViewById(R.id.toolbar_main);
 
       if (tb == null) {
         throw new NullPointerException();
@@ -258,7 +259,7 @@ public class MainActivity extends AppCompatActivity
   private DrawerLayout getDrawerLayout() {
 
     if (drawerLayout == null) {
-      DrawerLayout dl = (DrawerLayout) findViewById(R.id.drawer_layout);
+      DrawerLayout dl = (DrawerLayout) findViewById(R.id.drawerlayout_main);
 
       if (dl == null) {
         throw new NullPointerException();
@@ -273,7 +274,7 @@ public class MainActivity extends AppCompatActivity
   private NavigationView getDrawer() {
 
     if (drawer == null) {
-      NavigationView nv = (NavigationView) findViewById(R.id.drawer);
+      NavigationView nv = (NavigationView) findViewById(R.id.navigationview_main_drawer);
 
       if (nv == null) {
         throw new NullPointerException();
@@ -386,7 +387,7 @@ public class MainActivity extends AppCompatActivity
       FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
       ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in,
           R.anim.fade_out);
-      ft.replace(R.id.fragment_container, currentFragment);
+      ft.replace(R.id.framelayout_main_container, currentFragment);
       ft.commit();
 
       getDrawerLayout().closeDrawer(GravityCompat.START);
@@ -403,7 +404,7 @@ public class MainActivity extends AppCompatActivity
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in,
             R.anim.fade_out);
-        ft.replace(R.id.fragment_container, newFragment);
+        ft.replace(R.id.framelayout_main_container, newFragment);
         ft.commit();
 
         // Note: 'showProgess(false)' is called after the data has loaded in ListFragment

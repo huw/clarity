@@ -11,9 +11,10 @@ import android.os.IBinder;
  */
 public class AccountManagerAuthenticatorService extends Service {
 
-    @Override public IBinder onBind(Intent intent) {
+  @Override
+  public IBinder onBind(Intent intent) {
 
-        AccountManagerAuthenticator authenticator = new AccountManagerAuthenticator(this);
-        return authenticator.getIBinder();
-    }
+    AccountManagerAuthenticator authenticator = new AccountManagerAuthenticator(this);
+    return authenticator.getIBinder();
+  }
 }

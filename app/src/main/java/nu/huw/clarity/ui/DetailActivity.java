@@ -24,156 +24,161 @@ import nu.huw.clarity.ui.fragment.DetailFragment;
 import nu.huw.clarity.ui.misc.CheckCircle;
 
 public class DetailActivity extends AppCompatActivity
-        implements DetailFragment.OnDetailInteractionListener {
+    implements DetailFragment.OnDetailInteractionListener {
 
-    private int themeID;
+  private int themeID;
 
-    private void setupToolbar(Toolbar toolbar, int themeID) {
+  private void setupToolbar(Toolbar toolbar, int themeID) {
 
-        setSupportActionBar(toolbar);
-        final ActionBar actionBar = getSupportActionBar();
+    setSupportActionBar(toolbar);
+    final ActionBar actionBar = getSupportActionBar();
 
-        if (actionBar != null) {
-            actionBar.setTitle("");
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
-        // Set the theme to the theme we just had back in MainActivity
-        this.themeID = themeID;
-        setTheme(themeID);
-
-        AppBarLayout   abLayout   = (AppBarLayout) findViewById(R.id.barlayout_detail);
-        RelativeLayout detailView = (RelativeLayout) findViewById(R.id.detail_view);
-
-        // Set background colours depending on the view we just came from
-        if (abLayout != null && detailView != null) {
-            TypedValue typedValue = new TypedValue();
-            getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-            abLayout.setBackgroundColor(typedValue.data);
-            detailView.setBackgroundColor(typedValue.data);
-        }
+    if (actionBar != null) {
+      actionBar.setTitle("");
+      actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    // Set the theme to the theme we just had back in MainActivity
+    this.themeID = themeID;
+    setTheme(themeID);
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
+    AppBarLayout abLayout = (AppBarLayout) findViewById(R.id.barlayout_detail);
+    RelativeLayout detailView = (RelativeLayout) findViewById(R.id.relativelayout_detail_container);
 
-        Intent intent = getIntent();
-        Entry  entry;
+    // Set background colours depending on the view we just came from
+    if (abLayout != null && detailView != null) {
+      TypedValue typedValue = new TypedValue();
+      getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+      abLayout.setBackgroundColor(typedValue.data);
+      detailView.setBackgroundColor(typedValue.data);
+    }
+  }
 
-        if (intent.hasExtra("ENTRY")) {
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
 
-            // If we've passed an entry already, then just pick it up
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_detail);
 
-            entry = intent.getParcelableExtra("ENTRY");
+    Intent intent = getIntent();
+    Entry entry;
+
+    if (intent.hasExtra("ENTRY")) {
+
+      // If we've passed an entry already, then just pick it up
+
+      entry = intent.getParcelableExtra("ENTRY");
+    } else {
+      throw new IllegalArgumentException("Intent must contain 'ENTRY'");
+    }
+
+    setupToolbar((Toolbar) findViewById(R.id.toolbar_detail),
+        intent.getIntExtra("THEME_ID", R.style.AppTheme));
+
+    // Set the default text in the text field to the thing's name, and set the hint text to
+    // the thing's type
+    TextInputEditText nameView = (TextInputEditText) findViewById(
+        R.id.textinputedittext_detail_name);
+    TextInputLayout tiLayout = (TextInputLayout) findViewById(R.id.textinputlayout_detail_name);
+
+    if (nameView != null && tiLayout != null) {
+      nameView.setText(entry.name);
+
+      int hintID = R.string.prompt_name;
+
+      if (entry instanceof Task) {
+        if (((Task) entry).isProject) {
+          hintID = R.string.project;
         } else {
-            throw new IllegalArgumentException("Intent must contain 'ENTRY'");
+          hintID = R.string.task;
         }
+      } else if (entry instanceof Context) {
+        hintID = R.string.context;
+      } else if (entry instanceof Folder) {
+        hintID = R.string.folder;
+      }
 
-        setupToolbar((Toolbar) findViewById(R.id.toolbar_detail),
-                     intent.getIntExtra("THEME_ID", R.style.AppTheme));
+      nameView.setHint(hintID);
+      tiLayout.setHint(getResources().getString(hintID));
 
-        // Set the default text in the text field to the thing's name, and set the hint text to
-        // the thing's type
-        TextInputEditText nameView = (TextInputEditText) findViewById(R.id.detail_name);
-        TextInputLayout   tiLayout = (TextInputLayout) findViewById(R.id.detail_name_layout);
+      Fragment detailFragment = DetailFragment.newInstance(entry);
 
-        if (nameView != null && tiLayout != null) {
-            nameView.setText(entry.name);
-
-            int hintID = R.string.prompt_name;
-
-            if (entry instanceof Task) {
-                if (((Task) entry).isProject) {
-                    hintID = R.string.project;
-                } else {
-                    hintID = R.string.task;
-                }
-            } else if (entry instanceof Context) {
-                hintID = R.string.context;
-            } else if (entry instanceof Folder) {
-                hintID = R.string.folder;
-            }
-
-            nameView.setHint(hintID);
-            tiLayout.setHint(getResources().getString(hintID));
-
-            Fragment detailFragment = DetailFragment.newInstance(entry);
-
-            if (detailFragment != null) {
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.replace(R.id.detail_fragment_container, detailFragment);
-                ft.commit();
-            }
-        }
-
-        CheckCircle checkCircleView = (CheckCircle) findViewById(R.id.checkcircle);
-        if (entry instanceof Task) {
-            Task task = (Task) entry;
-
-            // Check circle
-            // Available tasks can have a flag, but they can't have colorised overdue/due soon
-            // circles because the user doesn't want to start them yet.
-
-            checkCircleView.setChecked(task.dateCompleted != null);
-            checkCircleView.setFlagged(task.flagged && themeID != R.style.AppTheme_Orange);
-
-            // Also, if the colour is going to clash with the background, then don't set the
-            // attribute. This applies to the red clashing with forecast, and orange clashing
-            // with flagged (in both cases the intended colour should be pretty obvious)
-
-          if (task.isRemaining()) {
-                checkCircleView.setOverdue(task.overdue && themeID != R.style.AppTheme_Red);
-                checkCircleView.setDueSoon(task.dueSoon);
-            } else {
-                checkCircleView.setOverdue(false);
-                checkCircleView.setDueSoon(false);
-            }
-        } else {
-            // Remove the check circle
-            checkCircleView.setVisibility(View.GONE);
-        }
+      if (detailFragment != null) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.scrollview_detail_fragmentcontainer, detailFragment);
+        ft.commit();
+      }
     }
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    CheckCircle checkCircleView = (CheckCircle) findViewById(R.id.checkcircle_detail);
+    if (entry instanceof Task) {
+      Task task = (Task) entry;
 
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-        }
+      // Check circle
+      // Available tasks can have a flag, but they can't have colorised overdue/due soon
+      // circles because the user doesn't want to start them yet.
 
-        return super.onOptionsItemSelected(item);
+      checkCircleView.setChecked(task.dateCompleted != null);
+      checkCircleView.setFlagged(task.flagged && themeID != R.style.AppTheme_Orange);
+
+      // Also, if the colour is going to clash with the background, then don't set the
+      // attribute. This applies to the red clashing with forecast, and orange clashing
+      // with flagged (in both cases the intended colour should be pretty obvious)
+
+      if (task.isRemaining()) {
+        checkCircleView.setOverdue(task.overdue && themeID != R.style.AppTheme_Red);
+        checkCircleView.setDueSoon(task.dueSoon);
+      } else {
+        checkCircleView.setOverdue(false);
+        checkCircleView.setDueSoon(false);
+      }
+    } else {
+      // Remove the check circle
+      checkCircleView.setVisibility(View.GONE);
+    }
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+
+    switch (item.getItemId()) {
+      case android.R.id.home:
+        finish();
+        return true;
     }
 
-    @Override public void onContextClick(String id) {
+    return super.onOptionsItemSelected(item);
+  }
 
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra("ENTRY_ID", id);
-        intent.putExtra("TABLE_NAME", DatabaseContract.Contexts.TABLE_NAME);
-        intent.putExtra("THEME_ID", themeID);
-        startActivity(intent);
+  @Override
+  public void onContextClick(String id) {
+
+    Intent intent = new Intent(this, DetailActivity.class);
+    intent.putExtra("ENTRY_ID", id);
+    intent.putExtra("TABLE_NAME", DatabaseContract.Contexts.TABLE_NAME);
+    intent.putExtra("THEME_ID", themeID);
+    startActivity(intent);
 
         /*Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("ENTRY_ID", id);
         intent.putExtra("TABLE_NAME", DatabaseContract.Contexts.TABLE_NAME);
         intent.putExtra("THEME_ID", themeID);
         startActivity(intent);*/
-    }
+  }
 
-    @Override public void onProjectClick(String id) {
+  @Override
+  public void onProjectClick(String id) {
 
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra("ENTRY_ID", id);
-        intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
-        intent.putExtra("THEME_ID", themeID);
-        startActivity(intent);
+    Intent intent = new Intent(this, DetailActivity.class);
+    intent.putExtra("ENTRY_ID", id);
+    intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
+    intent.putExtra("THEME_ID", themeID);
+    startActivity(intent);
 
         /*Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("ENTRY_ID", id);
         intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
         intent.putExtra("THEME_ID", themeID);
         startActivity(intent);*/
-    }
+  }
 }

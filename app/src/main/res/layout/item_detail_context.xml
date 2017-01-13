@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="wrap_content"
+  android:layout_height="48dp"
+  tools:context=".ui.DetailActivity">
+
+  <TextView
+    android:id="@+id/textview_detailitem_contextlabel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentStart="true"
+    android:layout_centerInParent="true"
+    android:paddingLeft="@dimen/horizontal_margin"
+    android:paddingRight="@dimen/horizontal_margin"
+    android:text="@string/context"
+    android:textColor="@color/secondary_text_light"
+    android:textSize="@dimen/subhead_size"/>
+
+  <TextView
+    android:id="@+id/textview_detailitem_contextvalue"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:layout_centerInParent="true"
+    android:layout_toEndOf="@id/textview_detailitem_contextlabel"
+    android:layout_toStartOf="@+id/imagebutton_detailitem_context"
+    android:ellipsize="end"
+    android:gravity="end"
+    android:maxLines="1"
+    android:text="@string/none"
+    android:textColor="@color/secondary_text_light"
+    android:textSize="@dimen/subhead_size"/>
+
+  <ImageButton
+    android:id="@id/imagebutton_detailitem_context"
+    android:layout_width="36dp"
+    android:layout_height="36dp"
+    android:layout_marginStart="-6dp"
+    android:layout_marginEnd="10dp"
+    android:layout_alignParentEnd="true"
+    android:layout_centerInParent="true"
+    android:background="@drawable/ripple_circle"
+    android:contentDescription="@string/detail_go_context"
+    android:src="@drawable/ic_arrow_forward"
+    android:tint="@color/primary_text_light"
+    android:visibility="gone"/>
+
+  <View
+    android:id="@+id/divider_detailitem_context"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:layout_alignParentBottom="true"
+    android:background="@color/divider_light"/>
+
+</RelativeLayout>

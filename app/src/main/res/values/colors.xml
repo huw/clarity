@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#702f96</color>
-    <color name="primary_dark">#4a1f63</color>
-    <color name="divider_light">#1f000000</color>
-    <color name="divider_dark">#1fffffff</color>
-    <color name="highlight">#f6f6f6</color>
-    <color name="background_navigation">#ffffff</color>
+  <color name="primary">#702f96</color>
+  <color name="primary_dark">#4a1f63</color>
+  <color name="divider_light">#1f000000</color>
+  <color name="divider_dark">#1fffffff</color>
+  <color name="highlight">#f6f6f6</color>
+  <color name="background_navigation">#ffffff</color>
 
-    <!-- Material Greyscale Colours -->
-    <color name="primary_text_light">#DE000000</color>
-    <color name="secondary_text_light">#8A000000</color>
-    <color name="disabled_text_light">#61000000</color>
+  <!-- Material Greyscale Colours -->
+  <color name="primary_text_light">#DE000000</color>
+  <color name="secondary_text_light">#8A000000</color>
+  <color name="disabled_text_light">#61000000</color>
 
-    <color name="primary_text_dark">#FFFFFFFF</color>
-    <color name="secondary_text_dark">#46FFFFFF</color>
-    <color name="disabled_text_dark">#80FFFFFF</color>
+  <color name="primary_text_dark">#FFFFFFFF</color>
+  <color name="secondary_text_dark">#46FFFFFF</color>
+  <color name="disabled_text_dark">#80FFFFFF</color>
 
-    <!-- Due Badge Colours -->
-    <color name="background_due_soon">#FFECB3</color>
-    <color name="background_overdue">#FFCDD2</color>
-    <color name="foreground_due_soon">#FF6F00</color>
-    <color name="foreground_overdue">#B71C1C</color>
+  <!-- Due Badge Colours -->
+  <color name="background_due_soon">#FFECB3</color>
+  <color name="background_overdue">#FFCDD2</color>
+  <color name="foreground_due_soon">#FF6F00</color>
+  <color name="foreground_overdue">#B71C1C</color>
 
-    <!-- OmniFocus Colours -->
-    <color name="flagged">@color/primary_orange</color>
-    <color name="overdue">@color/primary_red</color>
-    <color name="due_soon">#FFC107</color>
+  <!-- OmniFocus Colours -->
+  <color name="flagged">@color/primary_orange</color>
+  <color name="overdue">@color/primary_red</color>
+  <color name="due_soon">#FFC107</color>
 
-    <!-- Alternate Colours -->
-    <color name="primary_red">#F44336</color>
-    <color name="primary_red_dark">#C2352B</color>
-    <color name="primary_blue_grey">#607D8B</color>
-    <color name="primary_blue_grey_dark">#3E5059</color>
-    <color name="primary_blue">#2196F3</color>
-    <color name="primary_blue_dark">#1B75BF</color>
-    <color name="primary_orange">#FF9100</color>
-    <color name="primary_orange_dark">#E64A19</color>
-    <color name="primary_green">#4CAF50</color>
-    <color name="primary_green_dark">#367D38</color>
+  <!-- Alternate Colours -->
+  <color name="primary_red">#F44336</color>
+  <color name="primary_red_dark">#C2352B</color>
+  <color name="primary_blue_grey">#607D8B</color>
+  <color name="primary_blue_grey_dark">#3E5059</color>
+  <color name="primary_blue">#2196F3</color>
+  <color name="primary_blue_dark">#1B75BF</color>
+  <color name="primary_orange">#FF9100</color>
+  <color name="primary_orange_dark">#E64A19</color>
+  <color name="primary_green">#4CAF50</color>
+  <color name="primary_green_dark">#367D38</color>
 </resources>

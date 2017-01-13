@@ -23,9 +23,9 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
   public NestedTaskViewHolder(View view, ListAdapter adapter) {
 
     super(view, adapter);
-    nameView = (TextView) view.findViewById(R.id.name);
-    remainingView = (TextView) view.findViewById(R.id.remaining);
-    dateView = (TextView) view.findViewById(R.id.date);
+    nameView = (TextView) view.findViewById(R.id.textview_listitem_name);
+    remainingView = (TextView) view.findViewById(R.id.textview_listitem_count);
+    dateView = (TextView) view.findViewById(R.id.textview_listitem_date);
   }
 
   public void bind(Task task, Context androidContext) {

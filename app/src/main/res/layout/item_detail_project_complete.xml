@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="wrap_content"
+  android:layout_height="48dp"
+  tools:context=".ui.DetailActivity">
+
+  <TextView
+    android:id="@+id/textview_detailitem_projectcompletelabel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:layout_toStartOf="@+id/switch_detailitem_projectcomplete"
+    android:paddingLeft="@dimen/horizontal_margin"
+    android:paddingRight="@dimen/horizontal_margin"
+    android:ellipsize="middle"
+    android:maxLines="2"
+    android:text="@string/project_complete"
+    android:textColor="@color/secondary_text_light"
+    android:textSize="@dimen/subhead_size"/>
+
+  <android.support.v7.widget.SwitchCompat
+    android:id="@id/switch_detailitem_projectcomplete"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/horizontal_margin"
+    android:layout_alignParentEnd="true"
+    android:layout_centerInParent="true"
+    android:enabled="false"/>
+
+  <View
+    android:id="@+id/divider_detailitem_projectcomplete"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:layout_alignParentBottom="true"
+    android:background="@color/divider_light"/>
+
+</RelativeLayout>

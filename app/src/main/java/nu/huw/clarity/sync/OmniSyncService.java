@@ -9,20 +9,22 @@ import android.os.IBinder;
  */
 public class OmniSyncService extends Service {
 
-    private static final Object          syncAdapterLock = new Object();
-    private static       OmniSyncAdapter syncAdapter     = null;
+  private static final Object syncAdapterLock = new Object();
+  private static OmniSyncAdapter syncAdapter = null;
 
-    @Override public void onCreate() {
+  @Override
+  public void onCreate() {
 
-        synchronized (syncAdapterLock) {
-            if (syncAdapter == null) {
-                syncAdapter = new OmniSyncAdapter(getApplicationContext(), true);
-            }
-        }
+    synchronized (syncAdapterLock) {
+      if (syncAdapter == null) {
+        syncAdapter = new OmniSyncAdapter(getApplicationContext(), true);
+      }
     }
+  }
 
-    @Override public IBinder onBind(Intent intent) {
+  @Override
+  public IBinder onBind(Intent intent) {
 
-        return syncAdapter.getSyncAdapterBinder();
-    }
+    return syncAdapter.getSyncAdapterBinder();
+  }
 }

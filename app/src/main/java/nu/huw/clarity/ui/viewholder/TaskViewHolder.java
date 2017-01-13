@@ -28,10 +28,10 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
 
     super(view, adapter);
     this.view = view;
-    nameView = (TextView) view.findViewById(R.id.name);
-    contextView = (TextView) view.findViewById(R.id.context);
-    dateView = (TextView) view.findViewById(R.id.date);
-    checkCircleView = (CheckCircle) view.findViewById(R.id.checkcircle);
+    nameView = (TextView) view.findViewById(R.id.textview_listitem_name);
+    contextView = (TextView) view.findViewById(R.id.textview_listitem_context);
+    dateView = (TextView) view.findViewById(R.id.textview_listitem_date);
+    checkCircleView = (CheckCircle) view.findViewById(R.id.checkcircle_listitem);
   }
 
   public void bind(final Task task, Context androidContext) {

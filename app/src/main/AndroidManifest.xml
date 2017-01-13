@@ -54,7 +54,7 @@
       </intent-filter>
       <meta-data
         android:name="android.content.SyncAdapter"
-        android:resource="@xml/syncadapter"/>
+        android:resource="@xml/adapter_sync"/>
     </service>
 
     <activity android:name=".ui.DetailActivity"/>

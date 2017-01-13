@@ -8,7 +8,6 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
 import nu.huw.clarity.ui.LoginActivity;
 
 /**
@@ -17,63 +16,67 @@ import nu.huw.clarity.ui.LoginActivity;
  */
 public class AccountManagerAuthenticator extends AbstractAccountAuthenticator {
 
-    private final Context mContext;
+  private final Context mContext;
 
-    public AccountManagerAuthenticator(Context context) {
+  public AccountManagerAuthenticator(Context context) {
 
-        super(context);
+    super(context);
 
-        mContext = context;
-    }
+    mContext = context;
+  }
 
-    @Override public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
-                                       String authTokenType, String[] requiredFeatures,
-                                       Bundle options) throws NetworkErrorException {
+  @Override
+  public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
+      String authTokenType, String[] requiredFeatures,
+      Bundle options) throws NetworkErrorException {
 
-        final Intent intent = new Intent(mContext, LoginActivity.class);
-        intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+    final Intent intent = new Intent(mContext, LoginActivity.class);
+    intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 
-        final Bundle bundle = new Bundle();
-        bundle.putParcelable(AccountManager.KEY_INTENT, intent);
-        return bundle;
-    }
+    final Bundle bundle = new Bundle();
+    bundle.putParcelable(AccountManager.KEY_INTENT, intent);
+    return bundle;
+  }
 
-    @Override public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account,
-                                         String authTokenType, Bundle options)
-            throws NetworkErrorException {
+  @Override
+  public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account,
+      String authTokenType, Bundle options)
+      throws NetworkErrorException {
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override public String getAuthTokenLabel(String authTokenType) {
+  @Override
+  public String getAuthTokenLabel(String authTokenType) {
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
+  @Override
+  public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account,
-                                        String[] features) throws NetworkErrorException {
+  @Override
+  public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account,
+      String[] features) throws NetworkErrorException {
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account,
-                                     Bundle options) throws NetworkErrorException {
+  @Override
+  public Bundle confirmCredentials(AccountAuthenticatorResponse response, Account account,
+      Bundle options) throws NetworkErrorException {
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account,
-                                    String authTokenType, Bundle options)
-            throws NetworkErrorException {
+  @Override
+  public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account,
+      String authTokenType, Bundle options)
+      throws NetworkErrorException {
 
-        return null;
-    }
+    return null;
+  }
 }

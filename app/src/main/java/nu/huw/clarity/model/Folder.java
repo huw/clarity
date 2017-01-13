@@ -2,7 +2,6 @@ package nu.huw.clarity.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import nu.huw.clarity.db.model.DataModelHelper;
 
 /**
@@ -10,31 +9,34 @@ import nu.huw.clarity.db.model.DataModelHelper;
  */
 public class Folder extends Entry {
 
-    public static final Parcelable.Creator<Folder> CREATOR = new Parcelable.Creator<Folder>() {
-        public Folder createFromParcel(Parcel in) {
+  public static final Parcelable.Creator<Folder> CREATOR = new Parcelable.Creator<Folder>() {
+    public Folder createFromParcel(Parcel in) {
 
-            return new Folder(in);
-        }
-
-        public Folder[] newArray(int size) {
-
-            return new Folder[size];
-        }
-    };
-
-    public Folder() {}
-
-    protected Folder(Parcel in) {
-
-        super(in);
+      return new Folder(in);
     }
 
-    public @Override Entry getParent(android.content.Context androidContext) {
+    public Folder[] newArray(int size) {
 
-        if (parent == null) {
-            DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
-            parent = dataModelHelper.getFolderFromID(parentID);
-        }
-        return parent;
+      return new Folder[size];
     }
+  };
+
+  public Folder() {
+  }
+
+  protected Folder(Parcel in) {
+
+    super(in);
+  }
+
+  public
+  @Override
+  Entry getParent(android.content.Context androidContext) {
+
+    if (parent == null) {
+      DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+      parent = dataModelHelper.getFolderFromID(parentID);
+    }
+    return parent;
+  }
 }

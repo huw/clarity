@@ -9,10 +9,12 @@ import com.dd.plist.NSArray;
 import com.dd.plist.NSDictionary;
 import com.dd.plist.NSObject;
 import com.dd.plist.NSString;
+import com.dd.plist.PropertyListFormatException;
 import com.dd.plist.PropertyListParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.text.ParseException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -385,8 +387,10 @@ public class SyncDownParser {
             values.put(Perspectives.COLUMN_VIEW_MODE, viewMode);
             values.put(Perspectives.COLUMN_GROUP, group);
             values.put(Perspectives.COLUMN_SORT, sort);
-          } catch (Exception e) {
-            Log.e(TAG, "Failed to parse perspective", e);
+          } catch (IOException | ParseException | SAXException | ParserConfigurationException e) {
+            Log.e(TAG, "Error parsing perspective", e);
+          } catch (PropertyListFormatException e) {
+            Log.e(TAG, "Plist is malformed", e);
           }
         } else if (table.equals(Settings.TABLE_NAME)) {
 
@@ -424,8 +428,10 @@ public class SyncDownParser {
 
                 value = Duration.ofSeconds(Long.valueOf(value)).toString();
             }
-          } catch (Exception e) {
-            Log.e(TAG, "Failed to parse setting", e);
+          } catch (IOException | ParseException | SAXException | ParserConfigurationException e) {
+            Log.e(TAG, "Error parsing setting", e);
+          } catch (PropertyListFormatException e) {
+            Log.e(TAG, "Plist is malformed", e);
           }
         }
 

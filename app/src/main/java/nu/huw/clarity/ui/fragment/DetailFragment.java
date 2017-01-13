@@ -109,27 +109,28 @@ public class DetailFragment extends Fragment {
       typeStringID = R.string.project_parallel;
     }
 
-    ((TextView) view.findViewById(R.id.detail_project_type_value)).setText(typeStringID);
+    ((TextView) view.findViewById(R.id.textview_detailitem_projecttypevalue)).setText(typeStringID);
 
     // Project status field
     if (entry.dropped) {
-      ((TextView) view.findViewById(R.id.detail_status_value)).setText(R.string.status_dropped);
+      ((TextView) view.findViewById(R.id.textview_detailitem_statusvalue))
+          .setText(R.string.status_dropped);
     }
 
     // 'Complete when completing last action'
     if (entry.completeWithChildren) {
-      ((SwitchCompat) view.findViewById(R.id.detail_project_complete_switch)).setChecked(true);
+      ((SwitchCompat) view.findViewById(R.id.switch_detailitem_projectcomplete)).setChecked(true);
     }
 
     // Context field
     if (entry.contextID != null) {
       final Context context = entry.getContext(getContext());
 
-      TextView tv = (TextView) view.findViewById(R.id.detail_context_name);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_contextvalue);
       tv.setText(context.name);
       tv.setTextColor(PRIMARY_TEXT);
 
-      ImageButton ib = (ImageButton) view.findViewById(R.id.detail_context_button);
+      ImageButton ib = (ImageButton) view.findViewById(R.id.imagebutton_detailitem_context);
       ib.setVisibility(View.VISIBLE);
       ib.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -142,14 +143,14 @@ public class DetailFragment extends Fragment {
 
     // Flagged icon
     if (entry.flagged || entry.flaggedEffective) {
-      ((ToggleButton) view.findViewById(R.id.detail_flag_button)).setChecked(true);
+      ((ToggleButton) view.findViewById(R.id.textview_detailitem_flagvalue)).setChecked(true);
     }
 
     // Estimated duration
     if (entry.estimatedTime != null) {
       String time =
           String.valueOf(entry.estimatedTime.toMinutes()) + " " + getString(R.string.minutes);
-      TextView tv = (TextView) view.findViewById(R.id.detail_duration_value);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_durationvalue);
 
       tv.setText(time);
       tv.setTextColor(PRIMARY_TEXT);
@@ -158,7 +159,7 @@ public class DetailFragment extends Fragment {
     // Defer
     if (entry.dateDefer != null) {
       String date = entry.dateDefer.format(dateTimeFormatter);
-      TextView tv = (TextView) view.findViewById(R.id.detail_defer_value);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_defervalue);
 
       tv.setText(date);
       tv.setTextColor(PRIMARY_TEXT);
@@ -166,7 +167,7 @@ public class DetailFragment extends Fragment {
     if (entry.dateDeferEffective != null) {
 
       String date = entry.dateDeferEffective.format(dateTimeFormatter);
-      TextView tv = ((TextView) view.findViewById(R.id.detail_defer_value));
+      TextView tv = ((TextView) view.findViewById(R.id.textview_detailitem_defervalue));
 
       // Set the text _and_ italicise it
       tv.setText(date);
@@ -177,12 +178,12 @@ public class DetailFragment extends Fragment {
     // Due
     if (entry.dateDue != null) {
       String date = entry.dateDue.format(dateTimeFormatter);
-      TextView tv = (TextView) view.findViewById(R.id.detail_due_value);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_duevalue);
       tv.setText(date);
       tv.setTextColor(PRIMARY_TEXT);
     } else if (entry.dateDueEffective != null) {
       String date = entry.dateDueEffective.format(dateTimeFormatter);
-      TextView tv = ((TextView) view.findViewById(R.id.detail_due_value));
+      TextView tv = ((TextView) view.findViewById(R.id.textview_detailitem_duevalue));
       tv.setText(date);
       tv.setTextColor(PRIMARY_TEXT);
       tv.setTypeface(null, Typeface.ITALIC);
@@ -190,7 +191,7 @@ public class DetailFragment extends Fragment {
 
     // Repeat
     if (entry.repetitionRule != null) {
-      TextView tv = (TextView) view.findViewById(R.id.detail_repeat_value);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_repeatvalue);
       tv.setText(R.string.repeating);
       tv.setTextColor(PRIMARY_TEXT);
     }
@@ -208,11 +209,11 @@ public class DetailFragment extends Fragment {
     if (entry.projectID != null) {
       final Task project = entry.getProject(getContext());
 
-      TextView tv = (TextView) view.findViewById(R.id.detail_project_name);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_projectvalue);
       tv.setText(project.name);
       tv.setTextColor(PRIMARY_TEXT);
 
-      ImageButton ib = (ImageButton) view.findViewById(R.id.detail_project_button);
+      ImageButton ib = (ImageButton) view.findViewById(R.id.imagebutton_detailitem_project);
       ib.setVisibility(View.VISIBLE);
       ib.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -228,11 +229,11 @@ public class DetailFragment extends Fragment {
 
       final Context context = entry.getContext(getContext());
 
-      TextView tv = (TextView) view.findViewById(R.id.detail_context_name);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_contextvalue);
       tv.setText(context.name);
       tv.setTextColor(PRIMARY_TEXT);
 
-      ImageButton ib = (ImageButton) view.findViewById(R.id.detail_context_button);
+      ImageButton ib = (ImageButton) view.findViewById(R.id.imagebutton_detailitem_context);
       ib.setVisibility(View.VISIBLE);
       ib.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -245,14 +246,14 @@ public class DetailFragment extends Fragment {
 
     // Flagged icon
     if (entry.flagged || entry.flaggedEffective) {
-      ((ToggleButton) view.findViewById(R.id.detail_flag_button)).setChecked(true);
+      ((ToggleButton) view.findViewById(R.id.textview_detailitem_flagvalue)).setChecked(true);
     }
 
     // Estimated duration
     if (entry.estimatedTime != null) {
       String time =
           String.valueOf(entry.estimatedTime.toMinutes()) + " " + getString(R.string.minutes);
-      TextView tv = (TextView) view.findViewById(R.id.detail_duration_value);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_durationvalue);
 
       tv.setText(time);
       tv.setTextColor(PRIMARY_TEXT);
@@ -261,14 +262,14 @@ public class DetailFragment extends Fragment {
     // Defer
     if (entry.dateDefer != null) {
       String date = entry.dateDefer.format(dateTimeFormatter);
-      TextView tv = (TextView) view.findViewById(R.id.detail_defer_value);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_defervalue);
 
       tv.setText(date);
       tv.setTextColor(PRIMARY_TEXT);
     } else if (entry.dateDeferEffective != null) {
 
       String date = entry.dateDeferEffective.format(dateTimeFormatter);
-      TextView tv = ((TextView) view.findViewById(R.id.detail_defer_value));
+      TextView tv = ((TextView) view.findViewById(R.id.textview_detailitem_defervalue));
 
       // Set the text _and_ italicise it
       tv.setText(date);
@@ -279,12 +280,12 @@ public class DetailFragment extends Fragment {
     // Due
     if (entry.dateDue != null) {
       String date = entry.dateDue.format(dateTimeFormatter);
-      TextView tv = (TextView) view.findViewById(R.id.detail_due_value);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_duevalue);
       tv.setText(date);
       tv.setTextColor(PRIMARY_TEXT);
     } else if (entry.dateDueEffective != null) {
       String date = entry.dateDueEffective.format(dateTimeFormatter);
-      TextView tv = ((TextView) view.findViewById(R.id.detail_due_value));
+      TextView tv = ((TextView) view.findViewById(R.id.textview_detailitem_duevalue));
       tv.setText(date);
       tv.setTextColor(PRIMARY_TEXT);
       tv.setTypeface(null, Typeface.ITALIC);
@@ -292,7 +293,7 @@ public class DetailFragment extends Fragment {
 
     // Repeat
     if (entry.repetitionRule != null) {
-      TextView tv = (TextView) view.findViewById(R.id.detail_repeat_value);
+      TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_repeatvalue);
       tv.setText(R.string.repeating);
       tv.setTextColor(PRIMARY_TEXT);
     }
@@ -306,7 +307,7 @@ public class DetailFragment extends Fragment {
 
     // Status
     if (((Context) entry).droppedEffective) {
-      ((TextView) view.findViewById(R.id.detail_status_value))
+      ((TextView) view.findViewById(R.id.textview_detailitem_statusvalue))
           .setText(R.string.status_dropped);
     }
 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+  <item android:drawable="@drawable/widget_check_circle_complete_dark"
+        android:state_checked="true"/>
+  <item android:drawable="@drawable/widget_check_circle_flagged_overdue"
+        app:state_flagged="true"
+        app:state_overdue="true"/>
+  <item android:drawable="@drawable/widget_check_circle_flagged_due_soon"
+        app:state_due_soon="true"
+        app:state_flagged="true"/>
+  <item android:drawable="@drawable/widget_check_circle_overdue"
+        app:state_overdue="true"/>
+  <item android:drawable="@drawable/widget_check_circle_due_soon"
+        app:state_due_soon="true"/>
+  <item android:drawable="@drawable/widget_check_circle_flagged"
+        app:state_flagged="true"/>
+  <item android:drawable="@drawable/widget_check_circle_default_dark"
+        android:state_checked="false"
+        app:state_due_soon="false"
+        app:state_flagged="false"
+        app:state_overdue="false"/>
+  <item android:drawable="@drawable/widget_check_circle_default_dark"/>
+</selector>

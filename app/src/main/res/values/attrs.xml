@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="check_circle">
-        <attr name="state_flagged" format="boolean"/>
-        <attr name="state_overdue" format="boolean"/>
-        <attr name="state_due_soon" format="boolean"/>
-    </declare-styleable>
+  <declare-styleable name="check_circle">
+    <attr format="boolean" name="state_flagged"/>
+    <attr format="boolean" name="state_overdue"/>
+    <attr format="boolean" name="state_due_soon"/>
+  </declare-styleable>
 </resources>

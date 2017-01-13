@@ -1,12 +1,12 @@
 <resources>
-    <dimen name="horizontal_margin">16dp</dimen>
-    <dimen name="vertical_margin">16dp</dimen>
-    <dimen name="vertical_divider">12dp</dimen>
-    <dimen name="list_item_height">72dp</dimen>
-    <dimen name="drawer_item_height">48dp</dimen>
-    <dimen name="drawer_image_side">40dp</dimen>
-    <dimen name="dot_divider_margin">2dp</dimen>
-    <dimen name="due_border_radius">2dp</dimen>
-    <dimen name="due_padding">2dp</dimen>
-    <dimen name="check_circle_size">40dp</dimen>
+  <dimen name="horizontal_margin">16dp</dimen>
+  <dimen name="vertical_margin">16dp</dimen>
+  <dimen name="vertical_divider">12dp</dimen>
+  <dimen name="list_item_height">72dp</dimen>
+  <dimen name="drawer_item_height">48dp</dimen>
+  <dimen name="drawer_image_side">40dp</dimen>
+  <dimen name="dot_divider_margin">2dp</dimen>
+  <dimen name="due_border_radius">2dp</dimen>
+  <dimen name="due_padding">2dp</dimen>
+  <dimen name="check_circle_size">40dp</dimen>
 </resources>

@@ -62,7 +62,7 @@ class PerspectiveHelper {
     // Don't set `group` or `sort` because Forecast uses a custom grouping/sorting
 
     perspective.name = androidContext.getString(R.string.forecast);
-    perspective.menuID = R.id.nav_forecast;
+    perspective.menuID = R.id.menuitem_main_forecast;
     perspective.themeID = R.style.AppTheme_Red;
     perspective.color = R.color.primary_red;
     perspective.colorStateListID = R.color.state_list_red;
@@ -133,25 +133,25 @@ class PerspectiveHelper {
       case "ProcessFlagged":
         perspective.color = R.color.primary_orange;
         perspective.colorStateListID = R.color.state_list_orange;
-        perspective.menuID = R.id.nav_flagged;
+        perspective.menuID = R.id.menuitem_main_flagged;
         perspective.themeID = R.style.AppTheme_Orange;
         break;
       case "ProcessContexts":
         perspective.color = R.color.primary;
         perspective.colorStateListID = R.color.state_list_purple;
-        perspective.menuID = R.id.nav_contexts;
+        perspective.menuID = R.id.menuitem_main_context;
         perspective.themeID = R.style.AppTheme;
         break;
       case "ProcessProjects":
         perspective.color = R.color.primary_blue;
         perspective.colorStateListID = R.color.state_list_blue;
-        perspective.menuID = R.id.nav_projects;
+        perspective.menuID = R.id.menuitem_main_projects;
         perspective.themeID = R.style.AppTheme_Blue;
         break;
       case "ProcessInbox":
         perspective.color = R.color.primary_blue_grey;
         perspective.colorStateListID = R.color.state_list_blue_grey;
-        perspective.menuID = R.id.nav_inbox;
+        perspective.menuID = R.id.menuitem_main_inbox;
         perspective.themeID = R.style.AppTheme_BlueGrey;
         break;
       default:

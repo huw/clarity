@@ -3,15 +3,13 @@ package nu.huw.clarity.sync;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-
 import nu.huw.clarity.account.AccountManagerHelper;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 /**
  * Given a single file, downloads it and returns the file object. Designed to be used in an
@@ -19,84 +17,86 @@ import nu.huw.clarity.account.AccountManagerHelper;
  */
 class DownloadFileTask extends AsyncTask<Object, Void, File> {
 
-    private static final String TAG = DownloadFileTask.class.getSimpleName();
-    private final TaskListener taskListener;
+  private static final String TAG = DownloadFileTask.class.getSimpleName();
+  private final TaskListener taskListener;
 
-    DownloadFileTask(TaskListener listener) {
+  DownloadFileTask(TaskListener listener) {
 
-        taskListener = listener;
-    }
+    taskListener = listener;
+  }
 
-    DownloadFileTask() {
+  DownloadFileTask() {
 
-        taskListener = null;
-    }
+    taskListener = null;
+  }
 
-    @Override protected File doInBackground(Object... params) {
+  @Override
+  protected File doInBackground(Object... params) {
 
-        Context              context  = (Context) params[1];
-        File                 file     = (File) params[0];
-        AccountManagerHelper AMHelper = new AccountManagerHelper(context);
-        HttpClient           client   = (HttpClient) params[2];
+    Context context = (Context) params[1];
+    File file = (File) params[0];
+    AccountManagerHelper AMHelper = new AccountManagerHelper(context);
+    HttpClient client = (HttpClient) params[2];
 
-        GetMethod getFileMethod = new GetMethod(AMHelper.getOfocusURI() + file.getName());
+    GetMethod getFileMethod = new GetMethod(AMHelper.getOfocusURI() + file.getName());
 
-        try {
+    try {
 
-            client.executeMethod(getFileMethod);
+      client.executeMethod(getFileMethod);
 
-            if (getFileMethod.getStatusCode() == 200) {
+      if (getFileMethod.getStatusCode() == 200) {
 
-                // Basically, we make a GetMethod using standard procedure. Then we
-                // open its results up into a stream (making sure NOT to call
-                // `.releaseConnection()` until we're done), and bitwise copy the in
-                // stream to the out stream. THEN we close everything. File downloaded.
+        // Basically, we make a GetMethod using standard procedure. Then we
+        // open its results up into a stream (making sure NOT to call
+        // `.releaseConnection()` until we're done), and bitwise copy the in
+        // stream to the out stream. THEN we close everything. File downloaded.
 
-                InputStream      input   = getFileMethod.getResponseBodyAsStream();
-                File             outFile =
-                        File.createTempFile(file.getName(), null, context.getCacheDir());
-                RandomAccessFile output  = new RandomAccessFile(outFile, "rw");
+        InputStream input = getFileMethod.getResponseBodyAsStream();
+        File outFile =
+            File.createTempFile(file.getName(), null, context.getCacheDir());
+        RandomAccessFile output = new RandomAccessFile(outFile, "rw");
 
-                // Copy input stream to output stream, bitwise
-                byte data[] = new byte[4096];
-                int  count;
-                while ((count = input.read(data)) != -1) {
-                    output.write(data, 0, count);
-                }
-
-                // Be extra careful not to cross streams
-                // First time this joke has been made, ever
-
-                input.close();
-                output.close();
-
-                getFileMethod.releaseConnection();
-
-                Log.v(TAG, params[0] + " successfully downloaded (" + file.length() + " bytes)");
-
-                return outFile;
-            } else {
-                Log.e(TAG, "Unexpected WebDAV status " + getFileMethod.getStatusCode() + ": " +
-                           getFileMethod.getStatusText());
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Unexpected " + e.getClass().getName() + ": " + e.getMessage(), e);
+        // Copy input stream to output stream, bitwise
+        byte data[] = new byte[4096];
+        int count;
+        while ((count = input.read(data)) != -1) {
+          output.write(data, 0, count);
         }
 
-        return null;
+        // Be extra careful not to cross streams
+        // First time this joke has been made, ever
+
+        input.close();
+        output.close();
+
+        getFileMethod.releaseConnection();
+
+        Log.v(TAG, params[0] + " successfully downloaded (" + file.length() + " bytes)");
+
+        return outFile;
+      } else {
+        Log.e(TAG, "Unexpected WebDAV status " + getFileMethod.getStatusCode() + ": " +
+            getFileMethod.getStatusText());
+      }
+    } catch (IOException e) {
+      Log.e(TAG, "Error reading/writing file", e);
     }
 
-    @Override protected void onPostExecute(File result) {
+    return null;
+  }
 
-        super.onPostExecute(result);
+  @Override
+  protected void onPostExecute(File result) {
 
-        if (this.taskListener != null) {
-            this.taskListener.onFinished(result);
-        }
+    super.onPostExecute(result);
+
+    if (this.taskListener != null) {
+      this.taskListener.onFinished(result);
     }
+  }
 
-    interface TaskListener {
+  interface TaskListener {
 
-        void onFinished(File result);
-    }
+    void onFinished(File result);
+  }
 }

@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-
 import nu.huw.clarity.R;
 
 /**
@@ -17,76 +16,79 @@ import nu.huw.clarity.R;
  */
 public class ErrorDialogFragment extends DialogFragment {
 
-    private static final String TAG = ErrorDialogFragment.class.getSimpleName();
+  private static final String TAG = ErrorDialogFragment.class.getSimpleName();
 
-    public ErrorDialogFragment() {
-        // Required empty public constructor
-    }
+  public ErrorDialogFragment() {
+    // Required empty public constructor
+  }
 
-    @Override @NonNull public Dialog onCreateDialog(Bundle savedInstanceState) {
+  @Override
+  @NonNull
+  public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        super.onCreateDialog(savedInstanceState);
+    super.onCreateDialog(savedInstanceState);
 
-        Bundle args           = getArguments();
-        String message        = args.getString("MESSAGE", "");
-        String positiveString = args.getString("BUTTON_STRING", getString(R.string.try_again));
+    Bundle args = getArguments();
+    String message = args.getString("MESSAGE", "");
+    String positiveString = args.getString("BUTTON_STRING", getString(R.string.try_again));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(message);
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    builder.setMessage(message);
 
-        builder.setPositiveButton(positiveString, new DialogInterface.OnClickListener() {
-            @Override public void onClick(DialogInterface dialog, int which) {
+    builder.setPositiveButton(positiveString, new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
 
-                // (The code up to here explains itself)
-                // These two onClick responses pass a result back to the Activity
-                // that called up the dialog. The positive button gives an 'ok',
-                // and the negative gives a 'cancelled'.
-                //
-                // They do this because the activity implements a listener function
-                // which we then pass back to. If it doesn't (and we get an error),
-                // then we dismiss the message.
+        // (The code up to here explains itself)
+        // These two onClick responses pass a result back to the Activity
+        // that called up the dialog. The positive button gives an 'ok',
+        // and the negative gives a 'cancelled'.
+        //
+        // They do this because the activity implements a listener function
+        // which we then pass back to. If it doesn't (and we get an error),
+        // then we dismiss the message.
 
-                try {
+        try {
 
-                    onErrorDismissListener activity = (onErrorDismissListener) getActivity();
-                    activity.onErrorDismiss(Activity.RESULT_OK);
-                } catch (ClassCastException e) {
-                    Log.e(TAG, getActivity().getPackageName() +
-                               " should implement onErrorDismiss to receive results");
-                }
-            }
-        });
-
-        // Only build a 'cancel' button if there's not another action.
-        // I.E. If the string on the positive button is 'Got it', then
-        // the negative button is doing exactly the same thing. So
-        // there's no need for duplicate buttons
-
-        if (!positiveString.equals(getString(R.string.got_it))) {
-
-            builder.setNegativeButton(android.R.string.cancel,
-                                      new DialogInterface.OnClickListener() {
-                                          @Override
-                                          public void onClick(DialogInterface dialog, int which) {
-
-                                              try {
-                                                  onErrorDismissListener activity =
-                                                          (onErrorDismissListener) getActivity();
-                                                  activity.onErrorDismiss(Activity.RESULT_CANCELED);
-                                              } catch (ClassCastException e) {
-                                                  Log.e(TAG, getActivity().getPackageName() +
-                                                             " should implement onErrorDismiss to" +
-                                                             " receive results");
-                                              }
-                                          }
-                                      });
+          onErrorDismissListener activity = (onErrorDismissListener) getActivity();
+          activity.onErrorDismiss(Activity.RESULT_OK);
+        } catch (ClassCastException e) {
+          Log.e(TAG, getActivity().getPackageName() +
+              " should implement onErrorDismiss to receive results");
         }
+      }
+    });
 
-        return builder.create();
+    // Only build a 'cancel' button if there's not another action.
+    // I.E. If the string on the positive button is 'Got it', then
+    // the negative button is doing exactly the same thing. So
+    // there's no need for duplicate buttons
+
+    if (!positiveString.equals(getString(R.string.got_it))) {
+
+      builder.setNegativeButton(android.R.string.cancel,
+          new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+              try {
+                onErrorDismissListener activity =
+                    (onErrorDismissListener) getActivity();
+                activity.onErrorDismiss(Activity.RESULT_CANCELED);
+              } catch (ClassCastException e) {
+                Log.e(TAG, getActivity().getPackageName() +
+                    " should implement onErrorDismiss to" +
+                    " receive results");
+              }
+            }
+          });
     }
 
-    public interface onErrorDismissListener {
+    return builder.create();
+  }
 
-        void onErrorDismiss(int resultCode);
-    }
+  public interface onErrorDismissListener {
+
+    void onErrorDismiss(int resultCode);
+  }
 }

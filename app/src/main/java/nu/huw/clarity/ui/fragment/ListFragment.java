@@ -23,9 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-
 import java.util.List;
-
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.model.ListLoader;
@@ -41,323 +39,342 @@ import nu.huw.clarity.ui.misc.DividerItemDecoration;
  */
 public class ListFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Entry>> {
 
-    private static final String TAG = ListFragment.class.getSimpleName();
-    private ListFragment.OnListFragmentInteractionListener mListener;
-    private Bundle                                         mArgs;
-    private ListAdapter                                    mAdapter;
-    private View                                           mView;
-    private SwipeRefreshLayout                             mSwipeLayout;
-    private RecyclerView                                   mRecyclerView;
-    private RelativeLayout                                 mEmptyState;
-    private ProgressBar                                    mSpinner;
-    private Entry                                          mParent;
-    private Perspective                                    mPerspective;
-    private boolean mLoaded = false;
-    private IntentFilter syncIntentFilter;
-    private BroadcastReceiver syncReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
+  private static final String TAG = ListFragment.class.getSimpleName();
+  private ListFragment.OnListFragmentInteractionListener mListener;
+  private Bundle mArgs;
+  private ListAdapter mAdapter;
+  private View mView;
+  private SwipeRefreshLayout mSwipeLayout;
+  private RecyclerView mRecyclerView;
+  private RelativeLayout mEmptyState;
+  private ProgressBar mSpinner;
+  private Entry mParent;
+  private Perspective mPerspective;
+  private boolean mLoaded = false;
+  private IntentFilter syncIntentFilter;
+  private BroadcastReceiver syncReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
 
-            // Get objects
+      // Get objects
 
-            if (mView == null) return;
-            if (mArgs == null) mArgs = getArguments();
+      if (mView == null) return;
+      if (mArgs == null) mArgs = getArguments();
 
-            // Set swipe layout
+      // Set swipe layout
 
-            checkForSyncs();
+      checkForSyncs();
 
-            // Request a reload
+      // Request a reload
 
-            if (mArgs != null) {
-                getLoaderManager().initLoader(0, mArgs, ListFragment.this);
-            }
+      if (mArgs != null) {
+        getLoaderManager().initLoader(0, mArgs, ListFragment.this);
+      }
+    }
+  };
+
+  public ListFragment() {
+  }
+
+  /**
+   * Creates a new ListFragment
+   *
+   * @param perspective Perspective to determine filtering
+   * @param parent Parent Entry, can be null
+   */
+  public static ListFragment newInstance(Perspective perspective, @Nullable Entry parent) {
+
+    ListFragment fragment = new ListFragment();
+    Bundle args = new Bundle();
+    args.putParcelable("perspective", perspective);
+    args.putParcelable("parent", parent);
+    fragment.setArguments(args);
+    return fragment;
+  }
+
+  /**
+   * Called when creating the fragment object (not view)
+   * Includes general instantiation stuff
+   */
+  @Override
+  public void onCreate(@Nullable Bundle savedInstanceState) {
+
+    super.onCreate(savedInstanceState);
+    Context context = getContext();
+    mArgs = getArguments();
+
+    // Setup sync receiver
+
+    if (context != null) {
+      syncIntentFilter = new IntentFilter(context.getString(R.string.sync_broadcast_intent));
+    }
+
+    // Setup loader
+
+    if (mArgs != null) {
+      getLoaderManager().initLoader(0, mArgs, this);
+    }
+
+    // Setup list adapter
+
+    mAdapter = new ListAdapter(getContext(), mListener);
+  }
+
+  /**
+   * Called when creating the view
+   * Sets up the view & the swipe spinner
+   */
+  @Nullable
+  @Override
+  public View onCreateView(LayoutInflater inflater,
+      @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+
+    Context context = getContext();
+
+    // Inflate view
+
+    mView = inflater.inflate(R.layout.fragment_list, container, false);
+
+    // Setup swipe-to-refresh
+
+    AccountManagerHelper AMHelper = new AccountManagerHelper(getContext());
+    if (AMHelper.doesAccountExist()) {
+
+      // Get view & account
+
+      mSwipeLayout = (SwipeRefreshLayout) mView.findViewById(R.id.swiperefreshlayout_list);
+      final Account account = AMHelper.getAccount();
+      final String authority = getString(R.string.authority);
+
+      // Set refresh ring colours
+
+      TypedValue typedValue = new TypedValue();
+      getContext().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+      int color = typedValue.data;
+      mSwipeLayout.setColorSchemeColors(color);
+
+      // Set listener
+
+      mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        @Override
+        public void onRefresh() {
+
+          ContentResolver.requestSync(account, authority, new Bundle());
         }
-    };
+      });
 
-    public ListFragment() {}
+      // Check for current syncs
 
-    /**
-     * Creates a new ListFragment
-     *
-     * @param perspective Perspective to determine filtering
-     * @param parent      Parent Entry, can be null
-     */
-    public static ListFragment newInstance(Perspective perspective, @Nullable Entry parent) {
-
-        ListFragment fragment = new ListFragment();
-        Bundle       args     = new Bundle();
-        args.putParcelable("perspective", perspective);
-        args.putParcelable("parent", parent);
-        fragment.setArguments(args);
-        return fragment;
+      checkForSyncs();
     }
 
-    /**
-     * Called when creating the fragment object (not view)
-     * Includes general instantiation stuff
-     */
-    @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    // Setup recycler view & adapter
 
-        super.onCreate(savedInstanceState);
-        Context context = getContext();
-        mArgs = getArguments();
+    mRecyclerView = (RecyclerView) mView.findViewById(R.id.recyclerview_list);
+    mEmptyState = (RelativeLayout) mView.findViewById(R.id.relativelayout_list_empty);
+    mSpinner = (ProgressBar) mView.findViewById(R.id.progressbar_list_spinner);
 
-        // Setup sync receiver
+    mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+    mRecyclerView.invalidateItemDecorations();
+    mRecyclerView.addItemDecoration(new DividerItemDecoration(context));
+    mRecyclerView.setItemAnimator(null); // otherwise new items fade in (huge annoyance)
 
-        if (context != null) {
-            syncIntentFilter = new IntentFilter(context.getString(R.string.sync_broadcast_intent));
-        }
+    // Set adapter & refresh views
 
-        // Setup loader
+    mRecyclerView.setAdapter(mAdapter);
+    refreshAdapterViews();
 
-        if (mArgs != null) {
-            getLoaderManager().initLoader(0, mArgs, this);
-        }
+    return mView;
+  }
 
-        // Setup list adapter
+  /**
+   * Given an adapter, appropriately set it on the recycler view and display it to the user if it
+   * has any items.
+   */
+  private void refreshAdapterViews() {
 
-        mAdapter = new ListAdapter(getContext(), mListener);
+    if (mView == null || mAdapter == null) return;
+    if (mRecyclerView == null) {
+      mRecyclerView = (RecyclerView) mView.findViewById(R.id.recyclerview_list);
+    }
+    if (mEmptyState == null) {
+      mEmptyState = (RelativeLayout) mView.findViewById(R.id.relativelayout_list_empty);
+    }
+    if (mSpinner == null) {
+      mSpinner = (ProgressBar) mView.findViewById(R.id.progressbar_list_spinner);
     }
 
-    /**
-     * Called when creating the view
-     * Sets up the view & the swipe spinner
-     */
-    @Nullable @Override public View onCreateView(LayoutInflater inflater,
-                                                 @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    // Show the spinner if we're loading something, the empty state if we loaded nothing, and
+    // the recycler view if we loaded something.
 
-        Context context = getContext();
+    if (mAdapter.getItemCount() > 0) {
 
-        // Inflate view
+      // Show the recycler view if the adapter has items
 
-        mView = inflater.inflate(R.layout.fragment_list, container, false);
+      mRecyclerView.setVisibility(View.VISIBLE);
+      mEmptyState.setVisibility(View.GONE);
+      mSpinner.setVisibility(View.GONE);
+    } else if (mLoaded) {
 
-        // Setup swipe-to-refresh
+      // Show the empty state if the adapter is empty and we've tried to load something
 
-        AccountManagerHelper AMHelper = new AccountManagerHelper(getContext());
-        if (AMHelper.doesAccountExist()) {
+      mRecyclerView.setVisibility(View.GONE);
+      mEmptyState.setVisibility(View.VISIBLE);
+      mSpinner.setVisibility(View.GONE);
+    } else {
 
-            // Get view & account
+      // Show nothing
 
-            mSwipeLayout = (SwipeRefreshLayout) mView.findViewById(R.id.list_refresh);
-            final Account account   = AMHelper.getAccount();
-            final String  authority = getString(R.string.authority);
+      mRecyclerView.setVisibility(View.GONE);
+      mEmptyState.setVisibility(View.GONE);
+      mSpinner.setVisibility(View.VISIBLE);
+    }
+  }
 
-            // Set refresh ring colours
+  /**
+   * Checks for any running syncs and appropriately sets the swipe layout's spinner
+   */
+  public boolean checkForSyncs() {
 
-            TypedValue typedValue = new TypedValue();
-            getContext().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-            int color = typedValue.data;
-            mSwipeLayout.setColorSchemeColors(color);
+    String authority = getString(R.string.authority);
 
-            // Set listener
-
-            mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override public void onRefresh() {
-
-                    ContentResolver.requestSync(account, authority, new Bundle());
-                }
-            });
-
-            // Check for current syncs
-
-            checkForSyncs();
-        }
-
-        // Setup recycler view & adapter
-
-        mRecyclerView = (RecyclerView) mView.findViewById(R.id.list);
-        mEmptyState = (RelativeLayout) mView.findViewById(R.id.empty_state);
-        mSpinner = (ProgressBar) mView.findViewById(R.id.list_progress);
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-        mRecyclerView.invalidateItemDecorations();
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(context));
-        mRecyclerView.setItemAnimator(null); // otherwise new items fade in (huge annoyance)
-
-        // Set adapter & refresh views
-
-        mRecyclerView.setAdapter(mAdapter);
-        refreshAdapterViews();
-
-        return mView;
+    boolean active = false;
+    for (SyncInfo syncInfo : ContentResolver.getCurrentSyncs()) {
+      if (syncInfo.authority.equals(authority)) {
+        active = true;
+      }
     }
 
-    /**
-     * Given an adapter, appropriately set it on the recycler view and display it to the user if it
-     * has any items.
-     */
-    private void refreshAdapterViews() {
+    if (mView != null) {
+      if (mSwipeLayout != null) {
+        mSwipeLayout = (SwipeRefreshLayout) mView.findViewById(R.id.swiperefreshlayout_list);
+      }
 
-        if (mView == null || mAdapter == null) return;
-        if (mRecyclerView == null) mRecyclerView = (RecyclerView) mView.findViewById(R.id.list);
-        if (mEmptyState == null) {
-            mEmptyState = (RelativeLayout) mView.findViewById(R.id.empty_state);
-        }
-        if (mSpinner == null) mSpinner = (ProgressBar) mView.findViewById(R.id.list_progress);
+      if (mSwipeLayout == null) return active;
 
-        // Show the spinner if we're loading something, the empty state if we loaded nothing, and
-        // the recycler view if we loaded something.
+      if (active) {
 
-        if (mAdapter.getItemCount() > 0) {
+        // Weird bug with swipe layouts
+        // See: http://stackoverflow.com/a/26910973
 
-            // Show the recycler view if the adapter has items
+        mSwipeLayout.post(new Runnable() {
+          @Override
+          public void run() {
 
-            mRecyclerView.setVisibility(View.VISIBLE);
-            mEmptyState.setVisibility(View.GONE);
-            mSpinner.setVisibility(View.GONE);
-        } else if (mLoaded) {
+            mSwipeLayout.setRefreshing(true);
+          }
+        });
+      } else {
+        mSwipeLayout.post(new Runnable() {
+          @Override
+          public void run() {
 
-            // Show the empty state if the adapter is empty and we've tried to load something
-
-            mRecyclerView.setVisibility(View.GONE);
-            mEmptyState.setVisibility(View.VISIBLE);
-            mSpinner.setVisibility(View.GONE);
-        } else {
-
-            // Show nothing
-
-            mRecyclerView.setVisibility(View.GONE);
-            mEmptyState.setVisibility(View.GONE);
-            mSpinner.setVisibility(View.VISIBLE);
-        }
+            mSwipeLayout.setRefreshing(false);
+          }
+        });
+      }
     }
 
-    /**
-     * Checks for any running syncs and appropriately sets the swipe layout's spinner
-     */
-    public boolean checkForSyncs() {
+    return active;
+  }
 
-        String authority = getString(R.string.authority);
+  /**
+   * Return an appropriate loader given the arguments
+   *
+   * @param id ID of requested loader (currently irrelevant)
+   * @param args A bundle including arguments to retrieve a loder with
+   * @return A ListLoader
+   */
+  @Override
+  public Loader<List<Entry>> onCreateLoader(int id, Bundle args) {
 
-        boolean active = false;
-        for (SyncInfo syncInfo : ContentResolver.getCurrentSyncs()) {
-            if (syncInfo.authority.equals(authority)) {
-                active = true;
-            }
-        }
+    if (args != null && args.containsKey("perspective")) {
 
-        if (mView != null) {
-            if (mSwipeLayout != null) {
-                mSwipeLayout = (SwipeRefreshLayout) mView.findViewById(R.id.list_refresh);
-            }
+      mPerspective = args.getParcelable("perspective");
+      mParent = args.getParcelable("parent");
 
-            if (mSwipeLayout == null) return active;
-
-            if (active) {
-
-                // Weird bug with swipe layouts
-                // See: http://stackoverflow.com/a/26910973
-
-                mSwipeLayout.post(new Runnable() {
-                    @Override public void run() {
-
-                        mSwipeLayout.setRefreshing(true);
-                    }
-                });
-            } else {
-                mSwipeLayout.post(new Runnable() {
-                    @Override public void run() {
-
-                        mSwipeLayout.setRefreshing(false);
-                    }
-                });
-            }
-        }
-
-        return active;
+      return new ListLoader(getContext(), mPerspective, mParent);
     }
 
-    /**
-     * Return an appropriate loader given the arguments
-     *
-     * @param id   ID of requested loader (currently irrelevant)
-     * @param args A bundle including arguments to retrieve a loder with
-     *
-     * @return A ListLoader
-     */
-    @Override public Loader<List<Entry>> onCreateLoader(int id, Bundle args) {
+    throw new IllegalArgumentException("Argument bundle requires 'perspective' key");
+  }
 
-        if (args != null && args.containsKey("perspective")) {
+  /**
+   * Once the load is done, refresh the adapter and view
+   */
+  @Override
+  public void onLoadFinished(Loader<List<Entry>> loader, List<Entry> data) {
 
-            mPerspective = args.getParcelable("perspective");
-            mParent = args.getParcelable("parent");
+    mAdapter.setData(mParent, data);
 
-            return new ListLoader(getContext(), mPerspective, mParent);
-        }
+    Log.i(TAG, "Load finished (ListFragment)");
 
-        throw new IllegalArgumentException("Argument bundle requires 'perspective' key");
+    checkForSyncs();
+    refreshAdapterViews();
+
+    mLoaded = true;
+  }
+
+  /**
+   * Nothing needs to be cleaned up
+   */
+  @Override
+  public void onLoaderReset(Loader<List<Entry>> loader) {
+  }
+
+  /**
+   * Register and deregister the sync receiver when this fragment is no longer showing
+   */
+  @Override
+  public void onPause() {
+
+    super.onPause();
+
+    LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(syncReceiver);
+    checkForSyncs();
+  }
+
+  @Override
+  public void onResume() {
+
+    super.onResume();
+
+    LocalBroadcastManager.getInstance(getContext())
+        .registerReceiver(syncReceiver, syncIntentFilter);
+    checkForSyncs();
+  }
+
+  /**
+   * Register and deregister the fragment interaction listener
+   */
+  @Override
+  public void onAttach(Context context) {
+
+    super.onAttach(context);
+    if (context instanceof ListFragment.OnListFragmentInteractionListener) {
+      mListener = (ListFragment.OnListFragmentInteractionListener) context;
+    } else {
+      throw new RuntimeException(
+          context.toString() + " must implement OnListFragmentInteractionListener");
     }
+  }
 
-    /**
-     * Once the load is done, refresh the adapter and view
-     */
-    @Override public void onLoadFinished(Loader<List<Entry>> loader, List<Entry> data) {
+  @Override
+  public void onDetach() {
 
-        mAdapter.setData(mParent, data);
+    super.onDetach();
+    mListener = null;
+  }
 
-        Log.i(TAG, "Load finished (ListFragment)");
+  /**
+   * This interface must be implemented by activities that contain this
+   * fragment to allow an interaction in this fragment to be communicated
+   * to the activity and potentially other fragments contained in that
+   * activity.
+   */
+  public interface OnListFragmentInteractionListener {
 
-        checkForSyncs();
-        refreshAdapterViews();
-
-        mLoaded = true;
-    }
-
-    /**
-     * Nothing needs to be cleaned up
-     */
-    @Override public void onLoaderReset(Loader<List<Entry>> loader) {}
-
-    /**
-     * Register and deregister the sync receiver when this fragment is no longer showing
-     */
-    @Override public void onPause() {
-
-        super.onPause();
-
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(syncReceiver);
-        checkForSyncs();
-    }
-
-    @Override public void onResume() {
-
-        super.onResume();
-
-        LocalBroadcastManager.getInstance(getContext())
-                             .registerReceiver(syncReceiver, syncIntentFilter);
-        checkForSyncs();
-    }
-
-    /**
-     * Register and deregister the fragment interaction listener
-     */
-    @Override public void onAttach(Context context) {
-
-        super.onAttach(context);
-        if (context instanceof ListFragment.OnListFragmentInteractionListener) {
-            mListener = (ListFragment.OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(
-                    context.toString() + " must implement OnListFragmentInteractionListener");
-        }
-    }
-
-    @Override public void onDetach() {
-
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     */
-    public interface OnListFragmentInteractionListener {
-
-        void onListFragmentInteraction(ListAdapter.ViewHolder holder);
-    }
+    void onListFragmentInteraction(ListAdapter.ViewHolder holder);
+  }
 }
