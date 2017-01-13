@@ -157,6 +157,16 @@ public class Task extends Entry {
     return parent;
   }
 
+  @Override
+  public int getViewType() {
+    if (isProject) {
+      return VT_PROJECT;
+    } else if (isParent()) {
+      return VT_NESTED_TASK;
+    }
+    return VT_TASK;
+  }
+
   /**
    * Get the current task's enclosing context (if it exists) into the data model
    *

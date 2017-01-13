@@ -44,6 +44,10 @@
   <string name="available">%d available</string>
   <string name="no_remaining">no items remaining</string>
   <string name="remaining">%d remaining</string>
+  <string name="no_completed">no items completed</string>
+  <string name="completed">%d completed</string>
+  <string name="no_children">no items</string>
+  <string name="children">%d items</string>
   <string name="due_soon">%d due soon</string>
   <string name="overdue">%d overdue</string>
   <string name="no_context">No Context</string>

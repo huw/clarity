@@ -10,6 +10,7 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.fragment.ListFragment.OnListFragmentInteractionListener;
 import nu.huw.clarity.ui.viewholder.ContextViewHolder;
@@ -25,50 +26,32 @@ import nu.huw.clarity.ui.viewholder.TaskViewHolder;
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
   private static final String TAG = ListAdapter.class.getSimpleName();
-  private final OnListFragmentInteractionListener mListener;
-  private final android.content.Context mAndroidContext;
-  private final int TASK_VIEW_TYPE = 1;
-  private final int CONTEXT_VIEW_TYPE = 2;
-  private final int FOLDER_VIEW_TYPE = 3;
-  private final int PROJECT_VIEW_TYPE = 4;
-  private final int NESTED_TASK_VIEW_TYPE = 5;
-  private Entry mParent = null;
-  private List<Entry> mEntries = new ArrayList<>();
+  private final OnListFragmentInteractionListener listener;
+  private final android.content.Context androidContext;
+  private Perspective perspective;
+  private Entry parentEntry;
+  private List<Entry> entries = new ArrayList<>();
 
-  public ListAdapter(android.content.Context context,
+  public ListAdapter(android.content.Context androidContext,
       OnListFragmentInteractionListener listener) {
-
-    mAndroidContext = context;
-    mListener = listener;
+    this.androidContext = androidContext;
+    this.listener = listener;
   }
 
-  public void setData(Entry parent, List<Entry> items) {
+  public void setData(Perspective perspective, Entry parent, List<Entry> items) {
 
-    if (mEntries != null) notifyItemRangeRemoved(0, getItemCount());
+    if (entries != null) notifyItemRangeRemoved(0, getItemCount());
 
-    this.mParent = parent;
-    this.mEntries = items;
+    this.perspective = perspective;
+    this.parentEntry = parent;
+    this.entries = items;
 
     notifyItemRangeInserted(0, getItemCount());
   }
 
   @Override
   public int getItemViewType(int position) {
-
-    Entry item = mEntries.get(position);
-
-    if (item instanceof Task) {
-      if (((Task) item).isProject) {
-        return PROJECT_VIEW_TYPE;
-      } else if (((Task) item).isParent()) {
-        return NESTED_TASK_VIEW_TYPE;
-      }
-    } else if (item instanceof Context) {
-      return CONTEXT_VIEW_TYPE;
-    } else if (item instanceof Folder) {
-      return FOLDER_VIEW_TYPE;
-    }
-    return TASK_VIEW_TYPE;
+    return entries.get(position).getViewType();
   }
 
   /**
@@ -81,29 +64,29 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     View view;
 
     switch (viewType) {
-      case TASK_VIEW_TYPE:
+      case Entry.VT_TASK:
         view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.fragment_task, parent, false);
         return new TaskViewHolder(view, this);
-      case CONTEXT_VIEW_TYPE:
+      case Entry.VT_CONTEXT:
         view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.fragment_context, parent, false);
         return new ContextViewHolder(view, this);
-      case FOLDER_VIEW_TYPE:
+      case Entry.VT_FOLDER:
         view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.fragment_folder, parent, false);
         return new FolderViewHolder(view, this);
-      case PROJECT_VIEW_TYPE:
+      case Entry.VT_PROJECT:
         view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.fragment_project, parent, false);
         return new ProjectViewHolder(view, this);
-      case NESTED_TASK_VIEW_TYPE:
+      case Entry.VT_NESTED_TASK:
         view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.fragment_nested_task, parent, false);
         return new NestedTaskViewHolder(view, this);
     }
 
-    return new ViewHolder(new View(mAndroidContext), this);
+    return new ViewHolder(new View(androidContext), this);
   }
 
   /**
@@ -113,27 +96,36 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
   public void onBindViewHolder(final ViewHolder holder, int position) {
 
     int type = holder.getItemViewType();
+    Entry entry = entries.get(position);
+
+    if (type != Entry.VT_TASK) {
+
+      // Is header row if first item
+      // and not a task
+
+      entry.headerRow = position == 0;
+    }
 
     switch (type) {
-      case TASK_VIEW_TYPE:
-        Task task = (Task) mEntries.get(position);
-        ((TaskViewHolder) holder).bind(task, mAndroidContext);
+      case Entry.VT_TASK:
+        Task task = (Task) entry;
+        ((TaskViewHolder) holder).bind(task, androidContext, perspective);
         break;
-      case CONTEXT_VIEW_TYPE:
-        Context context = (Context) mEntries.get(position);
-        ((ContextViewHolder) holder).bind(context, this.mAndroidContext);
+      case Entry.VT_CONTEXT:
+        Context context = (Context) entry;
+        ((ContextViewHolder) holder).bind(context, this.androidContext, perspective);
         break;
-      case FOLDER_VIEW_TYPE:
-        Folder folder = (Folder) mEntries.get(position);
-        ((FolderViewHolder) holder).bind(folder, this.mAndroidContext);
+      case Entry.VT_FOLDER:
+        Folder folder = (Folder) entry;
+        ((FolderViewHolder) holder).bind(folder, this.androidContext, perspective);
         break;
-      case PROJECT_VIEW_TYPE:
-        Task project = (Task) mEntries.get(position);
-        ((ProjectViewHolder) holder).bind(project, this.mAndroidContext);
+      case Entry.VT_PROJECT:
+        Task project = (Task) entry;
+        ((ProjectViewHolder) holder).bind(project, this.androidContext, perspective);
         break;
-      case NESTED_TASK_VIEW_TYPE:
-        Task nestedTask = (Task) mEntries.get(position);
-        ((NestedTaskViewHolder) holder).bind(nestedTask, this.mAndroidContext);
+      case Entry.VT_NESTED_TASK:
+        Task nestedTask = (Task) entry;
+        ((NestedTaskViewHolder) holder).bind(nestedTask, this.androidContext, perspective);
         break;
     }
 
@@ -141,10 +133,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
       @Override
       public void onClick(View v) {
 
-        if (null != mListener) {
+        if (null != listener) {
           // Notify the active callbacks interface (the activity, if the
           // fragment is attached to one) that an item has been selected.
-          mListener.onListFragmentInteraction(holder);
+          listener.onListFragmentInteraction(holder);
         }
       }
     });
@@ -155,22 +147,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
    */
   @Override
   public int getItemCount() {
-
-    return mEntries.size();
+    return entries.size();
   }
 
   public void removeItem(Entry entry) {
-
-    int position = mEntries.indexOf(entry);
-    mEntries.remove(position);
+    int position = entries.indexOf(entry);
+    entries.remove(position);
     notifyItemRemoved(position);
-  }
-
-  public void enableHeader(boolean enable) {
-
-    if (mParent != null) {
-      mParent.headerRow = enable;
-    }
   }
 
   public static class ViewHolder extends RecyclerView.ViewHolder {

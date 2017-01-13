@@ -68,7 +68,7 @@
     android:layout_toEndOf="@id/textview_listitem_countduesoon"/>
 
   <TextView
-    android:id="@+id/textview_listitem_overdue"
+    android:id="@+id/textview_listitem_countoverdue"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignBaseline="@id/divider_listitem_countoverdue"

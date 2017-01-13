@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 
 /**
@@ -14,30 +15,31 @@ import nu.huw.clarity.ui.adapter.ListAdapter;
  */
 public class ContextViewHolder extends ListAdapter.ViewHolder {
 
-  public final TextView nameView;
-  public final TextView availableView;
-  public final TextView dueSoonView;
-  public final TextView overdueView;
-  public final TextView dueSoonDivider;
-  public final TextView overdueDivider;
+  private final TextView nameView;
+  private final TextView countView;
+  private final TextView dueSoonCountView;
+  private final TextView overdueCountView;
+  private final TextView dueSoonDivider;
+  private final TextView overdueDivider;
 
   public ContextViewHolder(View view, ListAdapter adapter) {
 
     super(view, adapter);
     nameView = (TextView) view.findViewById(R.id.textview_listitem_name);
-    availableView = (TextView) view.findViewById(R.id.textview_listitem_count);
-    dueSoonView = (TextView) view.findViewById(R.id.textview_listitem_countduesoon);
-    overdueView = (TextView) view.findViewById(R.id.textview_listitem_overdue);
+    countView = (TextView) view.findViewById(R.id.textview_listitem_count);
+    dueSoonCountView = (TextView) view.findViewById(R.id.textview_listitem_countduesoon);
+    overdueCountView = (TextView) view.findViewById(R.id.textview_listitem_countoverdue);
     dueSoonDivider = (TextView) view.findViewById(R.id.divider_listitem_duesoon);
     overdueDivider = (TextView) view.findViewById(R.id.divider_listitem_countoverdue);
   }
 
-  public void bind(Context context, android.content.Context androidContext) {
+  public void bind(Context context, android.content.Context androidContext,
+      Perspective perspective) {
 
     this.entry = context;
-    long available = this.entry.countAvailable;
-    long dueSoon = this.entry.countDueSoon;
-    long overdue = this.entry.countOverdue;
+    long count = this.entry.getCount(perspective.filterStatus);
+    long dueSoonCount = this.entry.countDueSoon;
+    long overdueCount = this.entry.countOverdue;
 
     Resources res = androidContext.getResources();
 
@@ -45,29 +47,25 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
     // (or language-dependent equivalent). If there are, then use the proper Android string
     // formatting tools to allow international users to properly read the string.
 
-    String availableString;
-    if (available > 0) {
-      availableString = res.getString(R.string.available, available);
-    } else {
-      availableString = res.getString(R.string.no_available);
-    }
+    int countStringID = this.entry.getCountString(count, perspective.filterStatus);
+    String countString = res.getString(countStringID, count);
 
     // For Due Soon or Overdue items, we only display the little card (and divider) if there
     // are any. So there's no need for empty state strings.
 
-    if (dueSoon > 0) {
-      String dueSoonString = res.getString(R.string.due_soon, dueSoon);
-      dueSoonView.setText(dueSoonString);
+    if (dueSoonCount > 0) {
+      String dueSoonString = res.getString(R.string.due_soon, dueSoonCount);
+      dueSoonCountView.setText(dueSoonString);
     } else {
-      dueSoonView.setVisibility(View.GONE);
+      dueSoonCountView.setVisibility(View.GONE);
       dueSoonDivider.setVisibility(View.GONE);
     }
 
-    if (overdue > 0) {
-      String overdueString = res.getString(R.string.overdue, overdue);
-      overdueView.setText(overdueString);
+    if (overdueCount > 0) {
+      String overdueString = res.getString(R.string.overdue, overdueCount);
+      overdueCountView.setText(overdueString);
     } else {
-      overdueView.setVisibility(View.GONE);
+      overdueCountView.setVisibility(View.GONE);
       overdueDivider.setVisibility(View.GONE);
     }
 
@@ -87,6 +85,6 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
     }
 
     nameView.setText(this.entry.name);
-    availableView.setText(availableString);
+    countView.setText(countString);
   }
 }

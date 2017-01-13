@@ -70,4 +70,9 @@ public class Context extends Entry {
     }
     return parent;
   }
+
+  @Override
+  public int getViewType() {
+    return VT_CONTEXT;
+  }
 }

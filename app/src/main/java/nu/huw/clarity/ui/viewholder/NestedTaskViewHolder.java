@@ -7,6 +7,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
 import nu.huw.clarity.R;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -28,9 +29,9 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
     dateView = (TextView) view.findViewById(R.id.textview_listitem_date);
   }
 
-  public void bind(Task task, Context androidContext) {
+  public void bind(Task task, Context androidContext, Perspective perspective) {
 
-    long remaining = task.countRemaining;
+    long count = task.getCount(perspective.filterStatus);
 
     Resources res = androidContext.getResources();
 
@@ -74,12 +75,8 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
     // Remaining items count
 
-    String remainingString;
-    if (remaining > 0) {
-      remainingString = res.getString(R.string.remaining, remaining);
-    } else {
-      remainingString = res.getString(R.string.no_remaining);
-    }
+    int countStringID = task.getCountString(count, perspective.filterStatus);
+    String countString = res.getString(countStringID, count);
 
     // Bold header row
 
@@ -89,7 +86,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
     nameView.setText(task.name);
     dateView.setText(date);
-    remainingView.setText(remainingString);
+    remainingView.setText(countString);
 
     this.entry = task;
   }

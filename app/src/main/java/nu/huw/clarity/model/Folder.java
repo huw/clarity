@@ -39,4 +39,9 @@ public class Folder extends Entry {
     }
     return parent;
   }
+
+  @Override
+  public int getViewType() {
+    return VT_FOLDER;
+  }
 }

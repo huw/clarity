@@ -40,17 +40,17 @@ import nu.huw.clarity.ui.misc.DividerItemDecoration;
 public class ListFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Entry>> {
 
   private static final String TAG = ListFragment.class.getSimpleName();
-  private ListFragment.OnListFragmentInteractionListener mListener;
-  private Bundle mArgs;
-  private ListAdapter mAdapter;
-  private View mView;
-  private SwipeRefreshLayout mSwipeLayout;
-  private RecyclerView mRecyclerView;
-  private RelativeLayout mEmptyState;
-  private ProgressBar mSpinner;
-  private Entry mParent;
-  private Perspective mPerspective;
-  private boolean mLoaded = false;
+  private ListFragment.OnListFragmentInteractionListener fragmentInteractionListener;
+  private Bundle args;
+  private ListAdapter adapter;
+  private View view;
+  private SwipeRefreshLayout swipeRefreshLayout;
+  private RecyclerView recyclerView;
+  private RelativeLayout emptyState;
+  private ProgressBar spinner;
+  private Entry parentEntry;
+  private Perspective perspective;
+  private boolean loaded = false;
   private IntentFilter syncIntentFilter;
   private BroadcastReceiver syncReceiver = new BroadcastReceiver() {
     @Override
@@ -58,8 +58,8 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
       // Get objects
 
-      if (mView == null) return;
-      if (mArgs == null) mArgs = getArguments();
+      if (view == null) return;
+      if (args == null) args = getArguments();
 
       // Set swipe layout
 
@@ -67,8 +67,8 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
       // Request a reload
 
-      if (mArgs != null) {
-        getLoaderManager().initLoader(0, mArgs, ListFragment.this);
+      if (args != null) {
+        getLoaderManager().initLoader(0, args, ListFragment.this);
       }
     }
   };
@@ -101,7 +101,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     super.onCreate(savedInstanceState);
     Context context = getContext();
-    mArgs = getArguments();
+    args = getArguments();
 
     // Setup sync receiver
 
@@ -111,13 +111,13 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // Setup loader
 
-    if (mArgs != null) {
-      getLoaderManager().initLoader(0, mArgs, this);
+    if (args != null) {
+      getLoaderManager().initLoader(0, args, this);
     }
 
     // Setup list adapter
 
-    mAdapter = new ListAdapter(getContext(), mListener);
+    adapter = new ListAdapter(getContext(), fragmentInteractionListener);
   }
 
   /**
@@ -134,7 +134,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // Inflate view
 
-    mView = inflater.inflate(R.layout.fragment_list, container, false);
+    view = inflater.inflate(R.layout.fragment_list, container, false);
 
     // Setup swipe-to-refresh
 
@@ -143,7 +143,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
       // Get view & account
 
-      mSwipeLayout = (SwipeRefreshLayout) mView.findViewById(R.id.swiperefreshlayout_list);
+      swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefreshlayout_list);
       final Account account = AMHelper.getAccount();
       final String authority = getString(R.string.authority);
 
@@ -152,11 +152,11 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
       TypedValue typedValue = new TypedValue();
       getContext().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
       int color = typedValue.data;
-      mSwipeLayout.setColorSchemeColors(color);
+      swipeRefreshLayout.setColorSchemeColors(color);
 
       // Set listener
 
-      mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+      swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
 
@@ -171,21 +171,21 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // Setup recycler view & adapter
 
-    mRecyclerView = (RecyclerView) mView.findViewById(R.id.recyclerview_list);
-    mEmptyState = (RelativeLayout) mView.findViewById(R.id.relativelayout_list_empty);
-    mSpinner = (ProgressBar) mView.findViewById(R.id.progressbar_list_spinner);
+    recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_list);
+    emptyState = (RelativeLayout) view.findViewById(R.id.relativelayout_list_empty);
+    spinner = (ProgressBar) view.findViewById(R.id.progressbar_list_spinner);
 
-    mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-    mRecyclerView.invalidateItemDecorations();
-    mRecyclerView.addItemDecoration(new DividerItemDecoration(context));
-    mRecyclerView.setItemAnimator(null); // otherwise new items fade in (huge annoyance)
+    recyclerView.setLayoutManager(new LinearLayoutManager(context));
+    recyclerView.invalidateItemDecorations();
+    recyclerView.addItemDecoration(new DividerItemDecoration(context));
+    recyclerView.setItemAnimator(null); // otherwise new items fade in (huge annoyance)
 
     // Set adapter & refresh views
 
-    mRecyclerView.setAdapter(mAdapter);
+    recyclerView.setAdapter(adapter);
     refreshAdapterViews();
 
-    return mView;
+    return view;
   }
 
   /**
@@ -194,41 +194,41 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
    */
   private void refreshAdapterViews() {
 
-    if (mView == null || mAdapter == null) return;
-    if (mRecyclerView == null) {
-      mRecyclerView = (RecyclerView) mView.findViewById(R.id.recyclerview_list);
+    if (view == null || adapter == null) return;
+    if (recyclerView == null) {
+      recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_list);
     }
-    if (mEmptyState == null) {
-      mEmptyState = (RelativeLayout) mView.findViewById(R.id.relativelayout_list_empty);
+    if (emptyState == null) {
+      emptyState = (RelativeLayout) view.findViewById(R.id.relativelayout_list_empty);
     }
-    if (mSpinner == null) {
-      mSpinner = (ProgressBar) mView.findViewById(R.id.progressbar_list_spinner);
+    if (spinner == null) {
+      spinner = (ProgressBar) view.findViewById(R.id.progressbar_list_spinner);
     }
 
     // Show the spinner if we're loading something, the empty state if we loaded nothing, and
     // the recycler view if we loaded something.
 
-    if (mAdapter.getItemCount() > 0) {
+    if (adapter.getItemCount() > 0) {
 
       // Show the recycler view if the adapter has items
 
-      mRecyclerView.setVisibility(View.VISIBLE);
-      mEmptyState.setVisibility(View.GONE);
-      mSpinner.setVisibility(View.GONE);
-    } else if (mLoaded) {
+      recyclerView.setVisibility(View.VISIBLE);
+      emptyState.setVisibility(View.GONE);
+      spinner.setVisibility(View.GONE);
+    } else if (loaded) {
 
       // Show the empty state if the adapter is empty and we've tried to load something
 
-      mRecyclerView.setVisibility(View.GONE);
-      mEmptyState.setVisibility(View.VISIBLE);
-      mSpinner.setVisibility(View.GONE);
+      recyclerView.setVisibility(View.GONE);
+      emptyState.setVisibility(View.VISIBLE);
+      spinner.setVisibility(View.GONE);
     } else {
 
       // Show nothing
 
-      mRecyclerView.setVisibility(View.GONE);
-      mEmptyState.setVisibility(View.GONE);
-      mSpinner.setVisibility(View.VISIBLE);
+      recyclerView.setVisibility(View.GONE);
+      emptyState.setVisibility(View.GONE);
+      spinner.setVisibility(View.VISIBLE);
     }
   }
 
@@ -246,31 +246,31 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
       }
     }
 
-    if (mView != null) {
-      if (mSwipeLayout != null) {
-        mSwipeLayout = (SwipeRefreshLayout) mView.findViewById(R.id.swiperefreshlayout_list);
+    if (view != null) {
+      if (swipeRefreshLayout != null) {
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefreshlayout_list);
       }
 
-      if (mSwipeLayout == null) return active;
+      if (swipeRefreshLayout == null) return active;
 
       if (active) {
 
         // Weird bug with swipe layouts
         // See: http://stackoverflow.com/a/26910973
 
-        mSwipeLayout.post(new Runnable() {
+        swipeRefreshLayout.post(new Runnable() {
           @Override
           public void run() {
 
-            mSwipeLayout.setRefreshing(true);
+            swipeRefreshLayout.setRefreshing(true);
           }
         });
       } else {
-        mSwipeLayout.post(new Runnable() {
+        swipeRefreshLayout.post(new Runnable() {
           @Override
           public void run() {
 
-            mSwipeLayout.setRefreshing(false);
+            swipeRefreshLayout.setRefreshing(false);
           }
         });
       }
@@ -291,10 +291,10 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     if (args != null && args.containsKey("perspective")) {
 
-      mPerspective = args.getParcelable("perspective");
-      mParent = args.getParcelable("parent");
+      perspective = args.getParcelable("perspective");
+      parentEntry = args.getParcelable("parent");
 
-      return new ListLoader(getContext(), mPerspective, mParent);
+      return new ListLoader(getContext(), perspective, parentEntry);
     }
 
     throw new IllegalArgumentException("Argument bundle requires 'perspective' key");
@@ -306,14 +306,14 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
   @Override
   public void onLoadFinished(Loader<List<Entry>> loader, List<Entry> data) {
 
-    mAdapter.setData(mParent, data);
+    adapter.setData(perspective, parentEntry, data);
 
     Log.i(TAG, "Load finished (ListFragment)");
 
     checkForSyncs();
     refreshAdapterViews();
 
-    mLoaded = true;
+    loaded = true;
   }
 
   /**
@@ -353,7 +353,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     super.onAttach(context);
     if (context instanceof ListFragment.OnListFragmentInteractionListener) {
-      mListener = (ListFragment.OnListFragmentInteractionListener) context;
+      fragmentInteractionListener = (ListFragment.OnListFragmentInteractionListener) context;
     } else {
       throw new RuntimeException(
           context.toString() + " must implement OnListFragmentInteractionListener");
@@ -364,7 +364,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
   public void onDetach() {
 
     super.onDetach();
-    mListener = null;
+    fragmentInteractionListener = null;
   }
 
   /**

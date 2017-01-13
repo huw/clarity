@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import nu.huw.clarity.R;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 import nu.huw.clarity.ui.misc.CheckCircle;
@@ -34,7 +35,7 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
     checkCircleView = (CheckCircle) view.findViewById(R.id.checkcircle_listitem);
   }
 
-  public void bind(final Task task, Context androidContext) {
+  public void bind(final Task task, Context androidContext, Perspective perspective) {
 
     String date = "";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
