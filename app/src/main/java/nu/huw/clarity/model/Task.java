@@ -236,106 +236,27 @@ public class Task extends Entry {
   }
 
   /**
-   * Get the string to show in the sort text field on the task (below the name, to the right)
+   * Get the string to show in the due text field on the task (below the name, to the right)
    */
-  public String getSortString(android.content.Context androidContext, Perspective perspective) {
+  public String getDueString(@NonNull android.content.Context androidContext) {
 
-    // If there's no sort on the perspective, return the due date (or null)
-
-    if (perspective == null || perspective.sort == null) {
-      if (dateDueEffective != null) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-        String string = dateDueEffective.format(dateTimeFormatter);
-        return androidContext.getString(R.string.listitem_sortdue, string);
-      } else {
-        return null;
-      }
-    }
-
-    // Otherwise...
-
-    switch (perspective.sort) {
-
-      case "defer":
-        if (dateDeferEffective != null) {
-          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-          String string = dateDeferEffective.format(dateTimeFormatter);
-          return androidContext.getString(R.string.listitem_sortdefer, string);
-        }
-        break;
-      case "completed":
-        if (dateCompleted != null) {
-          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-          String string = dateCompleted.format(dateTimeFormatter);
-          return androidContext.getString(R.string.listitem_sortcompleted, string);
-        }
-        break;
-      case "added":
-        if (dateAdded != null) {
-          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-          String string = dateAdded.format(dateTimeFormatter);
-          return androidContext.getString(R.string.listitem_sortadded, string);
-        }
-        break;
-      case "modified":
-        if (dateModified != null) {
-          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-          String string = dateModified.format(dateTimeFormatter);
-          return androidContext.getString(R.string.listitem_sortmodified, string);
-        }
-        break;
-      case "time":
-        if (estimatedTime != null) {
-          long minutes = estimatedTime.toMinutes();
-          return androidContext.getString(R.string.listitem_sortduration, minutes);
-        }
-        break;
-      case "context":
-      case "project":
-      case "flagged":
-      case "due":
-      case "none":
-      default:
-        if (dateDueEffective != null) {
-          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-          return androidContext
-              .getString(R.string.listitem_sortdue, dateDueEffective.format(dateTimeFormatter));
-        }
-        break;
+    if (dateDueEffective != null) {
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+      String string = dateDueEffective.format(dateTimeFormatter);
+      return androidContext.getString(R.string.listitem_sortdue, string);
     }
 
     return null;
   }
 
   /**
-   * When displaying items in a list, sometimes we have to set a different text style on their sort
+   * When displaying items in a list, sometimes we have to set a different text style on their due
    * strings.
    *
    * @return int Anything like Typeface.BOLD (e.g. Typeface.BOLD_ITALIC, Typeface.NORMAL, etc.)
    */
-  public int getSortTextStyle(Perspective perspective) {
-    if (perspective == null || perspective.sort == null) {
-      return isNotDueLocally() ? Typeface.ITALIC : Typeface.NORMAL;
-    }
-
-    switch (perspective.sort) {
-      case "defer":
-        return isNotDeferredLocally() ? Typeface.ITALIC : Typeface.NORMAL;
-      case "completed":
-      case "added":
-      case "modified":
-      case "time":
-        break;
-      case "context":
-      case "project":
-      case "flagged":
-      case "due":
-      case "none":
-      default:
-        return isNotDueLocally() ? Typeface.ITALIC : Typeface.NORMAL;
-    }
-
-    return Typeface.NORMAL;
+  public int getDueTextStyle() {
+    return isNotDueLocally() ? Typeface.ITALIC : Typeface.NORMAL;
   }
 
   /**
@@ -347,45 +268,16 @@ public class Task extends Entry {
    * should never grey out
    */
   @ColorInt
-  public int getSortColor(@NonNull android.content.Context androidContext,
-      @Nullable Perspective perspective) {
+  public int getDueColor(@NonNull android.content.Context androidContext) {
 
     @ColorRes int colorID = R.color.secondary_text_light;
 
-    if (perspective != null && perspective.sort != null) {
-      switch (perspective.sort) {
-        case "defer":
-        case "completed":
-        case "added":
-        case "modified":
-        case "time":
-          if (!isAvailable() && !headerRow) {
-            colorID = R.color.disabled_text_light;
-          }
-          break;
-        case "context":
-        case "project":
-        case "flagged":
-        case "due":
-        case "none":
-        default:
-          if (dueSoon) {
-            colorID = R.color.foreground_due_soon;
-          } else if (overdue) {
-            colorID = R.color.foreground_overdue;
-          } else if (!isAvailable() && !headerRow) {
-            colorID = R.color.disabled_text_light;
-          }
-          break;
-      }
-    } else {
-      if (dueSoon) {
-        colorID = R.color.foreground_due_soon;
-      } else if (overdue) {
-        colorID = R.color.foreground_overdue;
-      } else if (!isAvailable() && !headerRow) {
-        colorID = R.color.disabled_text_light;
-      }
+    if (dueSoon) {
+      colorID = R.color.foreground_due_soon;
+    } else if (overdue) {
+      colorID = R.color.foreground_overdue;
+    } else if (!isAvailable() && !headerRow) {
+      colorID = R.color.disabled_text_light;
     }
 
     return ContextCompat.getColor(androidContext, colorID);
@@ -393,39 +285,15 @@ public class Task extends Entry {
 
   /**
    * Sometimes the due date will have a background to show if it's due soon or overdue at a glance.
-   * This only appears if it's available, like with {@link #getSortColor(android.content.Context,
-   * Perspective) getSortColor()}
+   * This only appears if it's available, like with {@link #getDueColor(android.content.Context) getDueColor()}
    */
   @DrawableRes
-  public int getSortBackgroundDrawable(Perspective perspective) {
+  public int getDueBackgroundDrawable() {
 
-    if (perspective != null && perspective.sort != null) {
-      switch (perspective.sort) {
-        case "defer":
-        case "completed":
-        case "added":
-        case "modified":
-        case "time":
-          break;
-        case "context":
-        case "project":
-        case "flagged":
-        case "due":
-        case "none":
-        default:
-          if (dueSoon) {
-            return R.drawable.background_due_soon;
-          } else if (overdue) {
-            return R.drawable.background_overdue;
-          }
-          break;
-      }
-    } else {
-      if (dueSoon) {
-        return R.drawable.background_due_soon;
-      } else if (overdue) {
-        return R.drawable.background_overdue;
-      }
+    if (dueSoon) {
+      return R.drawable.background_due_soon;
+    } else if (overdue) {
+      return R.drawable.background_overdue;
     }
 
     return 0;

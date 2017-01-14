@@ -53,17 +53,17 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
     textview_listitem_viewmode.setText(viewModeString);
     textview_listitem_viewmode.setTextColor(viewModeColor);
 
-    // Set the sort string (date due / defer / estimated time / etc.)
+    // Set the due string
 
-    String sortString = task.getSortString(androidContext, perspective);
-    int sortTextStyle = task.getSortTextStyle(perspective);
-    @ColorInt int sortColor = task.getSortColor(androidContext, perspective);
-    @DrawableRes int sortBackgroundDrawable = task.getSortBackgroundDrawable(perspective);
+    String dueString = task.getDueString(androidContext);
+    int dueTextStyle = task.getDueTextStyle();
+    @ColorInt int dueColor = task.getDueColor(androidContext);
+    @DrawableRes int dueBackgroundDrawable = task.getDueBackgroundDrawable();
 
-    textview_listitem_sort.setText(sortString);
-    textview_listitem_sort.setTypeface(null, sortTextStyle);
-    textview_listitem_sort.setTextColor(sortColor);
-    textview_listitem_sort.setBackgroundResource(sortBackgroundDrawable);
+    textview_listitem_sort.setText(dueString);
+    textview_listitem_sort.setTypeface(null, dueTextStyle);
+    textview_listitem_sort.setTextColor(dueColor);
+    textview_listitem_sort.setBackgroundResource(dueBackgroundDrawable);
 
     // Check circle
     // Available tasks can have a flag, but they can't have colourised overdue/due soon
