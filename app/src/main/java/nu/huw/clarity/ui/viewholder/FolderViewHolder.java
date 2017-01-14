@@ -1,8 +1,6 @@
 package nu.huw.clarity.ui.viewholder;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -37,43 +35,35 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
 
   public void bind(Folder folder, Context androidContext, Perspective perspective) {
 
-    this.entry = folder;
-    long count = this.entry.getCount(perspective);
-    long dueSoonCount = this.entry.countDueSoon;
-    long overdueCount = this.entry.countOverdue;
+    // Set list item name
 
-    Resources res = androidContext.getResources();
+    int nameTextStyle = folder.getNameTextStyle();
+    textview_listitem_name.setTypeface(null, nameTextStyle);
+    textview_listitem_name.setText(folder.name);
 
-    // Remaining item count
+    // Set list item count (depends on perspective)
 
-    int countStringID = this.entry.getCountString(count, perspective);
-    String countString = res.getString(countStringID, count);
+    String countString = folder.getCountString(androidContext, perspective);
+    textview_listitem_count.setText(countString);
 
-    // Due soon / overdue badges
+    // Set due soon / overdue badges with text
 
-    if (dueSoonCount > 0) {
-      String dueSoonString = res.getString(R.string.due_soon, dueSoonCount);
+    if (folder.countDueSoon > 0) {
+      String dueSoonString = folder.getCountDueSoonString(androidContext);
       textview_listitem_countduesoon.setText(dueSoonString);
     } else {
       textview_listitem_countduesoon.setVisibility(View.GONE);
       divider_listitem_countduesoon.setVisibility(View.GONE);
     }
 
-    if (overdueCount > 0) {
-      String overdueString = res.getString(R.string.overdue, overdueCount);
+    if (folder.countOverdue > 0) {
+      String overdueString = folder.getCountOverdueString(androidContext);
       textview_listitem_countoverdue.setText(overdueString);
     } else {
       textview_listitem_countoverdue.setVisibility(View.GONE);
       divider_listitem_countoverdue.setVisibility(View.GONE);
     }
 
-    // Bold header rows
-
-    if (folder.headerRow) {
-      textview_listitem_name.setTypeface(null, Typeface.BOLD);
-    }
-
-    textview_listitem_name.setText(this.entry.name);
-    textview_listitem_count.setText(countString);
+    this.entry = folder;
   }
 }

@@ -40,17 +40,23 @@
   <string name="nearby">Nearby</string>
 
   <!-- List Items -->
-  <string name="no_available">no items available</string>
-  <string name="available">%d available</string>
-  <string name="no_remaining">no items remaining</string>
-  <string name="remaining">%d remaining</string>
-  <string name="no_completed">no items completed</string>
-  <string name="completed">%d completed</string>
-  <string name="no_children">no items</string>
-  <string name="children">%d items</string>
-  <string name="due_soon">%d due soon</string>
-  <string name="overdue">%d overdue</string>
+  <string name="listitem_countavailableempty">no items available</string>
+  <string name="listitem_countavailable">%d available</string>
+  <string name="listitem_countremainingempty">no items remaining</string>
+  <string name="listitem_countremaining">%d remaining</string>
+  <string name="listitem_countcompletedempty">no items completed</string>
+  <string name="listitem_countcompleted">%d completed</string>
+  <string name="listitem_countchildrenempty">no items</string>
+  <string name="listitem_countchildren">%d items</string>
+  <string name="listitem_countduesoon">%d due soon</string>
+  <string name="listitem_countoverdue">%d overdue</string>
   <string name="no_context">No Context</string>
+  <string name="listitem_sortdue">Due %s</string>
+  <string name="listitem_sortdefer">Deferred until %s</string>
+  <string name="listitem_sortcompleted">Completed %s</string>
+  <string name="listitem_sortadded">Added %s</string>
+  <string name="listitem_sortmodified">Modified %s</string>
+  <string name="listitem_sortduration">%d minutes</string>
 
   <!-- Empty States -->
   <string name="empty_title">There\'s nothing here</string>

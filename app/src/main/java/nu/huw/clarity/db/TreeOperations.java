@@ -75,7 +75,7 @@ public class TreeOperations {
    * Fill down the 'dropped' attributes on contexts, then update the 'blocked' attribute on all
    * tasks that reference that context, if the context is on hold (not dropped). For more on the
    * logic, see {@link #updateAttributesForSubtree(SQLiteDatabase, String, boolean, String, String,
-   * String, String, String, String)}  updateAttributesForSubtree()}.
+   * String, String, String, String, String)}  updateAttributesForSubtree()}.
    *
    * @param contextID If passed, will only update for that context
    */
@@ -105,11 +105,16 @@ public class TreeOperations {
 
   /**
    * All logic for this subroutine is in {@link #updateAttributesForSubtree(SQLiteDatabase, String,
-   * boolean, String, String, String, String, String, String)}  updateAttributesForSubtree()}, refer
-   * to thatmethod first. This essentially fills down the 'dropped' attribute recursively.
+   * boolean, String, String, String, String, String, String, String)}
+   * updateAttributesForSubtree()}, refer to thatmethod first. This essentially fills down the
+   * 'dropped' attribute recursively.
    */
   private void updateAttributesForContext(@NonNull SQLiteDatabase db, @Nullable String contextID,
       @Nullable String parentDropped) {
+
+    if (parentDropped == null) {
+      parentDropped = "0";
+    }
 
     String[] columns = new String[]{Contexts.COLUMN_ID, Contexts.COLUMN_DROPPED};
 
@@ -159,7 +164,7 @@ public class TreeOperations {
    */
   public void updateAttributesForSubtree(@Nullable String parentID) {
     SQLiteDatabase db = dbHelper.getWritableDatabase();
-    updateAttributesForSubtree(db, parentID, false, null, null, null, null, null, null);
+    updateAttributesForSubtree(db, parentID, false, null, null, null, null, null, null, null);
     db.close();
   }
 
@@ -176,7 +181,7 @@ public class TreeOperations {
       @Nullable final String parentID, final boolean parentBlocked,
       @Nullable final String parentDateDefer, @Nullable final String parentDateDue,
       @Nullable final String parentFlagged, @Nullable final String parentType,
-      @Nullable String projectID, @Nullable String projectStatus) {
+      @Nullable String projectID, @Nullable String projectStatus, @Nullable String projectType) {
 
     // Used to track which task is next for this parent
     // This is done using a standard algorithm to find the minimum rank, with some small
@@ -213,6 +218,7 @@ public class TreeOperations {
 
         projectID = results.getString(0);
         projectStatus = results.getString(8);
+        projectType = results.getString(10);
       }
 
       String childID = results.getString(0);
@@ -300,13 +306,14 @@ public class TreeOperations {
       // task's children and does the whole thing over again. Simple.
 
       updateAttributesForSubtree(db, childID, childBlocked, childDateDefer, childDateDue,
-          childFlagged, childType,
-          projectID, projectStatus);
+          childFlagged, childType, projectID, projectStatus, projectType);
 
-      // The 'next' task in a _sequential_ project is the _first_ _incomplete_, _unblocked_ task.
+      // The 'next' task in a _sequential_ project is the _first_ _incomplete_ task, whenever the
+      // project is _not a single-action list_. Blocking and deferring actually just holds up the
+      // whole 'bit'.
 
       if (childRank < nextRank && parentType != null && parentType.equals("sequential")
-          && childDateCompleted == null && !childBlocked && !childDeferred && !childDropped) {
+          && childDateCompleted == null && !childDropped && !parentType.equals("single action")) {
         nextID = childID;
         nextRank = childRank;
       }
@@ -716,7 +723,6 @@ public class TreeOperations {
   /**
    * Given a date from the column Tasks.DATE_DUE, return a set of ContentValues that can be used
    * to update a database row for that due date.
-   * TODO: Determine the 'due soon' date based on user settings
    *
    * @param dueString ISO 8601 timestamp
    * @return Values for the columns Tasks.OVERDUE or Tasks.DUE_SOON. May be empty.
@@ -735,7 +741,7 @@ public class TreeOperations {
     if (now.isAfter(due)) {
       values.put(Tasks.COLUMN_OVERDUE, true);
     } else {
-      due.minus(DUE_SOON_DURATION);
+      due = due.minus(DUE_SOON_DURATION);
       values.put(Tasks.COLUMN_DUE_SOON, now.isAfter(due));
     }
 

@@ -17,10 +17,10 @@ import android.widget.RelativeLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
-import nu.huw.clarity.db.DatabaseContract;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.fragment.DetailFragment;
 import nu.huw.clarity.ui.misc.CheckCircle;
@@ -40,9 +40,10 @@ public class DetailActivity extends AppCompatActivity
   TextInputLayout textinputlayout_detail_name;
   @BindView(R.id.textinputedittext_detail_name)
   TextInputEditText textinputedittext_detail_name;
-  private int themeID;
+  private Entry entry;
+  private Perspective perspective;
 
-  private void setupToolbar(int themeID) {
+  private void setupToolbar() {
 
     setSupportActionBar(toolbar_detail);
     final ActionBar actionBar = getSupportActionBar();
@@ -53,8 +54,9 @@ public class DetailActivity extends AppCompatActivity
     }
 
     // Set the theme to the theme we just had back in MainActivity
-    this.themeID = themeID;
-    setTheme(themeID);
+    if (perspective != null) {
+      setTheme(perspective.themeID);
+    }
 
     // Set background colours depending on the view we just came from
     TypedValue typedValue = new TypedValue();
@@ -69,20 +71,21 @@ public class DetailActivity extends AppCompatActivity
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_detail);
     ButterKnife.bind(this);
-
     Intent intent = getIntent();
-    Entry entry;
 
     if (intent.hasExtra("ENTRY")) {
-
-      // If we've passed an entry already, then just pick it up
-
       entry = intent.getParcelableExtra("ENTRY");
     } else {
       throw new IllegalArgumentException("Intent must contain 'ENTRY'");
     }
 
-    setupToolbar(R.style.AppTheme);
+    if (intent.hasExtra("PERSPECTIVE")) {
+      perspective = intent.getParcelableExtra("PERSPECTIVE");
+    } else {
+      throw new IllegalArgumentException("Intent must contain 'PERSPECTIVE'");
+    }
+
+    setupToolbar();
 
     // Set the default text in the text field to the thing's name, and set the hint text to
     // the thing's type
@@ -105,7 +108,7 @@ public class DetailActivity extends AppCompatActivity
     textinputedittext_detail_name.setHint(hintID);
     textinputlayout_detail_name.setHint(getResources().getString(hintID));
 
-    Fragment detailFragment = DetailFragment.newInstance(entry);
+    Fragment detailFragment = DetailFragment.newInstance(entry, perspective);
 
     if (detailFragment != null) {
       FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -122,14 +125,14 @@ public class DetailActivity extends AppCompatActivity
       // circles because the user doesn't want to start them yet.
 
       checkcircle_detail.setChecked(task.dateCompleted != null);
-      checkcircle_detail.setFlagged(task.flagged && themeID != R.style.AppTheme_Orange);
+      checkcircle_detail.setFlagged(task.flagged && perspective.themeID != R.style.AppTheme_Orange);
 
       // Also, if the colour is going to clash with the background, then don't set the
       // attribute. This applies to the red clashing with forecast, and orange clashing
       // with flagged (in both cases the intended colour should be pretty obvious)
 
       if (task.isRemaining()) {
-        checkcircle_detail.setOverdue(task.overdue && themeID != R.style.AppTheme_Red);
+        checkcircle_detail.setOverdue(task.overdue && perspective.themeID != R.style.AppTheme_Red);
         checkcircle_detail.setDueSoon(task.dueSoon);
       } else {
         checkcircle_detail.setOverdue(false);
@@ -154,12 +157,11 @@ public class DetailActivity extends AppCompatActivity
   }
 
   @Override
-  public void onContextClick(String id) {
+  public void onContextClick(Entry entry, Perspective perspective) {
 
     Intent intent = new Intent(this, DetailActivity.class);
-    intent.putExtra("ENTRY_ID", id);
-    intent.putExtra("TABLE_NAME", DatabaseContract.Contexts.TABLE_NAME);
-    intent.putExtra("THEME_ID", themeID);
+    intent.putExtra("ENTRY", entry);
+    intent.putExtra("PERSPECTIVE", perspective);
     startActivity(intent);
 
         /*Intent intent = new Intent(this, MainActivity.class);
@@ -170,12 +172,11 @@ public class DetailActivity extends AppCompatActivity
   }
 
   @Override
-  public void onProjectClick(String id) {
+  public void onProjectClick(Entry entry, Perspective perspective) {
 
     Intent intent = new Intent(this, DetailActivity.class);
-    intent.putExtra("ENTRY_ID", id);
-    intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
-    intent.putExtra("THEME_ID", themeID);
+    intent.putExtra("ENTRY", entry);
+    intent.putExtra("PERSPECTIVE", perspective);
     startActivity(intent);
 
         /*Intent intent = new Intent(this, MainActivity.class);

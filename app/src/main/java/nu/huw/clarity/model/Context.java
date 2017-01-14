@@ -2,6 +2,12 @@ package nu.huw.clarity.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import nu.huw.clarity.R;
 import nu.huw.clarity.db.model.DataModelHelper;
 
 /**
@@ -74,5 +80,29 @@ public class Context extends Entry {
   @Override
   public int getViewType() {
     return VT_CONTEXT;
+  }
+
+  /**
+   * The name field is greyed out if the context is dropped or on hold and not a header row
+   */
+  @ColorInt
+  public int getPrimaryTextColor(@NonNull android.content.Context androidContext) {
+
+    Log.i("Context", name + ": (bogus change) " + onHold + " " + droppedEffective + " " + dropped);
+
+    @ColorRes int colorID = (!onHold && !droppedEffective) || headerRow ? R.color.primary_text_light
+        : R.color.disabled_text_light;
+    return ContextCompat.getColor(androidContext, colorID);
+  }
+
+  /**
+   * The count field is greyed out if the context is dropped or on hold
+   */
+  @ColorInt
+  public int getSecondaryTextColor(@NonNull android.content.Context androidContext) {
+    @ColorRes int colorID =
+        (!onHold && !droppedEffective) || headerRow ? R.color.secondary_text_light
+            : R.color.disabled_text_light;
+    return ContextCompat.getColor(androidContext, colorID);
   }
 }

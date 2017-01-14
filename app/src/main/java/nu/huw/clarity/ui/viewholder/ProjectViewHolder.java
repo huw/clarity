@@ -1,8 +1,7 @@
 package nu.huw.clarity.ui.viewholder;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Typeface;
+import android.support.annotation.ColorInt;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -37,43 +36,41 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
 
   public void bind(Task project, Context androidContext, Perspective perspective) {
 
-    this.entry = project;
-    long count = this.entry.getCount(perspective);
-    long dueSoonCount = this.entry.countDueSoon;
-    long overdueCount = this.entry.countOverdue;
+    // Set list item name
 
-    Resources res = androidContext.getResources();
+    int nameTextStyle = project.getNameTextStyle();
+    @ColorInt int nameColor = project.getPrimaryTextColor(androidContext);
 
-    // Remaining item count
+    textview_listitem_name.setTypeface(null, nameTextStyle);
+    textview_listitem_name.setText(project.name);
+    textview_listitem_name.setTextColor(nameColor);
 
-    int countStringID = this.entry.getCountString(count, perspective);
-    String countString = res.getString(countStringID, count);
+    // Set list item count (depends on perspective)
 
-    // Due soon / overdue badges
+    String countString = project.getCountString(androidContext, perspective);
+    @ColorInt int countColor = project.getSecondaryTextColor(androidContext);
 
-    if (dueSoonCount > 0) {
-      String dueSoonString = res.getString(R.string.due_soon, dueSoonCount);
+    textview_listitem_count.setText(countString);
+    textview_listitem_count.setTextColor(countColor);
+
+    // Set due soon / overdue badges with text
+
+    if (project.countDueSoon > 0) {
+      String dueSoonString = project.getCountDueSoonString(androidContext);
       textview_listitem_countduesoon.setText(dueSoonString);
     } else {
       textview_listitem_countduesoon.setVisibility(View.GONE);
       divider_listitem_countduesoon.setVisibility(View.GONE);
     }
 
-    if (overdueCount > 0) {
-      String overdueString = res.getString(R.string.overdue, overdueCount);
+    if (project.countOverdue > 0) {
+      String overdueString = project.getCountOverdueString(androidContext);
       textview_listitem_countoverdue.setText(overdueString);
     } else {
       textview_listitem_countoverdue.setVisibility(View.GONE);
       divider_listitem_countoverdue.setVisibility(View.GONE);
     }
 
-    // Bold header row
-
-    if (project.headerRow) {
-      textview_listitem_name.setTypeface(null, Typeface.BOLD);
-    }
-
-    textview_listitem_name.setText(this.entry.name);
-    textview_listitem_count.setText(countString);
+    this.entry = project;
   }
 }

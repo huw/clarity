@@ -2,6 +2,7 @@ package nu.huw.clarity.ui.fragment;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -16,6 +17,7 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 import org.threeten.bp.format.DateTimeFormatter;
 
@@ -28,17 +30,20 @@ public class DetailFragment extends Fragment {
 
   private static final String TAG = DetailFragment.class.getSimpleName();
   private Entry entry;
+  private Perspective perspective;
   private OnDetailInteractionListener mListener;
+  @ColorInt
   private int PRIMARY_TEXT_COLOR;
 
   public DetailFragment() {
   }
 
-  public static DetailFragment newInstance(Entry entry) {
+  public static DetailFragment newInstance(Entry entry, Perspective perspective) {
 
     DetailFragment fragment = new DetailFragment();
     Bundle args = new Bundle();
     args.putParcelable("ENTRY", entry);
+    args.putParcelable("PERSPECTIVE", perspective);
     fragment.setArguments(args);
     return fragment;
   }
@@ -47,8 +52,12 @@ public class DetailFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
-    if (getArguments() != null) {
-      entry = getArguments().getParcelable("ENTRY");
+    Bundle args = getArguments();
+    if (args != null) {
+      entry = args.getParcelable("ENTRY");
+      perspective = args.getParcelable("PERSPECTIVE");
+    } else {
+      throw new IllegalArgumentException("DetailFragment requires argument bundle");
     }
 
     PRIMARY_TEXT_COLOR = ContextCompat.getColor(getContext(), R.color.primary_text_light);
@@ -58,20 +67,18 @@ public class DetailFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
 
-    if (entry == null) {
-      throw new NullPointerException("Entry cannot be null");
-    }
-
-    if (entry instanceof Task) {
-      if (((Task) entry).isProject) {
-        return bindProjectDetails(R.layout.fragment_project_detail, inflater, container);
-      } else {
-        return bindTaskDetails(R.layout.fragment_task_detail, inflater, container);
+    if (entry != null) {
+      if (entry instanceof Task) {
+        if (((Task) entry).isProject) {
+          return bindProjectDetails(R.layout.fragment_project_detail, inflater, container);
+        } else {
+          return bindTaskDetails(R.layout.fragment_task_detail, inflater, container);
+        }
+      } else if (entry instanceof Context) {
+        return bindContextDetails(R.layout.fragment_context_detail, inflater, container);
+      } else if (entry instanceof Folder) {
+        return bindFolderDetails(R.layout.fragment_folder_detail, inflater, container);
       }
-    } else if (entry instanceof Context) {
-      return bindContextDetails(R.layout.fragment_context_detail, inflater, container);
-    } else if (entry instanceof Folder) {
-      return bindFolderDetails(R.layout.fragment_folder_detail, inflater, container);
     }
 
     throw new NullPointerException("Entry is of unknown type");
@@ -135,7 +142,7 @@ public class DetailFragment extends Fragment {
         @Override
         public void onClick(View view) {
 
-          mListener.onContextClick(context.id);
+          mListener.onContextClick(context, perspective);
         }
       });
     }
@@ -218,7 +225,7 @@ public class DetailFragment extends Fragment {
         @Override
         public void onClick(View view) {
 
-          mListener.onProjectClick(project.id);
+          mListener.onProjectClick(project, perspective);
         }
       });
     }
@@ -238,7 +245,7 @@ public class DetailFragment extends Fragment {
         @Override
         public void onClick(View view) {
 
-          mListener.onContextClick(context.id);
+          mListener.onContextClick(context, perspective);
         }
       });
     }
@@ -322,8 +329,8 @@ public class DetailFragment extends Fragment {
 
   public interface OnDetailInteractionListener {
 
-    void onContextClick(String id);
+    void onContextClick(Entry entry, Perspective perspective);
 
-    void onProjectClick(String id);
+    void onProjectClick(Entry entry, Perspective perspective);
   }
 }

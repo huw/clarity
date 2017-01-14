@@ -24,7 +24,7 @@
     tools:text="Clarity (For OmniFocus)"/>
 
   <TextView
-    android:id="@+id/textview_listitem_date"
+    android:id="@+id/textview_listitem_sort"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignParentEnd="true"
@@ -39,7 +39,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_below="@id/textview_listitem_name"
-    android:layout_toStartOf="@id/textview_listitem_date"
+    android:layout_toStartOf="@id/textview_listitem_sort"
     android:ellipsize="end"
     android:gravity="start"
     android:maxLines="1"

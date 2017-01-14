@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity
 
       Intent intent = new Intent(this, DetailActivity.class);
       intent.putExtra("ENTRY", item);
-      intent.putExtra("THEME_ID", perspective.themeID);
+      intent.putExtra("PERSPECTIVE", perspective);
       startActivity(intent);
       return;
     }

@@ -1,10 +1,10 @@
 package nu.huw.clarity.model;
 
+import android.graphics.Typeface;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import nu.huw.clarity.R;
 
 /**
@@ -23,6 +23,7 @@ public class Entry extends Base implements Comparable<Entry> {
     public Entry createFromParcel(Parcel in) {
       return new Entry(in);
     }
+
     public Entry[] newArray(int size) {
       return new Entry[size];
     }
@@ -99,35 +100,78 @@ public class Entry extends Base implements Comparable<Entry> {
   }
 
   /**
-   * Return the correct count of children given a string representing a perspective's status filter
+   * Return a string resource given a count and perspective, such that the number displayed
+   * depends on the perspective and whether there are any items in the count
    */
-  public long getCount(@Nullable Perspective perspective) {
-    if (perspective == null || perspective.filterStatus == null) return countChildren;
+  public String getCountString(android.content.Context androidContext,
+      @Nullable Perspective perspective) {
+
+    if (perspective == null || perspective.filterStatus == null) {
+      if (countChildren > 0) {
+        return androidContext.getString(R.string.listitem_countchildren, countChildren);
+      } else {
+        return androidContext.getString(R.string.listitem_countchildrenempty);
+      }
+    }
+
     switch (perspective.filterStatus) {
       case "complete":
-        return countCompleted;
+        if (countCompleted > 0) {
+          return androidContext.getString(R.string.listitem_countcompleted, countCompleted);
+        } else {
+          return androidContext.getString(R.string.listitem_countcompletedempty);
+        }
       case "incomplete":
-        return countRemaining;
+        if (countRemaining > 0) {
+          return androidContext.getString(R.string.listitem_countremaining, countRemaining);
+        } else {
+          return androidContext.getString(R.string.listitem_countremainingempty);
+        }
       case "due":
-        return countAvailable;
+        if (countAvailable > 0) {
+          return androidContext.getString(R.string.listitem_countavailable, countAvailable);
+        } else {
+          return androidContext.getString(R.string.listitem_countavailableempty);
+        }
       default:
-        return countChildren;
+        if (countChildren > 0) {
+          return androidContext.getString(R.string.listitem_countchildren, countChildren);
+        } else {
+          return androidContext.getString(R.string.listitem_countchildrenempty);
+        }
     }
   }
 
-  @StringRes public int getCountString(long count, @Nullable Perspective perspective) {
-    if (perspective == null || perspective.filterStatus == null) {
-      return count > 0 ? R.string.children : R.string.no_children;
+  /**
+   * Return a string of the form 'x due soon', depending on locale
+   */
+  public String getCountDueSoonString(android.content.Context androidContext) {
+    if (countDueSoon > 0) {
+      return androidContext.getString(R.string.listitem_countduesoon, countDueSoon);
     }
-    switch (perspective.filterStatus) {
-      case "complete":
-        return count > 0 ? R.string.completed : R.string.no_completed;
-      case "incomplete":
-        return count > 0 ? R.string.remaining : R.string.no_remaining;
-      case "due":
-        return count > 0 ? R.string.available : R.string.no_available;
-      default:
-        return count > 0 ? R.string.children : R.string.no_children;
+    return null;
+  }
+
+  /**
+   * Return a string of the form 'x overdue', depending on locale
+   */
+  public String getCountOverdueString(android.content.Context androidContext) {
+    if (countOverdue > 0) {
+      return androidContext.getString(R.string.listitem_countoverdue, countOverdue);
+    }
+    return null;
+  }
+
+  /**
+   * When displaying items in a list, sometimes we have to set a different text style on their names
+   *
+   * @return int Anything like Typeface.BOLD (e.g. Typeface.BOLD_ITALIC, Typeface.NORMAL, etc.)
+   */
+  public int getNameTextStyle() {
+    if (headerRow) {
+      return Typeface.BOLD;
+    } else {
+      return Typeface.NORMAL;
     }
   }
 }

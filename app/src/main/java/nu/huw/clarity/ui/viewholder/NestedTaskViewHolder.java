@@ -1,9 +1,8 @@
 package nu.huw.clarity.ui.viewholder;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Typeface;
-import android.support.v4.content.ContextCompat;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -12,7 +11,6 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapter.ListAdapter;
-import org.threeten.bp.format.DateTimeFormatter;
 
 /**
  * A view holder for a folder, using R.layout.fragment_folder
@@ -23,8 +21,8 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
   TextView textview_listitem_name;
   @BindView(R.id.textview_listitem_count)
   TextView textview_listitem_count;
-  @BindView(R.id.textview_listitem_date)
-  TextView textview_listitem_date;
+  @BindView(R.id.textview_listitem_sort)
+  TextView textview_listitem_sort;
 
   public NestedTaskViewHolder(View view, ListAdapter adapter) {
     super(view, adapter);
@@ -33,62 +31,34 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
   public void bind(Task task, Context androidContext, Perspective perspective) {
 
-    long count = task.getCount(perspective);
+    // Set list item name
 
-    Resources res = androidContext.getResources();
-
-    String date = "";
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
-
-    // Due dates / effective due dates
-    // + italicise effective due dates
-
-    if (task.dateDue != null) {
-      date = "Due " + task.dateDue.format(dateTimeFormatter);
-    } else if (task.dateDueEffective != null) {
-      date = "Due " + task.dateDueEffective.format(dateTimeFormatter);
-      this.textview_listitem_date.setTypeface(null, Typeface.ITALIC);
-    }
-
-    // Due soon / overdue / unavailable backgrounds & colours on items
-
-    int color = R.color.secondary_text_light;
-    int background = 0;
-
-    if (!task.isRemaining()) {
-
-      // If the task isn't available, then show the user by changing its colours.
-
-      color = R.color.disabled_text_light;
-      textview_listitem_name.setTextColor(ContextCompat.getColor(androidContext, color));
-      textview_listitem_count.setTextColor(ContextCompat.getColor(androidContext, color));
-    } else if (task.dueSoon) {
-
-      color = R.color.foreground_due_soon;
-      background = R.drawable.background_due_soon;
-    } else if (task.overdue) {
-
-      color = R.color.foreground_overdue;
-      background = R.drawable.background_overdue;
-    }
-
-    textview_listitem_date.setTextColor(ContextCompat.getColor(androidContext, color));
-    textview_listitem_date.setBackgroundResource(background);
-
-    // Remaining items count
-
-    int countStringID = task.getCountString(count, perspective);
-    String countString = res.getString(countStringID, count);
-
-    // Bold header row
-
-    if (task.headerRow) {
-      textview_listitem_name.setTypeface(null, Typeface.BOLD);
-    }
+    int nameTextStyle = task.getNameTextStyle();
+    @ColorInt int nameColor = task.getPrimaryTextColor(androidContext);
 
     textview_listitem_name.setText(task.name);
-    textview_listitem_date.setText(date);
+    textview_listitem_name.setTypeface(null, nameTextStyle);
+    textview_listitem_name.setTextColor(nameColor);
+
+    // Set list item count (depends on perspective)
+
+    String countString = task.getCountString(androidContext, perspective);
+    @ColorInt int countColor = task.getSecondaryTextColor(androidContext);
+
     textview_listitem_count.setText(countString);
+    textview_listitem_count.setTextColor(countColor);
+
+    // Set the sort string (date due / defer / estimated time / etc.)
+
+    String sortString = task.getSortString(androidContext, perspective);
+    int sortTextStyle = task.getSortTextStyle(perspective);
+    @ColorInt int sortColor = task.getSortColor(androidContext, perspective);
+    @DrawableRes int sortBackgroundDrawable = task.getSortBackgroundDrawable(perspective);
+
+    textview_listitem_sort.setText(sortString);
+    textview_listitem_sort.setTypeface(null, sortTextStyle);
+    textview_listitem_sort.setTextColor(sortColor);
+    textview_listitem_sort.setBackgroundResource(sortBackgroundDrawable);
 
     this.entry = task;
   }

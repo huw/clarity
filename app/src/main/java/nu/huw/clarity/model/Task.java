@@ -1,12 +1,19 @@
 package nu.huw.clarity.model;
 
+import android.graphics.Typeface;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import nu.huw.clarity.R;
 import nu.huw.clarity.db.model.DataModelHelper;
 import org.threeten.bp.Duration;
 import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
 
 /**
  * A 'Task' is any item in the OmniFocus tree that isn't a folder. Projects are also tasks.
@@ -141,14 +148,11 @@ public class Task extends Entry {
   Entry getParent(@NonNull android.content.Context androidContext) {
 
     if (parent == null) {
-
       DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
       if (isProject) {
-
         // Parent is a folder
         parent = dataModelHelper.getFolderFromID(parentID);
       } else {
-
         // Parent is a task or project
         parent = dataModelHelper.getTaskFromID(parentID);
       }
@@ -168,6 +172,266 @@ public class Task extends Entry {
   }
 
   /**
+   * The name field is greyed out if the task isn't available, due soon, or overdue or a header row
+   */
+  @ColorInt
+  public int getPrimaryTextColor(@NonNull android.content.Context androidContext) {
+    @ColorRes int colorID =
+        isAvailable() || dueSoon || overdue || headerRow ? R.color.primary_text_light
+            : R.color.disabled_text_light;
+    return ContextCompat.getColor(androidContext, colorID);
+  }
+
+  /**
+   * Get the string to show in the viewMode text field on the task (below the name)
+   */
+  @Nullable
+  public String getViewModeString(@NonNull android.content.Context androidContext,
+      @Nullable Perspective perspective) {
+
+    // If there's no viewMode on the perspective, return the context name (or null)
+
+    if (perspective == null || perspective.viewMode == null) {
+      Context context = getContext(androidContext);
+      return context != null ? context.name : null;
+    }
+
+    // Otherwise...
+
+    switch (perspective.viewMode) {
+
+      // If it's a project, and we have a project, return its name. Otherwise null.
+
+      case "context":
+        Task project = getProject(androidContext);
+        if (project != null) {
+          return project.name;
+        }
+        break;
+
+      // Same thing with contexts, or any other thing we don't recognise
+
+      case "project":
+      default:
+        Context context = getContext(androidContext);
+        if (context != null) {
+          return context.name;
+        }
+        break;
+    }
+
+    return null;
+  }
+
+  /**
+   * The 'viewMode' field is greyed out if the task isn't available, unless it's due soon/overdue or
+   * a header row
+   */
+  @ColorInt
+  public int getSecondaryTextColor(@NonNull android.content.Context androidContext) {
+    @ColorRes int colorID =
+        isAvailable() || dueSoon || overdue || headerRow ? R.color.secondary_text_light
+            : R.color.disabled_text_light;
+    return ContextCompat.getColor(androidContext, colorID);
+  }
+
+  /**
+   * Get the string to show in the sort text field on the task (below the name, to the right)
+   */
+  public String getSortString(android.content.Context androidContext, Perspective perspective) {
+
+    // If there's no sort on the perspective, return the due date (or null)
+
+    if (perspective == null || perspective.sort == null) {
+      if (dateDueEffective != null) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+        String string = dateDueEffective.format(dateTimeFormatter);
+        return androidContext.getString(R.string.listitem_sortdue, string);
+      } else {
+        return null;
+      }
+    }
+
+    // Otherwise...
+
+    switch (perspective.sort) {
+
+      case "defer":
+        if (dateDeferEffective != null) {
+          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+          String string = dateDeferEffective.format(dateTimeFormatter);
+          return androidContext.getString(R.string.listitem_sortdefer, string);
+        }
+        break;
+      case "completed":
+        if (dateCompleted != null) {
+          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+          String string = dateCompleted.format(dateTimeFormatter);
+          return androidContext.getString(R.string.listitem_sortcompleted, string);
+        }
+        break;
+      case "added":
+        if (dateAdded != null) {
+          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+          String string = dateAdded.format(dateTimeFormatter);
+          return androidContext.getString(R.string.listitem_sortadded, string);
+        }
+        break;
+      case "modified":
+        if (dateModified != null) {
+          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+          String string = dateModified.format(dateTimeFormatter);
+          return androidContext.getString(R.string.listitem_sortmodified, string);
+        }
+        break;
+      case "time":
+        if (estimatedTime != null) {
+          long minutes = estimatedTime.toMinutes();
+          return androidContext.getString(R.string.listitem_sortduration, minutes);
+        }
+        break;
+      case "context":
+      case "project":
+      case "flagged":
+      case "due":
+      case "none":
+      default:
+        if (dateDueEffective != null) {
+          DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
+          return androidContext
+              .getString(R.string.listitem_sortdue, dateDueEffective.format(dateTimeFormatter));
+        }
+        break;
+    }
+
+    return null;
+  }
+
+  /**
+   * When displaying items in a list, sometimes we have to set a different text style on their sort
+   * strings.
+   *
+   * @return int Anything like Typeface.BOLD (e.g. Typeface.BOLD_ITALIC, Typeface.NORMAL, etc.)
+   */
+  public int getSortTextStyle(Perspective perspective) {
+    if (perspective == null || perspective.sort == null) {
+      return isNotDueLocally() ? Typeface.ITALIC : Typeface.NORMAL;
+    }
+
+    switch (perspective.sort) {
+      case "defer":
+        return isNotDeferredLocally() ? Typeface.ITALIC : Typeface.NORMAL;
+      case "completed":
+      case "added":
+      case "modified":
+      case "time":
+        break;
+      case "context":
+      case "project":
+      case "flagged":
+      case "due":
+      case "none":
+      default:
+        return isNotDueLocally() ? Typeface.ITALIC : Typeface.NORMAL;
+    }
+
+    return Typeface.NORMAL;
+  }
+
+  /**
+   * The 'sort' field can have a variety of colours. If the task isn't available, it greys out—but
+   * if it is available and due soon/overdue, then it needs to change colour again.
+   *
+   * There's an annoying quirk here, where if an item is overdue and incomplete, then it should
+   * override this rule and show its due soon/overdue colour. And if it's a header row, then it
+   * should never grey out
+   */
+  @ColorInt
+  public int getSortColor(@NonNull android.content.Context androidContext,
+      @Nullable Perspective perspective) {
+
+    @ColorRes int colorID = R.color.secondary_text_light;
+
+    if (perspective != null && perspective.sort != null) {
+      switch (perspective.sort) {
+        case "defer":
+        case "completed":
+        case "added":
+        case "modified":
+        case "time":
+          if (!isAvailable() && !headerRow) {
+            colorID = R.color.disabled_text_light;
+          }
+          break;
+        case "context":
+        case "project":
+        case "flagged":
+        case "due":
+        case "none":
+        default:
+          if (dueSoon) {
+            colorID = R.color.foreground_due_soon;
+          } else if (overdue) {
+            colorID = R.color.foreground_overdue;
+          } else if (!isAvailable() && !headerRow) {
+            colorID = R.color.disabled_text_light;
+          }
+          break;
+      }
+    } else {
+      if (dueSoon) {
+        colorID = R.color.foreground_due_soon;
+      } else if (overdue) {
+        colorID = R.color.foreground_overdue;
+      } else if (!isAvailable() && !headerRow) {
+        colorID = R.color.disabled_text_light;
+      }
+    }
+
+    return ContextCompat.getColor(androidContext, colorID);
+  }
+
+  /**
+   * Sometimes the due date will have a background to show if it's due soon or overdue at a glance.
+   * This only appears if it's available, like with {@link #getSortColor(android.content.Context,
+   * Perspective) getSortColor()}
+   */
+  @DrawableRes
+  public int getSortBackgroundDrawable(Perspective perspective) {
+
+    if (perspective != null && perspective.sort != null) {
+      switch (perspective.sort) {
+        case "defer":
+        case "completed":
+        case "added":
+        case "modified":
+        case "time":
+          break;
+        case "context":
+        case "project":
+        case "flagged":
+        case "due":
+        case "none":
+        default:
+          if (dueSoon) {
+            return R.drawable.background_due_soon;
+          } else if (overdue) {
+            return R.drawable.background_overdue;
+          }
+          break;
+      }
+    } else {
+      if (dueSoon) {
+        return R.drawable.background_due_soon;
+      } else if (overdue) {
+        return R.drawable.background_overdue;
+      }
+    }
+
+    return 0;
+  }
+
+  /**
    * Get the current task's enclosing context (if it exists) into the data model
    *
    * @param androidContext The current Android Context
@@ -176,7 +440,7 @@ public class Task extends Entry {
   @Nullable
   public Context getContext(@NonNull android.content.Context androidContext) {
 
-    if (context == null) {
+    if (context == null && contextID != null) {
       DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
       context = dataModelHelper.getContextFromID(contextID);
     }
@@ -193,7 +457,7 @@ public class Task extends Entry {
   @Nullable
   public Task getProject(@NonNull android.content.Context androidContext) {
 
-    if (project == null) {
+    if (project == null && projectID != null) {
       DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
       project = dataModelHelper.getTaskFromID(projectID);
     }
@@ -224,19 +488,24 @@ public class Task extends Entry {
   }
 
   /**
-   * @return Whether the task has had its due date explicitly set (as opposed to {@link
-   * #isNotDueLocally()})
-   */
-  public boolean isDueLocally() {
-    return dateDue != null && dateDueEffective != null;
-  }
-
-  /**
-   * @return Whether the task has had its due date set because of a parent (as opposed to {@link
-   * #isDueLocally()})
+   * @return Whether the task has had its due date set because of a parent
    */
   public boolean isNotDueLocally() {
     return dateDue == null && dateDueEffective != null;
+  }
+
+  /**
+   * @return Whether the task has had its defer date set because of a parent
+   */
+  public boolean isNotDeferredLocally() {
+    return dateDefer == null && dateDeferEffective != null;
+  }
+
+  /**
+   * @return Whether the task has had its flag set because of a parent
+   */
+  public boolean isNotFlaggedLocally() {
+    return !flagged && flaggedEffective;
   }
 
   public boolean isParent() {

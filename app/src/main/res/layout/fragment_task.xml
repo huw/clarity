@@ -25,7 +25,7 @@
     tools:text="Gantt Chart"/>
 
   <TextView
-    android:id="@+id/textview_listitem_date"
+    android:id="@+id/textview_listitem_sort"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_below="@id/textview_listitem_name"
@@ -36,11 +36,11 @@
     tools:text="Due 17 March 2016"/>
 
   <TextView
-    android:id="@+id/textview_listitem_context"
+    android:id="@+id/textview_listitem_viewmode"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_alignBaseline="@id/textview_listitem_date"
-    android:layout_toStartOf="@id/textview_listitem_date"
+    android:layout_alignBaseline="@id/textview_listitem_sort"
+    android:layout_toStartOf="@id/textview_listitem_sort"
     android:ellipsize="end"
     android:maxLines="1"
     android:textColor="@color/disabled_text_light"
