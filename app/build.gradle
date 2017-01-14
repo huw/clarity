@@ -39,4 +39,6 @@ dependencies {
     compile "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}"
     compile "org.apache.jackrabbit:jackrabbit-webdav:2.11.3"
     compile "com.googlecode.plist:dd-plist:1.16"
+    compile "com.jakewharton:butterknife:8.4.0"
+    annotationProcessor "com.jakewharton:butterknife-compiler:8.4.0"
 }

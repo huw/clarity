@@ -2,6 +2,10 @@ package nu.huw.clarity.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.IdRes;
+import android.support.annotation.StyleRes;
 
 /**
  * Holds data about a perspective which can be used for organisation
@@ -20,17 +24,22 @@ public class Perspective extends Base {
           return new Perspective[size];
         }
       };
+  @ColorRes
   public int color;
+  @ColorRes
   public int colorStateListID;
+  @DrawableRes
+  public int icon;
+  @IdRes
+  public int menuID;
+  @StyleRes
+  public int themeID;
   public String filterDuration;
   public String filterFlagged;
   public String filterStatus;
   public String group;
-  public int icon;
-  public int menuID;
   public String name;
   public String sort;
-  public int themeID;
   public String value;
   public String viewMode;
 
@@ -40,16 +49,20 @@ public class Perspective extends Base {
   private Perspective(Parcel in) {
 
     super(in);
+
+    // res
     color = in.readInt();
     colorStateListID = in.readInt();
+    icon = in.readInt();
+    menuID = in.readInt();
+    themeID = in.readInt();
+
+    // properties
     filterDuration = in.readString();
     filterFlagged = in.readString();
     filterStatus = in.readString();
     group = in.readString();
-    icon = in.readInt();
-    menuID = in.readInt();
     name = in.readString();
-    themeID = in.readInt();
     sort = in.readString();
     value = in.readString();
     viewMode = in.readString();
@@ -59,16 +72,20 @@ public class Perspective extends Base {
   public void writeToParcel(Parcel out, int flags) {
 
     super.writeToParcel(out, flags);
+
+    // res
     out.writeInt(color);
     out.writeInt(colorStateListID);
+    out.writeInt(icon);
+    out.writeInt(menuID);
+    out.writeInt(themeID);
+
+    // properties
     out.writeString(filterDuration);
     out.writeString(filterFlagged);
     out.writeString(filterStatus);
     out.writeString(group);
-    out.writeInt(icon);
-    out.writeInt(menuID);
     out.writeString(name);
-    out.writeInt(themeID);
     out.writeString(sort);
     out.writeString(value);
     out.writeString(viewMode);

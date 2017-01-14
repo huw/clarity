@@ -23,6 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import java.util.List;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
@@ -40,14 +43,19 @@ import nu.huw.clarity.ui.misc.DividerItemDecoration;
 public class ListFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Entry>> {
 
   private static final String TAG = ListFragment.class.getSimpleName();
+  @BindView(R.id.swiperefreshlayout_list)
+  SwipeRefreshLayout swiperefreshlayout_list;
+  @BindView(R.id.recyclerview_list)
+  RecyclerView recyclerview_list;
+  @BindView(R.id.relativelayout_list_empty)
+  RelativeLayout relativelayout_list_empty;
+  @BindView(R.id.progressbar_list_spinner)
+  ProgressBar progressbar_list_spinner;
   private ListFragment.OnListFragmentInteractionListener fragmentInteractionListener;
   private Bundle args;
   private ListAdapter adapter;
   private View view;
-  private SwipeRefreshLayout swipeRefreshLayout;
-  private RecyclerView recyclerView;
-  private RelativeLayout emptyState;
-  private ProgressBar spinner;
+  private Unbinder unbinder;
   private Entry parentEntry;
   private Perspective perspective;
   private boolean loaded = false;
@@ -135,6 +143,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
     // Inflate view
 
     view = inflater.inflate(R.layout.fragment_list, container, false);
+    unbinder = ButterKnife.bind(this, view);
 
     // Setup swipe-to-refresh
 
@@ -143,7 +152,8 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
       // Get view & account
 
-      swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefreshlayout_list);
+      swiperefreshlayout_list = (SwipeRefreshLayout) view
+          .findViewById(R.id.swiperefreshlayout_list);
       final Account account = AMHelper.getAccount();
       final String authority = getString(R.string.authority);
 
@@ -152,11 +162,11 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
       TypedValue typedValue = new TypedValue();
       getContext().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
       int color = typedValue.data;
-      swipeRefreshLayout.setColorSchemeColors(color);
+      swiperefreshlayout_list.setColorSchemeColors(color);
 
       // Set listener
 
-      swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+      swiperefreshlayout_list.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
 
@@ -171,21 +181,27 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // Setup recycler view & adapter
 
-    recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_list);
-    emptyState = (RelativeLayout) view.findViewById(R.id.relativelayout_list_empty);
-    spinner = (ProgressBar) view.findViewById(R.id.progressbar_list_spinner);
+    recyclerview_list = (RecyclerView) view.findViewById(R.id.recyclerview_list);
+    relativelayout_list_empty = (RelativeLayout) view.findViewById(R.id.relativelayout_list_empty);
+    progressbar_list_spinner = (ProgressBar) view.findViewById(R.id.progressbar_list_spinner);
 
-    recyclerView.setLayoutManager(new LinearLayoutManager(context));
-    recyclerView.invalidateItemDecorations();
-    recyclerView.addItemDecoration(new DividerItemDecoration(context));
-    recyclerView.setItemAnimator(null); // otherwise new items fade in (huge annoyance)
+    recyclerview_list.setLayoutManager(new LinearLayoutManager(context));
+    recyclerview_list.invalidateItemDecorations();
+    recyclerview_list.addItemDecoration(new DividerItemDecoration(context));
+    recyclerview_list.setItemAnimator(null); // otherwise new items fade in (huge annoyance)
 
     // Set adapter & refresh views
 
-    recyclerView.setAdapter(adapter);
+    recyclerview_list.setAdapter(adapter);
     refreshAdapterViews();
 
     return view;
+  }
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    unbinder.unbind();
   }
 
   /**
@@ -195,14 +211,15 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
   private void refreshAdapterViews() {
 
     if (view == null || adapter == null) return;
-    if (recyclerView == null) {
-      recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_list);
+    if (recyclerview_list == null) {
+      recyclerview_list = (RecyclerView) view.findViewById(R.id.recyclerview_list);
     }
-    if (emptyState == null) {
-      emptyState = (RelativeLayout) view.findViewById(R.id.relativelayout_list_empty);
+    if (relativelayout_list_empty == null) {
+      relativelayout_list_empty = (RelativeLayout) view
+          .findViewById(R.id.relativelayout_list_empty);
     }
-    if (spinner == null) {
-      spinner = (ProgressBar) view.findViewById(R.id.progressbar_list_spinner);
+    if (progressbar_list_spinner == null) {
+      progressbar_list_spinner = (ProgressBar) view.findViewById(R.id.progressbar_list_spinner);
     }
 
     // Show the spinner if we're loading something, the empty state if we loaded nothing, and
@@ -212,23 +229,23 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
       // Show the recycler view if the adapter has items
 
-      recyclerView.setVisibility(View.VISIBLE);
-      emptyState.setVisibility(View.GONE);
-      spinner.setVisibility(View.GONE);
+      recyclerview_list.setVisibility(View.VISIBLE);
+      relativelayout_list_empty.setVisibility(View.GONE);
+      progressbar_list_spinner.setVisibility(View.GONE);
     } else if (loaded) {
 
       // Show the empty state if the adapter is empty and we've tried to load something
 
-      recyclerView.setVisibility(View.GONE);
-      emptyState.setVisibility(View.VISIBLE);
-      spinner.setVisibility(View.GONE);
+      recyclerview_list.setVisibility(View.GONE);
+      relativelayout_list_empty.setVisibility(View.VISIBLE);
+      progressbar_list_spinner.setVisibility(View.GONE);
     } else {
 
       // Show nothing
 
-      recyclerView.setVisibility(View.GONE);
-      emptyState.setVisibility(View.GONE);
-      spinner.setVisibility(View.VISIBLE);
+      recyclerview_list.setVisibility(View.GONE);
+      relativelayout_list_empty.setVisibility(View.GONE);
+      progressbar_list_spinner.setVisibility(View.VISIBLE);
     }
   }
 
@@ -246,31 +263,29 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
       }
     }
 
-    if (view != null) {
-      if (swipeRefreshLayout != null) {
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefreshlayout_list);
-      }
-
-      if (swipeRefreshLayout == null) return active;
-
+    if (swiperefreshlayout_list != null) {
       if (active) {
 
         // Weird bug with swipe layouts
         // See: http://stackoverflow.com/a/26910973
 
-        swipeRefreshLayout.post(new Runnable() {
+        swiperefreshlayout_list.post(new Runnable() {
           @Override
           public void run() {
 
-            swipeRefreshLayout.setRefreshing(true);
+            if (swiperefreshlayout_list != null) {
+              swiperefreshlayout_list.setRefreshing(true);
+            }
           }
         });
       } else {
-        swipeRefreshLayout.post(new Runnable() {
+        swiperefreshlayout_list.post(new Runnable() {
           @Override
           public void run() {
 
-            swipeRefreshLayout.setRefreshing(false);
+            if (swiperefreshlayout_list != null) {
+              swiperefreshlayout_list.setRefreshing(false);
+            }
           }
         });
       }

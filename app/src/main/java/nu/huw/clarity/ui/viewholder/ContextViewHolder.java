@@ -5,6 +5,8 @@ import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Perspective;
@@ -15,22 +17,22 @@ import nu.huw.clarity.ui.adapter.ListAdapter;
  */
 public class ContextViewHolder extends ListAdapter.ViewHolder {
 
-  private final TextView nameView;
-  private final TextView countView;
-  private final TextView dueSoonCountView;
-  private final TextView overdueCountView;
-  private final TextView dueSoonDivider;
-  private final TextView overdueDivider;
+  @BindView(R.id.textview_listitem_name)
+  TextView textview_listitem_name;
+  @BindView(R.id.textview_listitem_count)
+  TextView textview_listitem_count;
+  @BindView(R.id.textview_listitem_countduesoon)
+  TextView textview_listitem_countduesoon;
+  @BindView(R.id.textview_listitem_countoverdue)
+  TextView textview_listitem_countoverdue;
+  @BindView(R.id.divider_listitem_countduesoon)
+  TextView divider_listitem_countduesoon;
+  @BindView(R.id.divider_listitem_countoverdue)
+  TextView divider_listitem_countoverdue;
 
   public ContextViewHolder(View view, ListAdapter adapter) {
-
     super(view, adapter);
-    nameView = (TextView) view.findViewById(R.id.textview_listitem_name);
-    countView = (TextView) view.findViewById(R.id.textview_listitem_count);
-    dueSoonCountView = (TextView) view.findViewById(R.id.textview_listitem_countduesoon);
-    overdueCountView = (TextView) view.findViewById(R.id.textview_listitem_countoverdue);
-    dueSoonDivider = (TextView) view.findViewById(R.id.divider_listitem_duesoon);
-    overdueDivider = (TextView) view.findViewById(R.id.divider_listitem_countoverdue);
+    ButterKnife.bind(this, view);
   }
 
   public void bind(Context context, android.content.Context androidContext,
@@ -55,18 +57,18 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
 
     if (dueSoonCount > 0) {
       String dueSoonString = res.getString(R.string.due_soon, dueSoonCount);
-      dueSoonCountView.setText(dueSoonString);
+      textview_listitem_countduesoon.setText(dueSoonString);
     } else {
-      dueSoonCountView.setVisibility(View.GONE);
-      dueSoonDivider.setVisibility(View.GONE);
+      textview_listitem_countduesoon.setVisibility(View.GONE);
+      divider_listitem_countduesoon.setVisibility(View.GONE);
     }
 
     if (overdueCount > 0) {
       String overdueString = res.getString(R.string.overdue, overdueCount);
-      overdueCountView.setText(overdueString);
+      textview_listitem_countoverdue.setText(overdueString);
     } else {
-      overdueCountView.setVisibility(View.GONE);
-      overdueDivider.setVisibility(View.GONE);
+      textview_listitem_countoverdue.setVisibility(View.GONE);
+      divider_listitem_countoverdue.setVisibility(View.GONE);
     }
 
     // If inactive, then fade this out
@@ -74,17 +76,17 @@ public class ContextViewHolder extends ListAdapter.ViewHolder {
     if (!context.id.equals("NO_CONTEXT") && context.droppedEffective &&
         !context.headerRow) {
 
-      nameView.setTextColor(
+      textview_listitem_name.setTextColor(
           ContextCompat.getColor(androidContext, R.color.disabled_text_light));
     }
 
     // If the item is a header row, bold it
 
     if (context.headerRow) {
-      nameView.setTypeface(null, Typeface.BOLD);
+      textview_listitem_name.setTypeface(null, Typeface.BOLD);
     }
 
-    nameView.setText(this.entry.name);
-    countView.setText(countString);
+    textview_listitem_name.setText(this.entry.name);
+    textview_listitem_count.setText(countString);
   }
 }

@@ -2,6 +2,7 @@ package nu.huw.clarity.ui.fragment;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.SwitchCompat;
@@ -28,7 +29,7 @@ public class DetailFragment extends Fragment {
   private static final String TAG = DetailFragment.class.getSimpleName();
   private Entry entry;
   private OnDetailInteractionListener mListener;
-  private int PRIMARY_TEXT;
+  private int PRIMARY_TEXT_COLOR;
 
   public DetailFragment() {
   }
@@ -50,7 +51,7 @@ public class DetailFragment extends Fragment {
       entry = getArguments().getParcelable("ENTRY");
     }
 
-    PRIMARY_TEXT = ContextCompat.getColor(getContext(), R.color.primary_text_light);
+    PRIMARY_TEXT_COLOR = ContextCompat.getColor(getContext(), R.color.primary_text_light);
   }
 
   @Override
@@ -78,7 +79,6 @@ public class DetailFragment extends Fragment {
 
   @Override
   public void onAttach(android.content.Context context) {
-
     super.onAttach(context);
     if (context instanceof OnDetailInteractionListener) {
       mListener = (OnDetailInteractionListener) context;
@@ -90,7 +90,6 @@ public class DetailFragment extends Fragment {
 
   @Override
   public void onDetach() {
-
     super.onDetach();
     mListener = null;
   }
@@ -102,7 +101,7 @@ public class DetailFragment extends Fragment {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
 
     // Project type field
-    int typeStringID = R.string.project_sequential;
+    @StringRes int typeStringID = R.string.project_sequential;
     if (entry.type.equals("single")) {
       typeStringID = R.string.project_single_actions;
     } else if (entry.type.equals("parallel")) {
@@ -128,7 +127,7 @@ public class DetailFragment extends Fragment {
 
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_contextvalue);
       tv.setText(context.name);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
 
       ImageButton ib = (ImageButton) view.findViewById(R.id.imagebutton_detailitem_context);
       ib.setVisibility(View.VISIBLE);
@@ -153,7 +152,7 @@ public class DetailFragment extends Fragment {
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_durationvalue);
 
       tv.setText(time);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
     }
 
     // Defer
@@ -162,7 +161,7 @@ public class DetailFragment extends Fragment {
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_defervalue);
 
       tv.setText(date);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
     }
     if (entry.dateDeferEffective != null) {
 
@@ -171,7 +170,7 @@ public class DetailFragment extends Fragment {
 
       // Set the text _and_ italicise it
       tv.setText(date);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
       tv.setTypeface(null, Typeface.ITALIC);
     }
 
@@ -180,12 +179,12 @@ public class DetailFragment extends Fragment {
       String date = entry.dateDue.format(dateTimeFormatter);
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_duevalue);
       tv.setText(date);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
     } else if (entry.dateDueEffective != null) {
       String date = entry.dateDueEffective.format(dateTimeFormatter);
       TextView tv = ((TextView) view.findViewById(R.id.textview_detailitem_duevalue));
       tv.setText(date);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
       tv.setTypeface(null, Typeface.ITALIC);
     }
 
@@ -193,7 +192,7 @@ public class DetailFragment extends Fragment {
     if (entry.repetitionRule != null) {
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_repeatvalue);
       tv.setText(R.string.repeating);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
     }
 
     return view;
@@ -211,7 +210,7 @@ public class DetailFragment extends Fragment {
 
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_projectvalue);
       tv.setText(project.name);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
 
       ImageButton ib = (ImageButton) view.findViewById(R.id.imagebutton_detailitem_project);
       ib.setVisibility(View.VISIBLE);
@@ -231,7 +230,7 @@ public class DetailFragment extends Fragment {
 
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_contextvalue);
       tv.setText(context.name);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
 
       ImageButton ib = (ImageButton) view.findViewById(R.id.imagebutton_detailitem_context);
       ib.setVisibility(View.VISIBLE);
@@ -256,7 +255,7 @@ public class DetailFragment extends Fragment {
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_durationvalue);
 
       tv.setText(time);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
     }
 
     // Defer
@@ -265,7 +264,7 @@ public class DetailFragment extends Fragment {
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_defervalue);
 
       tv.setText(date);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
     } else if (entry.dateDeferEffective != null) {
 
       String date = entry.dateDeferEffective.format(dateTimeFormatter);
@@ -273,7 +272,7 @@ public class DetailFragment extends Fragment {
 
       // Set the text _and_ italicise it
       tv.setText(date);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
       tv.setTypeface(null, Typeface.ITALIC);
     }
 
@@ -282,12 +281,12 @@ public class DetailFragment extends Fragment {
       String date = entry.dateDue.format(dateTimeFormatter);
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_duevalue);
       tv.setText(date);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
     } else if (entry.dateDueEffective != null) {
       String date = entry.dateDueEffective.format(dateTimeFormatter);
       TextView tv = ((TextView) view.findViewById(R.id.textview_detailitem_duevalue));
       tv.setText(date);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
       tv.setTypeface(null, Typeface.ITALIC);
     }
 
@@ -295,7 +294,7 @@ public class DetailFragment extends Fragment {
     if (entry.repetitionRule != null) {
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_repeatvalue);
       tv.setText(R.string.repeating);
-      tv.setTextColor(PRIMARY_TEXT);
+      tv.setTextColor(PRIMARY_TEXT_COLOR);
     }
 
     return view;

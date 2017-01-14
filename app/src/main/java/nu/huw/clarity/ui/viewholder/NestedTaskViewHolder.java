@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
@@ -17,16 +19,16 @@ import org.threeten.bp.format.DateTimeFormatter;
  */
 public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
-  public final TextView nameView;
-  public final TextView remainingView;
-  public final TextView dateView;
+  @BindView(R.id.textview_listitem_name)
+  TextView textview_listitem_name;
+  @BindView(R.id.textview_listitem_count)
+  TextView textview_listitem_count;
+  @BindView(R.id.textview_listitem_date)
+  TextView textview_listitem_date;
 
   public NestedTaskViewHolder(View view, ListAdapter adapter) {
-
     super(view, adapter);
-    nameView = (TextView) view.findViewById(R.id.textview_listitem_name);
-    remainingView = (TextView) view.findViewById(R.id.textview_listitem_count);
-    dateView = (TextView) view.findViewById(R.id.textview_listitem_date);
+    ButterKnife.bind(this, view);
   }
 
   public void bind(Task task, Context androidContext, Perspective perspective) {
@@ -45,7 +47,7 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
       date = "Due " + task.dateDue.format(dateTimeFormatter);
     } else if (task.dateDueEffective != null) {
       date = "Due " + task.dateDueEffective.format(dateTimeFormatter);
-      this.dateView.setTypeface(null, Typeface.ITALIC);
+      this.textview_listitem_date.setTypeface(null, Typeface.ITALIC);
     }
 
     // Due soon / overdue / unavailable backgrounds & colours on items
@@ -58,8 +60,8 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
       // If the task isn't available, then show the user by changing its colours.
 
       color = R.color.disabled_text_light;
-      nameView.setTextColor(ContextCompat.getColor(androidContext, color));
-      remainingView.setTextColor(ContextCompat.getColor(androidContext, color));
+      textview_listitem_name.setTextColor(ContextCompat.getColor(androidContext, color));
+      textview_listitem_count.setTextColor(ContextCompat.getColor(androidContext, color));
     } else if (task.dueSoon) {
 
       color = R.color.foreground_due_soon;
@@ -70,8 +72,8 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
       background = R.drawable.background_overdue;
     }
 
-    dateView.setTextColor(ContextCompat.getColor(androidContext, color));
-    dateView.setBackgroundResource(background);
+    textview_listitem_date.setTextColor(ContextCompat.getColor(androidContext, color));
+    textview_listitem_date.setBackgroundResource(background);
 
     // Remaining items count
 
@@ -81,12 +83,12 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
     // Bold header row
 
     if (task.headerRow) {
-      nameView.setTypeface(null, Typeface.BOLD);
+      textview_listitem_name.setTypeface(null, Typeface.BOLD);
     }
 
-    nameView.setText(task.name);
-    dateView.setText(date);
-    remainingView.setText(countString);
+    textview_listitem_name.setText(task.name);
+    textview_listitem_date.setText(date);
+    textview_listitem_count.setText(countString);
 
     this.entry = task;
   }

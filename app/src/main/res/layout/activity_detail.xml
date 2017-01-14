@@ -11,7 +11,7 @@
   tools:context="nu.huw.clarity.ui.DetailActivity">
 
   <android.support.design.widget.AppBarLayout
-    android:id="@+id/barlayout_detail"
+    android:id="@+id/appbarlayout_detail"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/primary"
@@ -74,7 +74,7 @@
     android:id="@+id/scrollview_detail_fragmentcontainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_below="@id/barlayout_detail"
+    android:layout_below="@id/appbarlayout_detail"
     android:background="@android:color/background_light"/>
 
 </RelativeLayout>

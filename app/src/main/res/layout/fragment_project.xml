@@ -35,7 +35,7 @@
     tools:text="87 remaining"/>
 
   <include
-    android:id="@+id/divider_listitem_duesoon"
+    android:id="@+id/divider_listitem_countduesoon"
     layout="@layout/divider_dot"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -48,8 +48,8 @@
     android:id="@+id/textview_listitem_countduesoon"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_alignBaseline="@id/divider_listitem_duesoon"
-    android:layout_toEndOf="@id/divider_listitem_duesoon"
+    android:layout_alignBaseline="@id/divider_listitem_countduesoon"
+    android:layout_toEndOf="@id/divider_listitem_countduesoon"
     android:background="@drawable/background_due_soon"
     android:ellipsize="end"
     android:maxLines="1"

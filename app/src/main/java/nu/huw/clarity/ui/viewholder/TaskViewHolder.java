@@ -6,6 +6,8 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
@@ -19,20 +21,19 @@ import org.threeten.bp.format.DateTimeFormatter;
 public class TaskViewHolder extends ListAdapter.ViewHolder {
 
   private static final String TAG = TaskViewHolder.class.getSimpleName();
-  public final View view;
-  private final TextView nameView;
-  private final TextView contextView;
-  private final TextView dateView;
-  private final CheckCircle checkCircleView;
+
+  @BindView(R.id.textview_listitem_name)
+  TextView textview_listitem_name;
+  @BindView(R.id.textview_listitem_context)
+  TextView textview_listitem_context;
+  @BindView(R.id.textview_listitem_date)
+  TextView textview_listitem_date;
+  @BindView(R.id.checkcircle_listitem)
+  CheckCircle checkcircle_listitem;
 
   public TaskViewHolder(View view, ListAdapter adapter) {
-
     super(view, adapter);
-    this.view = view;
-    nameView = (TextView) view.findViewById(R.id.textview_listitem_name);
-    contextView = (TextView) view.findViewById(R.id.textview_listitem_context);
-    dateView = (TextView) view.findViewById(R.id.textview_listitem_date);
-    checkCircleView = (CheckCircle) view.findViewById(R.id.checkcircle_listitem);
+    ButterKnife.bind(this, view);
   }
 
   public void bind(final Task task, Context androidContext, Perspective perspective) {
@@ -46,7 +47,7 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
       date = "Due " + task.dateDue.format(dateTimeFormatter);
     } else if (task.dateDueEffective != null) {
       date = "Due " + task.dateDueEffective.format(dateTimeFormatter);
-      this.dateView.setTypeface(null, Typeface.ITALIC);
+      textview_listitem_date.setTypeface(null, Typeface.ITALIC);
     }
 
     // Due soon / overdue / unavailable colours & backgrounds
@@ -59,8 +60,8 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
       // If the task isn't available, then show the user by changing its colours.
 
       color = R.color.disabled_text_light;
-      nameView.setTextColor(ContextCompat.getColor(androidContext, color));
-      contextView.setTextColor(ContextCompat.getColor(androidContext, color));
+      textview_listitem_name.setTextColor(ContextCompat.getColor(androidContext, color));
+      textview_listitem_context.setTextColor(ContextCompat.getColor(androidContext, color));
     } else if (task.dueSoon) {
       color = R.color.foreground_due_soon;
       background = R.drawable.background_due_soon;
@@ -69,38 +70,38 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
       background = R.drawable.background_overdue;
     }
 
-    dateView.setTextColor(ContextCompat.getColor(androidContext, color));
-    dateView.setBackgroundResource(background);
+    textview_listitem_date.setTextColor(ContextCompat.getColor(androidContext, color));
+    textview_listitem_date.setBackgroundResource(background);
 
     // Bold header row
 
     if (task.headerRow) {
-      nameView.setTypeface(null, Typeface.BOLD);
+      textview_listitem_name.setTypeface(null, Typeface.BOLD);
     }
 
-    nameView.setText(task.name);
-    dateView.setText(date);
+    textview_listitem_name.setText(task.name);
+    textview_listitem_date.setText(date);
     if (task.contextID != null) {
-      contextView.setText(task.getContext(androidContext).name);
+      textview_listitem_context.setText(task.getContext(androidContext).name);
     }
 
     // Check circle
     // Available tasks can have a flag, but they can't have colorised overdue/due soon
     // circles because the user doesn't want to start them yet.
-    checkCircleView.setChecked(task.dateCompleted != null);
-    checkCircleView.setFlagged(task.flagged);
+    checkcircle_listitem.setChecked(task.dateCompleted != null);
+    checkcircle_listitem.setFlagged(task.flagged);
 
     if (task.isRemaining()) {
-      checkCircleView.setOverdue(task.overdue);
-      checkCircleView.setDueSoon(task.dueSoon);
+      checkcircle_listitem.setOverdue(task.overdue);
+      checkcircle_listitem.setDueSoon(task.dueSoon);
     } else {
-      checkCircleView.setOverdue(false);
-      checkCircleView.setDueSoon(false);
+      checkcircle_listitem.setOverdue(false);
+      checkcircle_listitem.setDueSoon(false);
     }
 
     // Check circle callback
     // Adapter will handle necessary logic for removal
-    checkCircleView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+    checkcircle_listitem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override
       public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
       }

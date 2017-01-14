@@ -22,6 +22,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import java.util.List;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
@@ -37,9 +39,14 @@ public class MainActivity extends AppCompatActivity
 
   private static final int LOG_IN_FIRST_REQUEST = 1;
   private static final String TAG = MainActivity.class.getSimpleName();
-  private Toolbar toolbar;
-  private DrawerLayout drawerLayout;
-  private NavigationView drawer;
+
+  @BindView(R.id.toolbar_main)
+  Toolbar toolbar_main;
+  @BindView(R.id.drawerlayout_main)
+  DrawerLayout drawerlayout_main;
+  @BindView(R.id.navigationview_main_drawer)
+  NavigationView navigationview_main_drawer;
+
   private Fragment newFragment;
   private Fragment currentFragment;
   private boolean isChangingFragment;
@@ -50,7 +57,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onReceive(Context context, Intent intent) {
 
-      refreshMenu(drawer);
+      refreshMenu();
     }
   };
 
@@ -59,6 +66,7 @@ public class MainActivity extends AppCompatActivity
 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    ButterKnife.bind(this);
 
     // Get some perspective
     DataModelHelper dmHelper = new DataModelHelper(getApplicationContext());
@@ -70,19 +78,17 @@ public class MainActivity extends AppCompatActivity
         new IntentFilter(getApplicationContext().getString(R.string.sync_broadcast_intent));
 
     // Toolbar & Nav Drawer Setup
-    setupToolbar(getToolbar());
-    setupNavDrawer(getDrawerLayout(), getDrawer());
+    setupToolbar();
+    setupNavDrawer();
 
     if (savedInstanceState != null) {
       return;
     }
 
     if (!new AccountManagerHelper(getApplicationContext()).doesAccountExist()) {
-
       // If there are no syncing accounts, sign in
       startActivityForResult(new Intent(this, LoginActivity.class), LOG_IN_FIRST_REQUEST);
     } else {
-
       registerSyncs();
     }
 
@@ -94,9 +100,9 @@ public class MainActivity extends AppCompatActivity
         .commit();
   }
 
-  private void setupToolbar(Toolbar toolbar) {
+  private void setupToolbar() {
 
-    setSupportActionBar(toolbar);
+    setSupportActionBar(toolbar_main);
     final ActionBar actionBar = getSupportActionBar();
 
     if (actionBar != null) {
@@ -105,27 +111,24 @@ public class MainActivity extends AppCompatActivity
     }
   }
 
-  private void setupNavDrawer(DrawerLayout drawerLayout, NavigationView navigationView) {
+  private void setupNavDrawer() {
 
-    if (navigationView != null && drawerLayout != null) {
+    // Keep all icons as their original colours
+    navigationview_main_drawer.setItemIconTintList(null);
 
-      // Keep all icons as their original colours
-      navigationView.setItemIconTintList(null);
+    refreshMenu();
 
-      refreshMenu(navigationView);
+    // Colour and set the checked item
+    Perspective oldPerspective = perspective;
+    MenuItem firstItem = navigationview_main_drawer.getMenu().getItem(0);
+    updatePerspective(firstItem.getItemId());
 
-      // Colour and set the checked item
-      Perspective oldPerspective = perspective;
-      MenuItem firstItem = navigationView.getMenu().getItem(0);
-      updatePerspective(firstItem.getItemId());
+    navigationview_main_drawer.setCheckedItem(firstItem.getItemId());
+    setTitle(firstItem.getTitle());
+    changeColors(oldPerspective);
 
-      navigationView.setCheckedItem(firstItem.getItemId());
-      setTitle(firstItem.getTitle());
-      changeColors(oldPerspective);
-
-      navigationView.setNavigationItemSelectedListener(new NavigationViewListener());
-      drawerLayout.addDrawerListener(new DrawerListener());
-    }
+    navigationview_main_drawer.setNavigationItemSelectedListener(new NavigationViewListener());
+    drawerlayout_main.addDrawerListener(new DrawerListener());
   }
 
   private void updatePerspective(int menuID) {
@@ -143,7 +146,7 @@ public class MainActivity extends AppCompatActivity
     perspective = newPerspective;
   }
 
-  private void refreshMenu(NavigationView navigationView) {
+  private void refreshMenu() {
 
     // Build menu
     // We have a default menu for before the sync finishes, but as soon as that's done we
@@ -151,7 +154,7 @@ public class MainActivity extends AppCompatActivity
 
     perspectiveList = new DataModelHelper(getApplicationContext()).getPerspectives(false);
 
-    Menu menu = navigationView.getMenu();
+    Menu menu = navigationview_main_drawer.getMenu();
     menu.clear();
 
     for (Perspective menuItem : perspectiveList) {
@@ -160,7 +163,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     // Re-select the current perspective in the menu
-    drawer.setCheckedItem(perspective.menuID);
+    navigationview_main_drawer.setCheckedItem(perspective.menuID);
   }
 
   @Override
@@ -179,10 +182,6 @@ public class MainActivity extends AppCompatActivity
 
         // OK to start syncing
 
-        Account account = new AccountManagerHelper(getApplicationContext()).getAccount();
-        String authority = getString(R.string.authority);
-        Bundle extras = new Bundle();
-
         registerSyncs();    // Also requests a new sync
 
         if (currentFragment instanceof ListFragment) {
@@ -197,7 +196,7 @@ public class MainActivity extends AppCompatActivity
 
     switch (item.getItemId()) {
       case android.R.id.home:
-        getDrawerLayout().openDrawer(GravityCompat.START);
+        drawerlayout_main.openDrawer(GravityCompat.START);
         return true;
     }
 
@@ -207,10 +206,8 @@ public class MainActivity extends AppCompatActivity
   @Override
   public void onBackPressed() {
 
-    DrawerLayout dl = getDrawerLayout();
-
-    if (dl.isDrawerOpen(GravityCompat.START)) {
-      dl.closeDrawer(GravityCompat.START);
+    if (drawerlayout_main.isDrawerOpen(GravityCompat.START)) {
+      drawerlayout_main.closeDrawer(GravityCompat.START);
     } else {
       super.onBackPressed();
     }
@@ -241,60 +238,14 @@ public class MainActivity extends AppCompatActivity
     currentFragment = newFragment;
   }
 
-  private Toolbar getToolbar() {
-
-    if (toolbar == null) {
-      Toolbar tb = (Toolbar) findViewById(R.id.toolbar_main);
-
-      if (tb == null) {
-        throw new NullPointerException();
-      }
-
-      toolbar = tb;
-    }
-
-    return toolbar;
-  }
-
-  private DrawerLayout getDrawerLayout() {
-
-    if (drawerLayout == null) {
-      DrawerLayout dl = (DrawerLayout) findViewById(R.id.drawerlayout_main);
-
-      if (dl == null) {
-        throw new NullPointerException();
-      }
-
-      drawerLayout = dl;
-    }
-
-    return drawerLayout;
-  }
-
-  private NavigationView getDrawer() {
-
-    if (drawer == null) {
-      NavigationView nv = (NavigationView) findViewById(R.id.navigationview_main_drawer);
-
-      if (nv == null) {
-        throw new NullPointerException();
-      }
-
-      drawer = nv;
-    }
-
-    return drawer;
-  }
-
   private void changeColors(Perspective oldPerspective) {
 
     // Get the current header colour
     int colorFrom = ResourcesCompat.getColor(getResources(), oldPerspective.color, null);
 
-    // Set the drawer highlight color to the current perspective's
-    getDrawer().setItemTextColor(ResourcesCompat.getColorStateList(getResources(),
-        perspective.colorStateListID,
-        null));
+    // Set the navigationview_main_drawer highlight color to the current perspective's
+    navigationview_main_drawer.setItemTextColor(ResourcesCompat.getColorStateList(getResources(),
+        perspective.colorStateListID, null));
 
     // Now to figure out the colour we're transitioning to, we get the _new_ primary theme
     // colour, which has been changed, and save it into a new value.
@@ -311,22 +262,19 @@ public class MainActivity extends AppCompatActivity
       @Override
       public void onAnimationUpdate(ValueAnimator animator) {
 
-        Toolbar tb = getToolbar();
-        DrawerLayout dl = getDrawerLayout();
-
         // The update listener will give you a number between the two values you gave the
         // animation object initially. Every time it's ready to update, it runs this code.
         // By the way, you can just set the status bar background colour, and the program
         // will automatically tint it for you. Just make sure you call 'invalidate()'
         // afterward.
 
-        tb.setBackgroundColor((int) animator.getAnimatedValue());
-        dl.setStatusBarBackgroundColor((int) animator.getAnimatedValue());
-        dl.invalidate();
+        toolbar_main.setBackgroundColor((int) animator.getAnimatedValue());
+        drawerlayout_main.setStatusBarBackgroundColor((int) animator.getAnimatedValue());
+        drawerlayout_main.invalidate();
       }
     });
 
-    drawer.invalidate();
+    navigationview_main_drawer.invalidate();
 
     toolbarAnimation.start();
   }
@@ -390,7 +338,7 @@ public class MainActivity extends AppCompatActivity
       ft.replace(R.id.framelayout_main_container, currentFragment);
       ft.commit();
 
-      getDrawerLayout().closeDrawer(GravityCompat.START);
+      drawerlayout_main.closeDrawer(GravityCompat.START);
       return true;
     }
   }

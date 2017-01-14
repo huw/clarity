@@ -14,6 +14,8 @@ import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseContract;
 import nu.huw.clarity.model.Context;
@@ -26,11 +28,23 @@ import nu.huw.clarity.ui.misc.CheckCircle;
 public class DetailActivity extends AppCompatActivity
     implements DetailFragment.OnDetailInteractionListener {
 
+  @BindView(R.id.relativelayout_detail_container)
+  RelativeLayout relativelayout_detail_container;
+  @BindView(R.id.appbarlayout_detail)
+  AppBarLayout appbarlayout_detail;
+  @BindView(R.id.toolbar_detail)
+  Toolbar toolbar_detail;
+  @BindView(R.id.checkcircle_detail)
+  CheckCircle checkcircle_detail;
+  @BindView(R.id.textinputlayout_detail_name)
+  TextInputLayout textinputlayout_detail_name;
+  @BindView(R.id.textinputedittext_detail_name)
+  TextInputEditText textinputedittext_detail_name;
   private int themeID;
 
-  private void setupToolbar(Toolbar toolbar, int themeID) {
+  private void setupToolbar(int themeID) {
 
-    setSupportActionBar(toolbar);
+    setSupportActionBar(toolbar_detail);
     final ActionBar actionBar = getSupportActionBar();
 
     if (actionBar != null) {
@@ -42,16 +56,11 @@ public class DetailActivity extends AppCompatActivity
     this.themeID = themeID;
     setTheme(themeID);
 
-    AppBarLayout abLayout = (AppBarLayout) findViewById(R.id.barlayout_detail);
-    RelativeLayout detailView = (RelativeLayout) findViewById(R.id.relativelayout_detail_container);
-
     // Set background colours depending on the view we just came from
-    if (abLayout != null && detailView != null) {
-      TypedValue typedValue = new TypedValue();
-      getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-      abLayout.setBackgroundColor(typedValue.data);
-      detailView.setBackgroundColor(typedValue.data);
-    }
+    TypedValue typedValue = new TypedValue();
+    getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+    appbarlayout_detail.setBackgroundColor(typedValue.data);
+    relativelayout_detail_container.setBackgroundColor(typedValue.data);
   }
 
   @Override
@@ -59,6 +68,7 @@ public class DetailActivity extends AppCompatActivity
 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_detail);
+    ButterKnife.bind(this);
 
     Intent intent = getIntent();
     Entry entry;
@@ -72,69 +82,62 @@ public class DetailActivity extends AppCompatActivity
       throw new IllegalArgumentException("Intent must contain 'ENTRY'");
     }
 
-    setupToolbar((Toolbar) findViewById(R.id.toolbar_detail),
-        intent.getIntExtra("THEME_ID", R.style.AppTheme));
+    setupToolbar(R.style.AppTheme);
 
     // Set the default text in the text field to the thing's name, and set the hint text to
     // the thing's type
-    TextInputEditText nameView = (TextInputEditText) findViewById(
-        R.id.textinputedittext_detail_name);
-    TextInputLayout tiLayout = (TextInputLayout) findViewById(R.id.textinputlayout_detail_name);
 
-    if (nameView != null && tiLayout != null) {
-      nameView.setText(entry.name);
+    textinputedittext_detail_name.setText(entry.name);
+    int hintID = R.string.prompt_name;
 
-      int hintID = R.string.prompt_name;
-
-      if (entry instanceof Task) {
-        if (((Task) entry).isProject) {
-          hintID = R.string.project;
-        } else {
-          hintID = R.string.task;
-        }
-      } else if (entry instanceof Context) {
-        hintID = R.string.context;
-      } else if (entry instanceof Folder) {
-        hintID = R.string.folder;
+    if (entry instanceof Task) {
+      if (((Task) entry).isProject) {
+        hintID = R.string.project;
+      } else {
+        hintID = R.string.task;
       }
-
-      nameView.setHint(hintID);
-      tiLayout.setHint(getResources().getString(hintID));
-
-      Fragment detailFragment = DetailFragment.newInstance(entry);
-
-      if (detailFragment != null) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.scrollview_detail_fragmentcontainer, detailFragment);
-        ft.commit();
-      }
+    } else if (entry instanceof Context) {
+      hintID = R.string.context;
+    } else if (entry instanceof Folder) {
+      hintID = R.string.folder;
     }
 
-    CheckCircle checkCircleView = (CheckCircle) findViewById(R.id.checkcircle_detail);
+    textinputedittext_detail_name.setHint(hintID);
+    textinputlayout_detail_name.setHint(getResources().getString(hintID));
+
+    Fragment detailFragment = DetailFragment.newInstance(entry);
+
+    if (detailFragment != null) {
+      FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+      ft.replace(R.id.scrollview_detail_fragmentcontainer, detailFragment);
+      ft.commit();
+    }
+
+    // Check circle
+
     if (entry instanceof Task) {
       Task task = (Task) entry;
 
-      // Check circle
       // Available tasks can have a flag, but they can't have colorised overdue/due soon
       // circles because the user doesn't want to start them yet.
 
-      checkCircleView.setChecked(task.dateCompleted != null);
-      checkCircleView.setFlagged(task.flagged && themeID != R.style.AppTheme_Orange);
+      checkcircle_detail.setChecked(task.dateCompleted != null);
+      checkcircle_detail.setFlagged(task.flagged && themeID != R.style.AppTheme_Orange);
 
       // Also, if the colour is going to clash with the background, then don't set the
       // attribute. This applies to the red clashing with forecast, and orange clashing
       // with flagged (in both cases the intended colour should be pretty obvious)
 
       if (task.isRemaining()) {
-        checkCircleView.setOverdue(task.overdue && themeID != R.style.AppTheme_Red);
-        checkCircleView.setDueSoon(task.dueSoon);
+        checkcircle_detail.setOverdue(task.overdue && themeID != R.style.AppTheme_Red);
+        checkcircle_detail.setDueSoon(task.dueSoon);
       } else {
-        checkCircleView.setOverdue(false);
-        checkCircleView.setDueSoon(false);
+        checkcircle_detail.setOverdue(false);
+        checkcircle_detail.setDueSoon(false);
       }
     } else {
       // Remove the check circle
-      checkCircleView.setVisibility(View.GONE);
+      checkcircle_detail.setVisibility(View.GONE);
     }
   }
 

@@ -19,7 +19,11 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.OmniSyncLoginTask;
 import nu.huw.clarity.ui.fragment.ErrorDialogFragment;
@@ -29,70 +33,62 @@ public class LoginActivity extends AppCompatActivity
 
   private static final String TAG = LoginActivity.class.getSimpleName();
   static int RESULT_OK = 1;
-  /*
-   * Keep track of the login task to ensure we can cancel it if requested.
-   */
-  private OmniSyncLoginTask mAuthTask = null;
-  /*
-   * References for the UI.
-   */
-  private TextInputEditText mUsernameView;
-  private TextInputEditText mPasswordView;
-  private TextInputLayout mUsernameIL;
-  private TextInputLayout mPasswordIL;
-  private View mProgressView;
-  private View mLoginFormView;
-  /*
-   * Other
-   */
-  private AccountManager mAccountManager;
-  private String mUsername;
-  private String mPassword;
-  private boolean mRetryOnErrorDismiss;
+
+  @BindView(R.id.textinputedittext_login_username)
+  TextInputEditText textinputedittext_login_username;
+  @BindView(R.id.textinputedittext_login_password)
+  TextInputEditText textinputedittext_login_password;
+  @BindView(R.id.textinputlayout_login_username)
+  TextInputLayout textinputlayout_login_username;
+  @BindView(R.id.textinputlayout_login_password)
+  TextInputLayout textinputlayout_login_password;
+  @BindView(R.id.progressbar_login_spinner)
+  ProgressBar progressbar_login_spinner;
+  @BindView(R.id.relativelayout_login_form)
+  RelativeLayout relativelayout_login_form;
+  @BindView(R.id.button_login_signin)
+  Button button_login_signin;
+
+  // Keep track of login task so we can cancel it later
+  private OmniSyncLoginTask omniSyncLoginTask = null;
+  private AccountManager accountManager;
+  private String username;
+  private String password;
+  private boolean retryOnErrorDismiss;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
+    ButterKnife.bind(this);
 
-    mAccountManager = AccountManager.get(getBaseContext());
+    accountManager = AccountManager.get(getBaseContext());
 
     // Set up the login form.
-    mUsernameView = (TextInputEditText) findViewById(R.id.textinputedittext_login_username);
-    mPasswordView = (TextInputEditText) findViewById(R.id.textinputedittext_login_password);
+    textinputlayout_login_username.setErrorEnabled(true);
+    textinputlayout_login_password.setErrorEnabled(true);
 
-    mUsernameIL = (TextInputLayout) findViewById(R.id.textinputlayout_login_username);
-    mPasswordIL = (TextInputLayout) findViewById(R.id.textinputlayout_login_password);
+    textinputedittext_login_password
+        .setOnEditorActionListener(new TextView.OnEditorActionListener() {
+          @Override
+          public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
 
-    mUsernameIL.setErrorEnabled(true);
-    mPasswordIL.setErrorEnabled(true);
+            if (id == R.id.login || id == EditorInfo.IME_NULL) {
+              attemptLogin();
+              return true;
+            }
+            return false;
+          }
+        });
 
-    mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+    button_login_signin.setOnClickListener(new OnClickListener() {
       @Override
-      public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+      public void onClick(View view) {
 
-        if (id == R.id.login || id == EditorInfo.IME_NULL) {
-          attemptLogin();
-          return true;
-        }
-        return false;
+        attemptLogin();
       }
     });
-
-    Button mSignInButton = (Button) findViewById(R.id.button_login_signin);
-    if (mSignInButton != null) {
-      mSignInButton.setOnClickListener(new OnClickListener() {
-        @Override
-        public void onClick(View view) {
-
-          attemptLogin();
-        }
-      });
-    }
-
-    mProgressView = findViewById(R.id.progressbar_login);
-    mLoginFormView = findViewById(R.id.relativelayout_login_form);
   }
 
   /**
@@ -102,40 +98,40 @@ public class LoginActivity extends AppCompatActivity
    */
   private void attemptLogin() {
 
-    if (mAuthTask != null) {
+    if (omniSyncLoginTask != null) {
       return;
     }
 
     // Reset errors.
-    mUsernameIL.setError(null);
-    mPasswordIL.setError(null);
+    textinputlayout_login_username.setError(null);
+    textinputlayout_login_password.setError(null);
 
     // Store values at the time of the login attempt.
-    mUsername = mUsernameView.getText().toString();
-    mPassword = mPasswordView.getText().toString();
+    username = textinputedittext_login_username.getText().toString();
+    password = textinputedittext_login_password.getText().toString();
 
     boolean cancel = false;
     View focusView = null;
 
     // Check for a valid password.
-    if (TextUtils.isEmpty(mPassword)) {
-      mPasswordIL.setError(getString(R.string.error_field_required));
-      focusView = mPasswordView;
+    if (TextUtils.isEmpty(password)) {
+      textinputlayout_login_password.setError(getString(R.string.error_field_required));
+      focusView = textinputedittext_login_password;
       cancel = true;
-    } else if (!isPasswordValid(mPassword)) {
-      mPasswordIL.setError(getString(R.string.error_invalid_password));
-      focusView = mPasswordView;
+    } else if (!isPasswordValid(password)) {
+      textinputlayout_login_password.setError(getString(R.string.error_invalid_password));
+      focusView = textinputedittext_login_password;
       cancel = true;
     }
 
     // Check for a valid email address.
-    if (TextUtils.isEmpty(mUsername)) {
-      mUsernameIL.setError(getString(R.string.error_field_required));
-      focusView = mUsernameView;
+    if (TextUtils.isEmpty(username)) {
+      textinputlayout_login_username.setError(getString(R.string.error_field_required));
+      focusView = textinputedittext_login_username;
       cancel = true;
-    } else if (!isUsernameValid(mUsername)) {
-      mUsernameIL.setError(getString(R.string.error_invalid_username));
-      focusView = mUsernameView;
+    } else if (!isUsernameValid(username)) {
+      textinputlayout_login_username.setError(getString(R.string.error_invalid_username));
+      focusView = textinputedittext_login_username;
       cancel = true;
     }
 
@@ -150,10 +146,10 @@ public class LoginActivity extends AppCompatActivity
 
       InputMethodManager imm =
           (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-      imm.hideSoftInputFromWindow(mLoginFormView.getWindowToken(), 0);
+      imm.hideSoftInputFromWindow(relativelayout_login_form.getWindowToken(), 0);
 
-      mAuthTask = new OmniSyncLoginTask(mUsername, mPassword, new LoginListener());
-      mAuthTask.execute((Void) null);
+      omniSyncLoginTask = new OmniSyncLoginTask(username, password, new LoginListener());
+      omniSyncLoginTask.execute((Void) null);
     }
   }
 
@@ -179,29 +175,29 @@ public class LoginActivity extends AppCompatActivity
 
     int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-    mLoginFormView.setVisibility(View.VISIBLE);
-    mLoginFormView.animate().setDuration(shortAnimTime).alpha(show ? 0 : 1)
+    relativelayout_login_form.setVisibility(View.VISIBLE);
+    relativelayout_login_form.animate().setDuration(shortAnimTime).alpha(show ? 0 : 1)
         .setListener(new AnimatorListenerAdapter() {
           @Override
           public void onAnimationEnd(Animator animation) {
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            relativelayout_login_form.setVisibility(show ? View.GONE : View.VISIBLE);
           }
         });
 
-    mProgressView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0)
+    progressbar_login_spinner.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0)
         .setListener(new AnimatorListenerAdapter() {
           @Override
           public void onAnimationEnd(Animator animation) {
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            progressbar_login_spinner.setVisibility(show ? View.VISIBLE : View.GONE);
           }
         });
   }
 
   public void onErrorDismiss(int resultCode) {
 
-    if (resultCode == Activity.RESULT_OK && mRetryOnErrorDismiss) {
+    if (resultCode == Activity.RESULT_OK && retryOnErrorDismiss) {
       attemptLogin();
     }
   }
@@ -214,7 +210,7 @@ public class LoginActivity extends AppCompatActivity
     userData.putString("SERVER_DOMAIN", serverDomain);
     userData.putString("SERVER_PORT", serverPort);
 
-    mAccountManager.addAccountExplicitly(account, password, userData);
+    accountManager.addAccountExplicitly(account, password, userData);
     Log.i(TAG, "Added account to system");
 
     setResult(RESULT_OK);
@@ -227,11 +223,11 @@ public class LoginActivity extends AppCompatActivity
     public void onFinished(Bundle result) {
 
       // Null the task so it can be rebuilt later
-      mAuthTask = null;
+      omniSyncLoginTask = null;
 
       if (result.getBoolean("SUCCESS")) {
 
-        addAccount(mUsername, mPassword, result.getString("SERVER_DOMAIN"),
+        addAccount(username, password, result.getString("SERVER_DOMAIN"),
             result.getString("SERVER_PORT"));
       } else {
 
@@ -252,7 +248,7 @@ public class LoginActivity extends AppCompatActivity
 
         if (loginErrorRef != 0) {
 
-          mRetryOnErrorDismiss = result.getBoolean("ERROR_LOGIN_RETRY");
+          retryOnErrorDismiss = result.getBoolean("ERROR_LOGIN_RETRY");
 
           DialogFragment errorDialog = new ErrorDialogFragment();
           Bundle args = new Bundle();
@@ -269,12 +265,12 @@ public class LoginActivity extends AppCompatActivity
           errorDialog.show(getSupportFragmentManager(), "Error Dialog");
         } else if (usernameErrorRef != 0) {
 
-          mUsernameIL.setError(getString(usernameErrorRef));
-          mUsernameIL.requestFocus();
+          textinputlayout_login_username.setError(getString(usernameErrorRef));
+          textinputlayout_login_username.requestFocus();
         } else if (passwordErrorRef != 0) {
 
-          mPasswordIL.setError(getString(passwordErrorRef));
-          mPasswordIL.requestFocus();
+          textinputlayout_login_password.setError(getString(passwordErrorRef));
+          textinputlayout_login_password.requestFocus();
         }
       }
     }
