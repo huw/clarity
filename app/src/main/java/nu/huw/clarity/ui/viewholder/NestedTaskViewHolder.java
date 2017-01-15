@@ -3,6 +3,7 @@ package nu.huw.clarity.ui.viewholder;
 import android.content.Context;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
+import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -23,6 +24,8 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
   TextView textview_listitem_count;
   @BindView(R.id.textview_listitem_sort)
   TextView textview_listitem_sort;
+  @BindView(R.id.imageview_listitem_arrow)
+  AppCompatImageView imageview_listitem_arrow;
 
   public NestedTaskViewHolder(View view, ListAdapter adapter) {
     super(view, adapter);
@@ -59,6 +62,10 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
     textview_listitem_sort.setTypeface(null, dueTextStyle);
     textview_listitem_sort.setTextColor(dueColor);
     textview_listitem_sort.setBackgroundResource(dueBackgroundDrawable);
+
+    // Display/remove arrow icon
+
+    imageview_listitem_arrow.setVisibility(task.headerRow ? View.GONE : View.VISIBLE);
 
     this.entry = task;
   }

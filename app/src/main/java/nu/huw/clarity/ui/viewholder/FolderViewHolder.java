@@ -1,6 +1,7 @@
 package nu.huw.clarity.ui.viewholder;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -27,6 +28,8 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
   TextView divider_listitem_countduesoon;
   @BindView(R.id.divider_listitem_countoverdue)
   TextView divider_listitem_countoverdue;
+  @BindView(R.id.imageview_listitem_folder)
+  AppCompatImageView imageview_listitem_folder;
 
   public FolderViewHolder(View view, ListAdapter adapter) {
     super(view, adapter);
@@ -63,6 +66,10 @@ public class FolderViewHolder extends ListAdapter.ViewHolder {
       textview_listitem_countoverdue.setVisibility(View.GONE);
       divider_listitem_countoverdue.setVisibility(View.GONE);
     }
+
+    // Display/remove arrow icon
+
+    imageview_listitem_folder.setVisibility(folder.headerRow ? View.GONE : View.VISIBLE);
 
     this.entry = folder;
   }

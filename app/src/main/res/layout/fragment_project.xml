@@ -16,6 +16,8 @@
     android:id="@+id/textview_listitem_name"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_alignParentStart="true"
+    android:layout_toStartOf="@+id/imageview_listitem_arrow"
     android:ellipsize="end"
     android:maxLines="1"
     android:textColor="@color/primary_text_light"
@@ -79,5 +81,14 @@
     android:textColor="@color/foreground_overdue"
     android:textSize="@dimen/body1_size"
     tools:text="1 overdue"/>
+
+  <android.support.v7.widget.AppCompatImageView
+    android:id="@id/imageview_listitem_arrow"
+    android:layout_width="@dimen/check_circle_size"
+    android:layout_height="@dimen/check_circle_size"
+    android:layout_marginStart="@dimen/horizontal_margin"
+    android:layout_alignParentEnd="true"
+    android:padding="@dimen/listitem_arrow_padding"
+    android:src="@drawable/ic_chevron_list"/>
 
 </RelativeLayout>

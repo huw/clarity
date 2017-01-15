@@ -2,6 +2,7 @@ package nu.huw.clarity.ui.viewholder;
 
 import android.content.Context;
 import android.support.annotation.ColorInt;
+import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -28,6 +29,8 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
   TextView divider_listitem_countduesoon;
   @BindView(R.id.divider_listitem_countoverdue)
   TextView divider_listitem_countoverdue;
+  @BindView(R.id.imageview_listitem_arrow)
+  AppCompatImageView imageview_listitem_arrow;
 
   public ProjectViewHolder(View view, ListAdapter adapter) {
     super(view, adapter);
@@ -70,6 +73,10 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
       textview_listitem_countoverdue.setVisibility(View.GONE);
       divider_listitem_countoverdue.setVisibility(View.GONE);
     }
+
+    // Display/remove arrow icon
+
+    imageview_listitem_arrow.setVisibility(project.headerRow ? View.GONE : View.VISIBLE);
 
     this.entry = project;
   }
