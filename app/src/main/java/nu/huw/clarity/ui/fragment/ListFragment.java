@@ -16,7 +16,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -94,8 +93,8 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     ListFragment fragment = new ListFragment();
     Bundle args = new Bundle();
-    args.putParcelable("perspective", perspective);
-    args.putParcelable("parent", parent);
+    args.putParcelable("PERSPECTIVE", perspective);
+    args.putParcelable("PARENT", parent);
     fragment.setArguments(args);
     return fragment;
   }
@@ -134,8 +133,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
    */
   @Nullable
   @Override
-  public View onCreateView(LayoutInflater inflater,
-      @Nullable ViewGroup container,
+  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
 
     Context context = getContext();
@@ -152,8 +150,6 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
       // Get view & account
 
-      swiperefreshlayout_list = (SwipeRefreshLayout) view
-          .findViewById(R.id.swiperefreshlayout_list);
       final Account account = AMHelper.getAccount();
       final String authority = getString(R.string.authority);
 
@@ -181,10 +177,6 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // Setup recycler view & adapter
 
-    recyclerview_list = (RecyclerView) view.findViewById(R.id.recyclerview_list);
-    relativelayout_list_empty = (RelativeLayout) view.findViewById(R.id.relativelayout_list_empty);
-    progressbar_list_spinner = (ProgressBar) view.findViewById(R.id.progressbar_list_spinner);
-
     recyclerview_list.setLayoutManager(new LinearLayoutManager(context));
     recyclerview_list.invalidateItemDecorations();
     recyclerview_list.addItemDecoration(new DividerItemDecoration(context));
@@ -211,16 +203,6 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
   private void refreshAdapterViews() {
 
     if (view == null || adapter == null) return;
-    if (recyclerview_list == null) {
-      recyclerview_list = (RecyclerView) view.findViewById(R.id.recyclerview_list);
-    }
-    if (relativelayout_list_empty == null) {
-      relativelayout_list_empty = (RelativeLayout) view
-          .findViewById(R.id.relativelayout_list_empty);
-    }
-    if (progressbar_list_spinner == null) {
-      progressbar_list_spinner = (ProgressBar) view.findViewById(R.id.progressbar_list_spinner);
-    }
 
     // Show the spinner if we're loading something, the empty state if we loaded nothing, and
     // the recycler view if we loaded something.
@@ -304,15 +286,15 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
   @Override
   public Loader<List<Entry>> onCreateLoader(int id, Bundle args) {
 
-    if (args != null && args.containsKey("perspective")) {
+    if (args != null && args.containsKey("PERSPECTIVE")) {
 
-      perspective = args.getParcelable("perspective");
-      parentEntry = args.getParcelable("parent");
+      perspective = args.getParcelable("PERSPECTIVE");
+      parentEntry = args.getParcelable("PARENT");
 
       return new ListLoader(getContext(), perspective, parentEntry);
     }
 
-    throw new IllegalArgumentException("Argument bundle requires 'perspective' key");
+    throw new IllegalArgumentException("Argument bundle requires 'PERSPECTIVE' key");
   }
 
   /**
@@ -321,14 +303,11 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
   @Override
   public void onLoadFinished(Loader<List<Entry>> loader, List<Entry> data) {
 
+    loaded = true;
     adapter.setData(perspective, parentEntry, data);
-
-    Log.i(TAG, "Load finished (ListFragment)");
 
     checkForSyncs();
     refreshAdapterViews();
-
-    loaded = true;
   }
 
   /**

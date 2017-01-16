@@ -2,7 +2,6 @@ package nu.huw.clarity.db.model;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
 import java.util.List;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
@@ -23,7 +22,6 @@ public class ListLoader extends AsyncTaskLoader<List<Entry>> {
   @Override
   public List<Entry> loadInBackground() {
 
-    Context context = getContext();
     DataModelHelper dmHelper = new DataModelHelper(getContext());
 
     List<Entry> entries = dmHelper.getEntriesFromPerspective(perspective, parent);
@@ -31,8 +29,6 @@ public class ListLoader extends AsyncTaskLoader<List<Entry>> {
     if (parent != null) {
       entries.add(0, parent);
     }
-
-    Log.i(TAG, "Load finished (ListLoader)");
 
     return entries;
   }
