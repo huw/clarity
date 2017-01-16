@@ -161,12 +161,19 @@ public class Task extends Entry {
     return parent;
   }
 
+  /**
+   * If the perspective's viewMode is 'project', then we should display things in the project tree.
+   * But otherwise, it only cares about displaying everything as a task.
+   */
   @Override
-  public int getViewType() {
-    if (isProject) {
-      return VT_PROJECT;
-    } else if (isParent()) {
-      return VT_NESTED_TASK;
+  public int getViewType(@Nullable Perspective perspective) {
+    if (perspective == null || (perspective.viewMode != null && perspective.viewMode
+        .equals("project"))) {
+      if (isProject) {
+        return VT_PROJECT;
+      } else if (isParent()) {
+        return VT_NESTED_TASK;
+      }
     }
     return VT_TASK;
   }
@@ -285,7 +292,8 @@ public class Task extends Entry {
 
   /**
    * Sometimes the due date will have a background to show if it's due soon or overdue at a glance.
-   * This only appears if it's available, like with {@link #getDueColor(android.content.Context) getDueColor()}
+   * This only appears if it's available, like with {@link #getDueColor(android.content.Context)
+   * getDueColor()}
    */
   @DrawableRes
   public int getDueBackgroundDrawable() {

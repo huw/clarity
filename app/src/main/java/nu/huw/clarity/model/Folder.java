@@ -2,6 +2,7 @@ package nu.huw.clarity.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import nu.huw.clarity.db.model.DataModelHelper;
 
 /**
@@ -41,7 +42,7 @@ public class Folder extends Entry {
   }
 
   @Override
-  public int getViewType() {
+  public int getViewType(@Nullable Perspective perspective) {
     return VT_FOLDER;
   }
 }

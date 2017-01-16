@@ -51,7 +51,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
   @Override
   public int getItemViewType(int position) {
-    return entries.get(position).getViewType();
+    return entries.get(position).getViewType(perspective);
   }
 
   /**

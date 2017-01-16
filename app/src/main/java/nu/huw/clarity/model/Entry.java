@@ -95,7 +95,7 @@ public class Entry extends Base implements Comparable<Entry> {
   /**
    * Return the view type integer for use with the ListAdapter
    */
-  public int getViewType() {
+  public int getViewType(@Nullable Perspective perspective) {
     throw new UnsupportedOperationException("Subclass must override getViewType()");
   }
 

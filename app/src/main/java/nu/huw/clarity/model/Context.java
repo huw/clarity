@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import nu.huw.clarity.R;
@@ -78,7 +79,7 @@ public class Context extends Entry {
   }
 
   @Override
-  public int getViewType() {
+  public int getViewType(@Nullable Perspective perspective) {
     return VT_CONTEXT;
   }
 
