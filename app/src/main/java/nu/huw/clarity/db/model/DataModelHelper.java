@@ -87,19 +87,16 @@ public class DataModelHelper {
 
     if (contextHelper == null) contextHelper = new ContextHelper(dbHelper, androidContext);
     if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
-    List<Context> contexts = new ArrayList<>();
+    List<Context> contexts = contextHelper.getContextsFromParent((Context) parent);
     List<Task> tasks = new ArrayList<>();
     List<Entry> entries = new ArrayList<>();
-
-    contexts.addAll(contextHelper.getContextsFromParent((Context) parent));
-    tasks.addAll(taskHelper.getTasksFromContext((Context) parent));
 
     // Filter items
     // In this case, only tasks need to be filtered
 
-    for (Task task : tasks) {
+    for (Task task : taskHelper.getTasksFromContext((Context) parent)) {
       if (filterTask(perspective, task)) {
-        entries.add(task);
+        tasks.add(task);
       }
     }
 
