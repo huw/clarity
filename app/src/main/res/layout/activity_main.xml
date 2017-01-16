@@ -29,6 +29,7 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:layout_below="@id/toolbar_main"
+      android:background="@color/background_navigation"
       tools:context=".ui.MainActivity"/>
 
   </RelativeLayout>
@@ -38,7 +39,7 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="@color/background_navigation"
+    android:background="@color/background_content"
     app:itemBackground="@drawable/highlight_navigation"
     app:menu="@menu/drawer"/>
 

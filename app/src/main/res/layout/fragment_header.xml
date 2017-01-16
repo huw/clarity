@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="@dimen/list_item_height"
+  android:paddingStart="@dimen/horizontal_margin"
+  android:paddingEnd="@dimen/horizontal_margin"
+  android:background="?android:attr/selectableItemBackground"
+  android:clickable="true"
+  android:focusable="true"
+  android:gravity="center_vertical"
+  android:orientation="horizontal">
+
+  <TextView
+    android:id="@+id/textview_listitem_name"
+    android:textStyle="bold"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentStart="true"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:textColor="@color/primary_text_light"
+    android:textSize="@dimen/subhead_size"
+    tools:text="Clarity (For OmniFocus)"/>
+
+  <TextView
+    android:id="@+id/textview_listitem_count"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/textview_listitem_name"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:textColor="@color/disabled_text_light"
+    android:textSize="@dimen/body1_size"
+    tools:text="87 remaining"/>
+
+  <include
+    android:id="@+id/divider_listitem_countduesoon"
+    layout="@layout/divider_dot"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/dot_divider_margin"
+    android:layout_marginRight="@dimen/dot_divider_margin"
+    android:layout_alignBaseline="@id/textview_listitem_count"
+    android:layout_toEndOf="@id/textview_listitem_count"/>
+
+  <TextView
+    android:id="@+id/textview_listitem_countduesoon"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignBaseline="@id/divider_listitem_countduesoon"
+    android:layout_toEndOf="@id/divider_listitem_countduesoon"
+    android:background="@drawable/background_due_soon"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:textColor="@color/foreground_due_soon"
+    android:textSize="@dimen/body1_size"
+    tools:text="2 due soon"/>
+
+  <include
+    android:id="@+id/divider_listitem_countoverdue"
+    layout="@layout/divider_dot"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/dot_divider_margin"
+    android:layout_marginRight="@dimen/dot_divider_margin"
+    android:layout_alignBaseline="@id/textview_listitem_countduesoon"
+    android:layout_toEndOf="@id/textview_listitem_countduesoon"/>
+
+  <TextView
+    android:id="@+id/textview_listitem_countoverdue"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignBaseline="@id/divider_listitem_countoverdue"
+    android:layout_toEndOf="@id/divider_listitem_countoverdue"
+    android:background="@drawable/background_overdue"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:textColor="@color/foreground_overdue"
+    android:textSize="@dimen/body1_size"
+    tools:text="1 overdue"/>
+
+</RelativeLayout>

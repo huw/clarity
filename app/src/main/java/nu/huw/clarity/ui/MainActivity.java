@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -30,9 +32,7 @@ import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.model.DataModelHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
-import nu.huw.clarity.ui.adapter.ListAdapter;
 import nu.huw.clarity.ui.fragment.ListFragment;
-import nu.huw.clarity.ui.viewholder.TaskViewHolder;
 
 public class MainActivity extends AppCompatActivity
     implements ListFragment.OnListFragmentInteractionListener {
@@ -214,20 +214,9 @@ public class MainActivity extends AppCompatActivity
   }
 
   @Override
-  public void onListFragmentInteraction(ListAdapter.ViewHolder holder) {
+  public void onItemListInteraction(@NonNull Entry entry, @Nullable Perspective perspective) {
 
-    Entry item = holder.entry;
-
-    if (holder instanceof TaskViewHolder || item.headerRow) {
-
-      Intent intent = new Intent(this, DetailActivity.class);
-      intent.putExtra("ENTRY", item);
-      intent.putExtra("PERSPECTIVE", perspective);
-      startActivity(intent);
-      return;
-    }
-
-    newFragment = ListFragment.newInstance(perspective, item);
+    newFragment = ListFragment.newInstance(perspective, entry);
 
     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
     ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
@@ -236,6 +225,17 @@ public class MainActivity extends AppCompatActivity
     ft.commit();
 
     currentFragment = newFragment;
+
+  }
+
+  @Override
+  public void onItemDetailInteraction(@NonNull Entry entry, @Nullable Perspective perspective) {
+
+    Intent intent = new Intent(this, DetailActivity.class);
+    intent.putExtra("ENTRY", entry);
+    intent.putExtra("PERSPECTIVE", perspective);
+    startActivity(intent);
+
   }
 
   private void changeColors(Perspective oldPerspective) {

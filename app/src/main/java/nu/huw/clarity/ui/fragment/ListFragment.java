@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SyncInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -177,9 +178,13 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // Setup recycler view & adapter
 
-    recyclerview_list.setLayoutManager(new LinearLayoutManager(context));
+    LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+    DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(context,
+        layoutManager.getOrientation());
+
+    recyclerview_list.setLayoutManager(layoutManager);
     recyclerview_list.invalidateItemDecorations();
-    recyclerview_list.addItemDecoration(new DividerItemDecoration(context));
+    recyclerview_list.addItemDecoration(dividerItemDecoration);
     recyclerview_list.setItemAnimator(null); // otherwise new items fade in (huge annoyance)
 
     // Set adapter & refresh views
@@ -369,6 +374,8 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
    */
   public interface OnListFragmentInteractionListener {
 
-    void onListFragmentInteraction(ListAdapter.ViewHolder holder);
+    void onItemDetailInteraction(@NonNull Entry entry, @Nullable Perspective perspective);
+
+    void onItemListInteraction(@NonNull Entry entry, @Nullable Perspective perspective);
   }
 }

@@ -15,6 +15,7 @@ import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.fragment.ListFragment.OnListFragmentInteractionListener;
 import nu.huw.clarity.ui.viewholder.ContextViewHolder;
 import nu.huw.clarity.ui.viewholder.FolderViewHolder;
+import nu.huw.clarity.ui.viewholder.HeaderViewHolder;
 import nu.huw.clarity.ui.viewholder.NestedTaskViewHolder;
 import nu.huw.clarity.ui.viewholder.ProjectViewHolder;
 import nu.huw.clarity.ui.viewholder.TaskViewHolder;
@@ -51,7 +52,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
   @Override
   public int getItemViewType(int position) {
-    return entries.get(position).getViewType(perspective);
+    Entry entry = entries.get(position);
+    if (entry == parentEntry) {
+      return Entry.VT_HEADER;
+    } else {
+      return entry.getViewType(perspective);
+    }
   }
 
   /**
@@ -84,6 +90,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.fragment_nested_task, parent, false);
         return new NestedTaskViewHolder(view, this);
+      case Entry.VT_HEADER:
+        view = LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.fragment_header, parent, false);
+        return new HeaderViewHolder(view, this);
     }
 
     return new ViewHolder(new View(androidContext), this);
@@ -96,9 +106,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
   public void onBindViewHolder(final ViewHolder holder, int position) {
 
     int type = holder.getItemViewType();
-    Entry entry = entries.get(position);
-
-    entry.headerRow = entry == parentEntry; // if parent, then make it a header row
+    final Entry entry = entries.get(position);
 
     switch (type) {
       case Entry.VT_TASK:
@@ -121,19 +129,34 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         Task nestedTask = (Task) entry;
         ((NestedTaskViewHolder) holder).bind(nestedTask, this.androidContext, perspective);
         break;
+      case Entry.VT_HEADER:
+        ((HeaderViewHolder) holder).bind(entry, this.androidContext, perspective);
+        break;
     }
 
-    holder.view.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
+    // If the item is a task or a header, then we should send the user straight to the detail view
+    // on click. Otherwise, we want to further explore this item's contents, so send them through
+    // the list again. See MainActivity.
 
-        if (null != listener) {
-          // Notify the active callbacks interface (the activity, if the
-          // fragment is attached to one) that an item has been selected.
-          listener.onListFragmentInteraction(holder);
+    if (type == Entry.VT_TASK || type == Entry.VT_HEADER) {
+      holder.view.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          if (listener != null) {
+            listener.onItemDetailInteraction(entry, perspective);
+          }
         }
-      }
-    });
+      });
+    } else {
+      holder.view.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          if (listener != null) {
+            listener.onItemListInteraction(entry, perspective);
+          }
+        }
+      });
+    }
   }
 
   /**
@@ -144,16 +167,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     return entries.size();
   }
 
-  public void removeItem(Entry entry) {
-    int position = entries.indexOf(entry);
-    entries.remove(position);
-    notifyItemRemoved(position);
-  }
-
   public static class ViewHolder extends RecyclerView.ViewHolder {
 
-    public final View view;
-    public final ListAdapter adapter;
+    protected final View view;
+    protected final ListAdapter adapter;
     public Entry entry;
 
     public ViewHolder(View view, ListAdapter adapter) {

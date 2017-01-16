@@ -1,59 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<android.support.v7.widget.CardView
   xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="@dimen/list_item_height"
-  android:paddingStart="@dimen/horizontal_margin"
-  android:paddingEnd="@dimen/horizontal_margin"
-  android:background="?android:attr/selectableItemBackground"
+  android:background="@color/background_content"
   android:clickable="true"
   android:focusable="true"
-  android:gravity="center_vertical"
-  android:orientation="horizontal">
+  android:foreground="?android:attr/selectableItemBackground"
+  app:cardCornerRadius="0dp"
+  app:cardElevation="2dp">
 
-  <TextView
-    android:id="@+id/textview_listitem_name"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignParentStart="true"
-    android:layout_toStartOf="@+id/checkcircle_listitem"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:textColor="@color/primary_text_light"
-    android:textSize="@dimen/subhead_size"
-    tools:text="Gantt Chart"/>
+  <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="@dimen/horizontal_margin"
+    android:paddingEnd="@dimen/horizontal_margin"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
 
-  <TextView
-    android:id="@+id/textview_listitem_sort"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/textview_listitem_name"
-    android:layout_toStartOf="@id/checkcircle_listitem"
-    android:gravity="end"
-    android:textColor="@color/secondary_text_light"
-    android:textSize="@dimen/body1_size"
-    tools:text="Due 17 March 2016"/>
+    <TextView
+      android:id="@+id/textview_listitem_name"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentStart="true"
+      android:layout_toStartOf="@+id/checkcircle_listitem"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:textColor="@color/primary_text_light"
+      android:textSize="@dimen/subhead_size"
+      tools:text="Gantt Chart"/>
 
-  <TextView
-    android:id="@+id/textview_listitem_viewmode"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_alignBaseline="@id/textview_listitem_sort"
-    android:layout_toStartOf="@id/textview_listitem_sort"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:textColor="@color/disabled_text_light"
-    android:textSize="@dimen/body1_size"
-    tools:text="Holiday Goals"/>
+    <TextView
+      android:id="@+id/textview_listitem_sort"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/textview_listitem_name"
+      android:layout_toStartOf="@id/checkcircle_listitem"
+      android:gravity="end"
+      android:textColor="@color/secondary_text_light"
+      android:textSize="@dimen/body1_size"
+      tools:text="Due 17 March 2016"/>
 
-  <nu.huw.clarity.ui.misc.CheckCircle
-    android:id="@id/checkcircle_listitem"
-    android:layout_width="@dimen/check_circle_size"
-    android:layout_height="@dimen/check_circle_size"
-    android:layout_marginStart="@dimen/horizontal_margin"
-    android:layout_alignParentEnd="true"
-    android:button="@drawable/widget_check_circle_dark"
-    android:checked="false"/>
+    <TextView
+      android:id="@+id/textview_listitem_viewmode"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignBaseline="@id/textview_listitem_sort"
+      android:layout_toStartOf="@id/textview_listitem_sort"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:textColor="@color/disabled_text_light"
+      android:textSize="@dimen/body1_size"
+      tools:text="Holiday Goals"/>
 
-</RelativeLayout>
+    <nu.huw.clarity.ui.misc.CheckCircle
+      android:id="@id/checkcircle_listitem"
+      android:layout_width="@dimen/check_circle_size"
+      android:layout_height="@dimen/check_circle_size"
+      android:layout_marginStart="@dimen/horizontal_margin"
+      android:layout_alignParentEnd="true"
+      android:button="@drawable/widget_check_circle_dark"
+      android:checked="false"/>
+
+  </RelativeLayout>
+
+</android.support.v7.widget.CardView>

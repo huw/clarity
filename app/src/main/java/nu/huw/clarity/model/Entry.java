@@ -1,6 +1,5 @@
 package nu.huw.clarity.model;
 
-import android.graphics.Typeface;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -18,6 +17,7 @@ public class Entry extends Base implements Comparable<Entry> {
   public static final int VT_FOLDER = 3;
   public static final int VT_PROJECT = 4;
   public static final int VT_NESTED_TASK = 5;
+  public static final int VT_HEADER = 6;
 
   public static final Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator<Entry>() {
     public Entry createFromParcel(Parcel in) {
@@ -37,7 +37,6 @@ public class Entry extends Base implements Comparable<Entry> {
   public String name;
   public String parentID;
   public long rank;
-  public boolean headerRow;
   Entry parent;
 
   public Entry() {
@@ -55,7 +54,6 @@ public class Entry extends Base implements Comparable<Entry> {
     parent = in.readParcelable(Entry.class.getClassLoader());
     parentID = in.readString();
     rank = in.readLong();
-    headerRow = in.readInt() != 0;
   }
 
   @Override
@@ -71,7 +69,6 @@ public class Entry extends Base implements Comparable<Entry> {
     out.writeParcelable(parent, 0);
     out.writeString(parentID);
     out.writeLong(rank);
-    out.writeInt(headerRow ? 1 : 0);
   }
 
   @Override
@@ -160,18 +157,5 @@ public class Entry extends Base implements Comparable<Entry> {
       return androidContext.getString(R.string.listitem_countoverdue, countOverdue);
     }
     return null;
-  }
-
-  /**
-   * When displaying items in a list, sometimes we have to set a different text style on their names
-   *
-   * @return int Anything like Typeface.BOLD (e.g. Typeface.BOLD_ITALIC, Typeface.NORMAL, etc.)
-   */
-  public int getNameTextStyle() {
-    if (headerRow) {
-      return Typeface.BOLD;
-    } else {
-      return Typeface.NORMAL;
-    }
   }
 }

@@ -36,12 +36,9 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
 
     // Set list item name
 
-    int nameTextStyle = task.getNameTextStyle();
     @ColorInt int nameColor = task.getPrimaryTextColor(androidContext);
-
-    textview_listitem_name.setText(task.name);
-    textview_listitem_name.setTypeface(null, nameTextStyle);
     textview_listitem_name.setTextColor(nameColor);
+    textview_listitem_name.setText(task.name);
 
     // Set list item count (depends on perspective)
 
@@ -62,10 +59,6 @@ public class NestedTaskViewHolder extends ListAdapter.ViewHolder {
     textview_listitem_sort.setTypeface(null, dueTextStyle);
     textview_listitem_sort.setTextColor(dueColor);
     textview_listitem_sort.setBackgroundResource(dueBackgroundDrawable);
-
-    // Display/remove arrow icon
-
-    imageview_listitem_arrow.setVisibility(task.headerRow ? View.GONE : View.VISIBLE);
 
     this.entry = task;
   }

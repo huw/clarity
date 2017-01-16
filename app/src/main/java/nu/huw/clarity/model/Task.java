@@ -184,7 +184,7 @@ public class Task extends Entry {
   @ColorInt
   public int getPrimaryTextColor(@NonNull android.content.Context androidContext) {
     @ColorRes int colorID =
-        isAvailable() || dueSoon || overdue || headerRow ? R.color.primary_text_light
+        isAvailable() || dueSoon || overdue ? R.color.primary_text_light
             : R.color.disabled_text_light;
     return ContextCompat.getColor(androidContext, colorID);
   }
@@ -237,7 +237,7 @@ public class Task extends Entry {
   @ColorInt
   public int getSecondaryTextColor(@NonNull android.content.Context androidContext) {
     @ColorRes int colorID =
-        isAvailable() || dueSoon || overdue || headerRow ? R.color.secondary_text_light
+        isAvailable() || dueSoon || overdue ? R.color.secondary_text_light
             : R.color.disabled_text_light;
     return ContextCompat.getColor(androidContext, colorID);
   }
@@ -283,7 +283,7 @@ public class Task extends Entry {
       colorID = R.color.foreground_due_soon;
     } else if (overdue) {
       colorID = R.color.foreground_overdue;
-    } else if (!isAvailable() && !headerRow) {
+    } else if (!isAvailable()) {
       colorID = R.color.disabled_text_light;
     }
 

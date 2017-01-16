@@ -91,7 +91,7 @@ public class Context extends Entry {
 
     Log.i("Context", name + ": (bogus change) " + onHold + " " + droppedEffective + " " + dropped);
 
-    @ColorRes int colorID = (!onHold && !droppedEffective) || headerRow ? R.color.primary_text_light
+    @ColorRes int colorID = (!onHold && !droppedEffective) ? R.color.primary_text_light
         : R.color.disabled_text_light;
     return ContextCompat.getColor(androidContext, colorID);
   }
@@ -102,7 +102,7 @@ public class Context extends Entry {
   @ColorInt
   public int getSecondaryTextColor(@NonNull android.content.Context androidContext) {
     @ColorRes int colorID =
-        (!onHold && !droppedEffective) || headerRow ? R.color.secondary_text_light
+        (!onHold && !droppedEffective) ? R.color.secondary_text_light
             : R.color.disabled_text_light;
     return ContextCompat.getColor(androidContext, colorID);
   }

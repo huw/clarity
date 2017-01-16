@@ -41,12 +41,10 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
 
     // Set list item name
 
-    int nameTextStyle = project.getNameTextStyle();
     @ColorInt int nameColor = project.getPrimaryTextColor(androidContext);
-
-    textview_listitem_name.setTypeface(null, nameTextStyle);
-    textview_listitem_name.setText(project.name);
     textview_listitem_name.setTextColor(nameColor);
+    textview_listitem_name.setText(project.name);
+
 
     // Set list item count (depends on perspective)
 
@@ -73,10 +71,6 @@ public class ProjectViewHolder extends ListAdapter.ViewHolder {
       textview_listitem_countoverdue.setVisibility(View.GONE);
       divider_listitem_countoverdue.setVisibility(View.GONE);
     }
-
-    // Display/remove arrow icon
-
-    imageview_listitem_arrow.setVisibility(project.headerRow ? View.GONE : View.VISIBLE);
 
     this.entry = project;
   }

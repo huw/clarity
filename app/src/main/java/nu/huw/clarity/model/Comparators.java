@@ -235,7 +235,7 @@ public class Comparators {
     @Override
     public int compare(Task t1, Task t2) {
 
-      // Check for nulls, and if none then compare by context name
+      // Check for nulls, and if none then compare by context rank
 
       if (t1.contextID == null) {
         if (t2.contextID == null) {
