@@ -10,7 +10,7 @@ import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 
-public class HeaderViewHolder extends ListAdapter.ViewHolder {
+public class EntryHeaderViewHolder extends ListAdapter.ViewHolder {
 
   @BindView(R.id.textview_listitem_name)
   TextView textview_listitem_name;
@@ -25,7 +25,7 @@ public class HeaderViewHolder extends ListAdapter.ViewHolder {
   @BindView(R.id.divider_listitem_countoverdue)
   TextView divider_listitem_countoverdue;
 
-  public HeaderViewHolder(View view, ListAdapter adapter) {
+  public EntryHeaderViewHolder(View view, ListAdapter adapter) {
     super(view, adapter);
     ButterKnife.bind(this, view);
   }

@@ -9,6 +9,7 @@ import nu.huw.clarity.db.DatabaseContract.Entries;
 import nu.huw.clarity.db.DatabaseContract.Folders;
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.model.Header;
 
 class FolderHelper {
 
@@ -104,5 +105,28 @@ class FolderHelper {
     folder.rank = dbHelper.getLong(cursor, Entries.COLUMN_RANK);
 
     return folder;
+  }
+
+  /**
+   * Get a list of Header objects representing all folders and IDs
+   */
+  List<Header> getFolderHeaders() {
+
+    SQLiteDatabase db = dbHelper.getReadableDatabase();
+    String[] columns = new String[]{Folders.COLUMN_ID, Folders.COLUMN_NAME};
+    Cursor cursor = db.query(Folders.TABLE_NAME, columns, null, null, null, null, null);
+
+    List<Header> result = new ArrayList<>();
+    while (cursor.moveToNext()) {
+
+      Header header = new Header(cursor.getString(1));
+      header.folderID = cursor.getString(0);
+      result.add(header);
+
+    }
+
+    cursor.close();
+    db.close();
+    return result;
   }
 }

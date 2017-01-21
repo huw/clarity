@@ -12,12 +12,13 @@ import nu.huw.clarity.R;
  */
 public class Entry extends Base implements Comparable<Entry> {
 
-  public static final int VT_TASK = 1;
-  public static final int VT_CONTEXT = 2;
-  public static final int VT_FOLDER = 3;
-  public static final int VT_PROJECT = 4;
-  public static final int VT_NESTED_TASK = 5;
-  public static final int VT_HEADER = 6;
+  public static final int VT_HEADER_ENTRY = 0;
+  public static final int VT_HEADER_COLLATION = 1;
+  public static final int VT_TASK = 2;
+  public static final int VT_NESTED_TASK = 3;
+  public static final int VT_CONTEXT = 4;
+  public static final int VT_PROJECT = 5;
+  public static final int VT_FOLDER = 6;
 
   public static final Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator<Entry>() {
     public Entry createFromParcel(Parcel in) {

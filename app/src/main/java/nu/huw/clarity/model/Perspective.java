@@ -37,7 +37,7 @@ public class Perspective extends Base {
   public String filterDuration;
   public String filterFlagged;
   public String filterStatus;
-  public String group;
+  public String collation;
   public String name;
   public String sort;
   public String value;
@@ -61,7 +61,7 @@ public class Perspective extends Base {
     filterDuration = in.readString();
     filterFlagged = in.readString();
     filterStatus = in.readString();
-    group = in.readString();
+    collation = in.readString();
     name = in.readString();
     sort = in.readString();
     value = in.readString();
@@ -84,7 +84,7 @@ public class Perspective extends Base {
     out.writeString(filterDuration);
     out.writeString(filterFlagged);
     out.writeString(filterStatus);
-    out.writeString(group);
+    out.writeString(collation);
     out.writeString(name);
     out.writeString(sort);
     out.writeString(value);

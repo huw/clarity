@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import org.threeten.bp.Duration;
 import org.threeten.bp.Instant;
+import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZoneId;
 
@@ -35,8 +36,8 @@ public class Base implements Parcelable {
   protected Base(Parcel in) {
 
     id = in.readString();
-    dateAdded = getDate(in.readString());
-    dateModified = getDate(in.readString());
+    dateAdded = getDateTime(in.readString());
+    dateModified = getDateTime(in.readString());
   }
 
   // Write the object data to the parcel
@@ -62,6 +63,15 @@ public class Base implements Parcelable {
     }
   }
 
+  String getTimeString(@Nullable LocalDate d) {
+
+    if (d == null) {
+      return null;
+    } else {
+      return d.toString();
+    }
+  }
+
   String getTimeString(@Nullable Duration d) {
 
     if (d == null) {
@@ -71,12 +81,21 @@ public class Base implements Parcelable {
     }
   }
 
-  LocalDateTime getDate(@Nullable String s) {
+  LocalDateTime getDateTime(@Nullable String s) {
 
     if (s == null) {
       return null;
     } else {
       return LocalDateTime.ofInstant(Instant.parse(s), ZoneId.systemDefault());
+    }
+  }
+
+  LocalDate getDate(@Nullable String s) {
+
+    if (s == null) {
+      return null;
+    } else {
+      return LocalDate.parse(s);
     }
   }
 

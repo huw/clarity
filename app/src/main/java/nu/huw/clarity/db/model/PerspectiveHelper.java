@@ -50,16 +50,16 @@ class PerspectiveHelper {
   /**
    * Gets a Forecast perspective object
    */
-  public Perspective getForecast() {
+  Perspective getForecast() {
 
     Perspective perspective = new Perspective();
 
     perspective.id = "ProcessForecast";
     perspective.filterDuration = "any";
     perspective.filterFlagged = "any";
-    perspective.filterStatus = "due";
-
-    // Don't set `group` or `sort` because Forecast uses a custom grouping/sorting
+    perspective.filterStatus = "incomplete";
+    perspective.sort = "due";
+    perspective.collation = "due";
 
     perspective.name = androidContext.getString(R.string.forecast);
     perspective.menuID = R.id.menuitem_main_forecast;
@@ -105,7 +105,7 @@ class PerspectiveHelper {
         dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_FLAGGED);
     perspective.filterStatus =
         dbHelper.getString(cursor, Perspectives.COLUMN_FILTER_STATUS);
-    perspective.group = dbHelper.getString(cursor, Perspectives.COLUMN_GROUP);
+    perspective.collation = dbHelper.getString(cursor, Perspectives.COLUMN_GROUP);
     perspective.name = dbHelper.getString(cursor, Perspectives.COLUMN_NAME);
     perspective.sort = dbHelper.getString(cursor, Perspectives.COLUMN_SORT);
     perspective.value = dbHelper.getString(cursor, Perspectives.COLUMN_VALUE);

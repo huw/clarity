@@ -26,11 +26,13 @@ import android.widget.RelativeLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.model.ListLoader;
 import nu.huw.clarity.model.Entry;
+import nu.huw.clarity.model.Header;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 import nu.huw.clarity.ui.misc.DividerItemDecoration;
@@ -40,7 +42,8 @@ import nu.huw.clarity.ui.misc.DividerItemDecoration;
  * flexible, so it'll hold any type of entry and display them differently using the ListAdapter
  * and various ViewHolders.
  */
-public class ListFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Entry>> {
+public class ListFragment extends Fragment implements
+    LoaderManager.LoaderCallbacks<TreeMap<Header, TreeSet<? extends Entry>>> {
 
   private static final String TAG = ListFragment.class.getSimpleName();
   @BindView(R.id.swiperefreshlayout_list)
@@ -186,6 +189,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
     recyclerview_list.invalidateItemDecorations();
     recyclerview_list.addItemDecoration(dividerItemDecoration);
     recyclerview_list.setItemAnimator(null); // otherwise new items fade in (huge annoyance)
+    recyclerview_list.setNestedScrollingEnabled(true); // smooth scrolling
 
     // Set adapter & refresh views
 
@@ -289,7 +293,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
    * @return A ListLoader
    */
   @Override
-  public Loader<List<Entry>> onCreateLoader(int id, Bundle args) {
+  public Loader<TreeMap<Header, TreeSet<? extends Entry>>> onCreateLoader(int id, Bundle args) {
 
     if (args != null && args.containsKey("PERSPECTIVE")) {
 
@@ -306,7 +310,8 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
    * Once the load is done, refresh the adapter and view
    */
   @Override
-  public void onLoadFinished(Loader<List<Entry>> loader, List<Entry> data) {
+  public void onLoadFinished(Loader<TreeMap<Header, TreeSet<? extends Entry>>> loader,
+      TreeMap<Header, TreeSet<? extends Entry>> data) {
 
     loaded = true;
     adapter.setData(perspective, parentEntry, data);
@@ -319,7 +324,7 @@ public class ListFragment extends Fragment implements LoaderManager.LoaderCallba
    * Nothing needs to be cleaned up
    */
   @Override
-  public void onLoaderReset(Loader<List<Entry>> loader) {
+  public void onLoaderReset(Loader<TreeMap<Header, TreeSet<? extends Entry>>> loader) {
   }
 
   /**

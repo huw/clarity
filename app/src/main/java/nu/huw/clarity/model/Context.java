@@ -7,7 +7,6 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.model.DataModelHelper;
 
@@ -88,9 +87,6 @@ public class Context extends Entry {
    */
   @ColorInt
   public int getPrimaryTextColor(@NonNull android.content.Context androidContext) {
-
-    Log.i("Context", name + ": (bogus change) " + onHold + " " + droppedEffective + " " + dropped);
-
     @ColorRes int colorID = (!onHold && !droppedEffective) ? R.color.primary_text_light
         : R.color.disabled_text_light;
     return ContextCompat.getColor(androidContext, colorID);

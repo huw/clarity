@@ -67,7 +67,7 @@ public class TaskViewHolder extends ListAdapter.ViewHolder {
     // circles because the user doesn't want to start them yet.
 
     checkcircle_listitem.setChecked(task.dateCompleted != null);
-    checkcircle_listitem.setFlagged(task.flagged);
+    checkcircle_listitem.setFlagged(task.flaggedEffective);
 
     if (task.isRemaining()) {
       checkcircle_listitem.setOverdue(task.overdue);

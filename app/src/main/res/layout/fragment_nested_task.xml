@@ -65,7 +65,7 @@
       android:layout_height="@dimen/check_circle_size"
       android:layout_marginStart="@dimen/horizontal_margin"
       android:layout_alignParentEnd="true"
-      android:padding="@dimen/listitem_arrow_padding"
+      android:padding="@dimen/listitem_padding_arrow"
       android:src="@drawable/ic_chevron_list"/>
 
   </RelativeLayout>

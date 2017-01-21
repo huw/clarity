@@ -6,9 +6,9 @@
   android:layout_height="@dimen/list_item_height"
   android:paddingStart="@dimen/horizontal_margin"
   android:paddingEnd="@dimen/horizontal_margin"
-  android:background="?android:attr/selectableItemBackground"
   android:clickable="true"
   android:focusable="true"
+  android:foreground="?android:attr/selectableItemBackground"
   android:gravity="center_vertical"
   android:orientation="horizontal">
 

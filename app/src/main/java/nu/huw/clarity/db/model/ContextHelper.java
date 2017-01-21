@@ -12,6 +12,7 @@ import nu.huw.clarity.db.DatabaseContract.Entries;
 import nu.huw.clarity.db.DatabaseContract.Tasks;
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Context;
+import nu.huw.clarity.model.Header;
 
 class ContextHelper {
 
@@ -19,12 +20,10 @@ class ContextHelper {
   private static final String PARENT_ARG = Contexts.COLUMN_PARENT_ID + " = ?";
   private static final String ID_ARG = Contexts.COLUMN_ID + " = ?";
   private DatabaseHelper dbHelper;
-  private android.content.Context androidContext;
 
-  ContextHelper(DatabaseHelper dbHelper, android.content.Context context) {
+  ContextHelper(DatabaseHelper dbHelper) {
 
     this.dbHelper = dbHelper;
-    this.androidContext = context;
   }
 
   /**
@@ -32,14 +31,14 @@ class ContextHelper {
    *
    * @param parent Any Context or null, where null will return all top-level contexts
    */
-  List<Context> getContextsFromParent(Context parent) {
+  List<Context> getContextsFromParent(Context parent, android.content.Context androidContext) {
 
     if (parent == null) {
 
       // Add 'No Context' to the top of the top-level context list
 
       List<Context> result = new ArrayList<>();
-      result.add(getNoContext());
+      result.add(getNoContext(androidContext));
       result.addAll(getContextsFromSelection(NO_PARENT, null));
       return result;
     } else {
@@ -97,7 +96,7 @@ class ContextHelper {
    *
    * @return A context object representing the tasks with no context
    */
-  private Context getNoContext() {
+  private Context getNoContext(android.content.Context androidContext) {
 
     SQLiteDatabase db = dbHelper.getReadableDatabase();
     Context noContext = new Context();
@@ -159,5 +158,28 @@ class ContextHelper {
     context.radius = dbHelper.getLong(cursor, Contexts.COLUMN_RADIUS);
 
     return context;
+  }
+
+  /**
+   * Get a list of Header objects representing all contexts and IDs
+   */
+  List<Header> getContextHeaders() {
+
+    SQLiteDatabase db = dbHelper.getReadableDatabase();
+    String[] columns = new String[]{Contexts.COLUMN_ID, Contexts.COLUMN_NAME};
+    Cursor cursor = db.query(Contexts.TABLE_NAME, columns, null, null, null, null, null);
+
+    List<Header> result = new ArrayList<>();
+    while (cursor.moveToNext()) {
+
+      Header header = new Header(cursor.getString(1));
+      header.contextID = cursor.getString(0);
+      result.add(header);
+
+    }
+
+    cursor.close();
+    db.close();
+    return result;
   }
 }

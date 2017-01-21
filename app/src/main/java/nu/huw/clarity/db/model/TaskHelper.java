@@ -10,6 +10,7 @@ import nu.huw.clarity.db.DatabaseContract.Tasks;
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Folder;
+import nu.huw.clarity.model.Header;
 import nu.huw.clarity.model.Task;
 
 class TaskHelper {
@@ -193,5 +194,29 @@ class TaskHelper {
     task.type = dbHelper.getString(cursor, Tasks.COLUMN_TYPE);
 
     return task;
+  }
+
+  /**
+   * Get a list of Header objects representing all projects and IDs
+   */
+  List<Header> getProjectHeaders() {
+
+    SQLiteDatabase db = dbHelper.getReadableDatabase();
+    String[] columns = new String[]{Tasks.COLUMN_ID, Tasks.COLUMN_NAME};
+    Cursor cursor = db
+        .query(Tasks.TABLE_NAME, columns, Tasks.COLUMN_PROJECT + "='1'", null, null, null, null);
+
+    List<Header> result = new ArrayList<>();
+    while (cursor.moveToNext()) {
+
+      Header header = new Header(cursor.getString(1));
+      header.projectID = cursor.getString(0);
+      result.add(header);
+
+    }
+
+    cursor.close();
+    db.close();
+    return result;
   }
 }

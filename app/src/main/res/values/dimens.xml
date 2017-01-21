@@ -3,12 +3,14 @@
   <dimen name="vertical_margin">16dp</dimen>
   <dimen name="vertical_divider">12dp</dimen>
   <dimen name="list_item_height">72dp</dimen>
+  <dimen name="list_collationheader_height">48dp</dimen>
+  <dimen name="list_padding_bottom">48dp</dimen>
   <dimen name="drawer_item_height">48dp</dimen>
   <dimen name="drawer_image_side">40dp</dimen>
   <dimen name="dot_divider_margin">2dp</dimen>
   <dimen name="due_border_radius">2dp</dimen>
   <dimen name="due_padding">2dp</dimen>
   <dimen name="check_circle_size">40dp</dimen>
-  <dimen name="listitem_arrow_padding">2dp</dimen>
-  <dimen name="listitem_folder_padding">8dp</dimen>
+  <dimen name="listitem_padding_arrow">2dp</dimen>
+  <dimen name="listitem_padding_folder">8dp</dimen>
 </resources>

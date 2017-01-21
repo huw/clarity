@@ -2,11 +2,13 @@ package nu.huw.clarity.db.model;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
-import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import nu.huw.clarity.model.Entry;
+import nu.huw.clarity.model.Header;
 import nu.huw.clarity.model.Perspective;
 
-public class ListLoader extends AsyncTaskLoader<List<Entry>> {
+public class ListLoader extends AsyncTaskLoader<TreeMap<Header, TreeSet<? extends Entry>>> {
 
   private static final String TAG = ListLoader.class.getSimpleName();
   private Perspective perspective;
@@ -20,17 +22,11 @@ public class ListLoader extends AsyncTaskLoader<List<Entry>> {
   }
 
   @Override
-  public List<Entry> loadInBackground() {
+  public TreeMap<Header, TreeSet<? extends Entry>> loadInBackground() {
 
     DataModelHelper dmHelper = new DataModelHelper(getContext());
 
-    List<Entry> entries = dmHelper.getEntriesFromPerspective(perspective, parent);
-
-    if (parent != null) {
-      entries.add(0, parent);
-    }
-
-    return entries;
+    return dmHelper.getEntriesFromPerspective(perspective, parent);
   }
 
   /**
