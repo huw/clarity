@@ -108,11 +108,11 @@ public class DetailFragment extends Fragment {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy");
 
     // Project type field
-    @StringRes int typeStringID = R.string.project_sequential;
+    @StringRes int typeStringID = R.string.detail_projectsequential;
     if (entry.type.equals("single")) {
-      typeStringID = R.string.project_single_actions;
+      typeStringID = R.string.detail_projectsingleactions;
     } else if (entry.type.equals("parallel")) {
-      typeStringID = R.string.project_parallel;
+      typeStringID = R.string.detail_projectparallel;
     }
 
     ((TextView) view.findViewById(R.id.textview_detailitem_projecttypevalue)).setText(typeStringID);
@@ -120,7 +120,7 @@ public class DetailFragment extends Fragment {
     // Project status field
     if (entry.dropped) {
       ((TextView) view.findViewById(R.id.textview_detailitem_statusvalue))
-          .setText(R.string.status_dropped);
+          .setText(R.string.detail_dropped);
     }
 
     // 'Complete when completing last action'
@@ -155,7 +155,8 @@ public class DetailFragment extends Fragment {
     // Estimated duration
     if (entry.estimatedTime != null) {
       String time =
-          String.valueOf(entry.estimatedTime.toMinutes()) + " " + getString(R.string.minutes);
+          String.valueOf(entry.estimatedTime.toMinutes()) + " " + getString(
+              R.string.detail_minutes);
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_durationvalue);
 
       tv.setText(time);
@@ -198,7 +199,7 @@ public class DetailFragment extends Fragment {
     // Repeat
     if (entry.repetitionRule != null) {
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_repeatvalue);
-      tv.setText(R.string.repeating);
+      tv.setText(R.string.detail_repeating);
       tv.setTextColor(PRIMARY_TEXT_COLOR);
     }
 
@@ -258,7 +259,8 @@ public class DetailFragment extends Fragment {
     // Estimated duration
     if (entry.estimatedTime != null) {
       String time =
-          String.valueOf(entry.estimatedTime.toMinutes()) + " " + getString(R.string.minutes);
+          String.valueOf(entry.estimatedTime.toMinutes()) + " " + getString(
+              R.string.detail_minutes);
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_durationvalue);
 
       tv.setText(time);
@@ -300,7 +302,7 @@ public class DetailFragment extends Fragment {
     // Repeat
     if (entry.repetitionRule != null) {
       TextView tv = (TextView) view.findViewById(R.id.textview_detailitem_repeatvalue);
-      tv.setText(R.string.repeating);
+      tv.setText(R.string.detail_repeating);
       tv.setTextColor(PRIMARY_TEXT_COLOR);
     }
 
@@ -314,7 +316,7 @@ public class DetailFragment extends Fragment {
     // Status
     if (((Context) entry).droppedEffective) {
       ((TextView) view.findViewById(R.id.textview_detailitem_statusvalue))
-          .setText(R.string.status_dropped);
+          .setText(R.string.detail_dropped);
     }
 
     return view;

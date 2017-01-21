@@ -91,18 +91,18 @@ public class DetailActivity extends AppCompatActivity
     // the thing's type
 
     textinputedittext_detail_name.setText(entry.name);
-    int hintID = R.string.prompt_name;
+    int hintID = R.string.detail_name;
 
     if (entry instanceof Task) {
       if (((Task) entry).isProject) {
-        hintID = R.string.project;
+        hintID = R.string.detail_project;
       } else {
-        hintID = R.string.task;
+        hintID = R.string.detail_task;
       }
     } else if (entry instanceof Context) {
-      hintID = R.string.context;
+      hintID = R.string.detail_context;
     } else if (entry instanceof Folder) {
-      hintID = R.string.folder;
+      hintID = R.string.detail_folder;
     }
 
     textinputedittext_detail_name.setHint(hintID);

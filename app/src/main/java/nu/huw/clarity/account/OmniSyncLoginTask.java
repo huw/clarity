@@ -46,7 +46,7 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
       verifyLogin(client, bundle, newHost);
     } catch (UnknownHostException e) {
       bundle.putBoolean("SUCCESS", false);
-      bundle.putInt("ERROR_LOGIN", R.string.error_no_connection);
+      bundle.putInt("ERROR_LOGIN", R.string.login_error_noconnection);
       bundle.putBoolean("ERROR_LOGIN_RETRY", true);
       Log.e(TAG, "No connection for login", e);
     } catch (URISyntaxException e) {
@@ -112,14 +112,14 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
     } else if (findServerMethod.getStatusText().equals("No such user")) {
 
       bundle.putBoolean("SUCCESS", false);
-      bundle.putInt("ERROR_USERNAME", R.string.error_not_registered);
+      bundle.putInt("ERROR_USERNAME", R.string.login_error_notregistered);
       Log.w(TAG, "User not registered");
 
       return null;
     } else {
 
       bundle.putBoolean("SUCCESS", false);
-      bundle.putInt("ERROR_LOGIN", R.string.error_server_fault);
+      bundle.putInt("ERROR_LOGIN", R.string.login_error_serverfault);
       bundle.putBoolean("ERROR_LOGIN_RETRY", true);
       Log.e(TAG, "Unexpected status " + findServerMethod.getStatusCode() + ": " +
           findServerMethod.getStatusText());
@@ -167,14 +167,14 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
 
       case 401:
 
-        bundle.putInt("ERROR_PASSWORD", R.string.error_incorrect_password);
+        bundle.putInt("ERROR_PASSWORD", R.string.login_error_incorrectpassword);
         Log.w(TAG, "Incorrect password entered");
         break;
 
       case 404:
 
-        bundle.putInt("ERROR_LOGIN", R.string.error_no_ofocus);
-        bundle.putInt("ERROR_LOGIN_BUTTON", R.string.got_it);
+        bundle.putInt("ERROR_LOGIN", R.string.login_error_noofocus);
+        bundle.putInt("ERROR_LOGIN_BUTTON", R.string.errordialogfragment_gotit);
         Log.w(TAG, "No OmniFocus.ofocus folder");
         break;
 

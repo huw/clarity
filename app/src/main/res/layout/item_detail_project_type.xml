@@ -14,7 +14,7 @@
     android:layout_centerInParent="true"
     android:paddingLeft="@dimen/horizontal_margin"
     android:paddingRight="@dimen/horizontal_margin"
-    android:text="@string/project_type"
+    android:text="@string/detail_projecttype"
     android:textColor="@color/secondary_text_light"
     android:textSize="@dimen/subhead_size"/>
 
@@ -28,7 +28,7 @@
     android:ellipsize="end"
     android:gravity="end"
     android:maxLines="1"
-    android:text="@string/project_sequential"
+    android:text="@string/detail_projectsequential"
     android:textColor="@color/primary_text_light"
     android:textSize="@dimen/subhead_size"/>
 

@@ -36,7 +36,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="@dimen/horizontal_margin"
       android:layout_centerHorizontal="true"
-      android:contentDescription="@string/empty_title"
+      android:contentDescription="@string/list_emptytitle"
       android:src="@drawable/empty_check"/>
 
     <TextView
@@ -45,7 +45,7 @@
       android:layout_height="wrap_content"
       android:layout_below="@id/imageview_list_empty"
       android:layout_centerHorizontal="true"
-      android:text="@string/empty_title"
+      android:text="@string/list_emptytitle"
       android:textColor="@color/disabled_text_light"
       android:textSize="@dimen/headline_size"/>
 
@@ -56,7 +56,7 @@
       android:layout_below="@id/textview_list_emptyheadline"
       android:layout_centerHorizontal="true"
       android:gravity="center"
-      android:text="@string/empty_congratulations"
+      android:text="@string/list_emptysubtitle"
       android:textColor="@color/disabled_text_light"
       android:textSize="@dimen/subhead_size"/>
 

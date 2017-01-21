@@ -61,7 +61,7 @@ class PerspectiveHelper {
     perspective.sort = "due";
     perspective.collation = "due";
 
-    perspective.name = androidContext.getString(R.string.forecast);
+    perspective.name = androidContext.getString(R.string.menu_forecast);
     perspective.menuID = R.id.menuitem_main_forecast;
     perspective.themeID = R.style.AppTheme_Red;
     perspective.color = R.color.primary_red;

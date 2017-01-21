@@ -43,7 +43,7 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:ellipsize="end"
-          android:hint="@string/prompt_name"
+          android:hint="@string/detail_name"
           android:inputType="textMultiLine"
           android:maxLines="3"
           tools:text="This is a much longer name, that might cause this thing to take up multiple lines. But I'm not sure what's going to happen with it."/>

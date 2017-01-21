@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import nu.huw.clarity.BuildConfig;
+import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseHelper;
 import nu.huw.clarity.model.Comparators;
 import nu.huw.clarity.model.Comparators.HeaderTypeComparator;
@@ -157,7 +158,7 @@ public class DataModelHelper {
 
     // Convert and return
 
-    Header tasksHeader = new Header("Items");
+    Header tasksHeader = new Header(androidContext.getString(R.string.listitem_headingitems));
     entryMap.put(tasksHeader, tasks);
 
     return entryMap;
@@ -200,7 +201,7 @@ public class DataModelHelper {
     // Convert and return
     // Remember, sorting is implicit according to 'natural' (rank) ordering
 
-    Header genericHeader = new Header("Items");
+    Header genericHeader = new Header(androidContext.getString(R.string.listitem_headingitems));
     entryMap.put(genericHeader, entries);
 
     return entryMap;
@@ -426,10 +427,12 @@ public class DataModelHelper {
 
           // Two very easy headers:
 
-          Header flaggedHeader = new Header("Flagged");
+          Header flaggedHeader = new Header(
+              androidContext.getString(R.string.listitem_headingflagged));
           flaggedHeader.flagged = true;
 
-          Header unflaggedHeader = new Header("Unflagged");
+          Header unflaggedHeader = new Header(
+              androidContext.getString(R.string.listitem_headingunflagged));
           unflaggedHeader.flagged = false;
 
           TreeSet<Task> flaggedSet = new TreeSet<>(taskComparator);
@@ -456,51 +459,60 @@ public class DataModelHelper {
           // today, tomorrow, later this week, later this month, later this week, the future,
           // and no due date
 
-          Header todayHeader = new Header("Today");
+          Header todayHeader = new Header(androidContext.getString(R.string.listitem_headingtoday));
           todayHeader.dateDue = LocalDate.now().plusDays(1).atStartOfDay();
           TreeSet<Task> todaySet = new TreeSet<>(taskComparator);
 
-          Header yesterdayHeader = new Header("Yesterday");
+          Header yesterdayHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyesterday));
           yesterdayHeader.dateDue = LocalDate.now().minusDays(1).atStartOfDay();
           TreeSet<Task> yesterdaySet = new TreeSet<>(taskComparator);
 
-          Header earlierWeekHeader = new Header("Earlier this week");
+          Header earlierWeekHeader = new Header(
+              androidContext.getString(R.string.listitem_headingweekearlier));
           earlierWeekHeader.dateDue = LocalDate.now().minusWeeks(1).atStartOfDay();
           TreeSet<Task> earlierWeekSet = new TreeSet<>(taskComparator);
 
-          Header earlierMonthHeader = new Header("Earlier this month");
+          Header earlierMonthHeader = new Header(
+              androidContext.getString(R.string.listitem_headingmonthearlier));
           earlierMonthHeader.dateDue = LocalDate.now().minusMonths(1).atStartOfDay();
           TreeSet<Task> earlierMonthSet = new TreeSet<>(taskComparator);
 
-          Header earlierYearHeader = new Header("Earlier this year");
+          Header earlierYearHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyearearlier));
           earlierYearHeader.dateDue = LocalDate.now().minusYears(1).atStartOfDay();
           TreeSet<Task> earlierYearSet = new TreeSet<>(taskComparator);
 
-          Header pastHeader = new Header("Past");
+          Header pastHeader = new Header(androidContext.getString(R.string.listitem_headingpast));
           pastHeader.dateDue = LocalDateTime.MIN;
           TreeSet<Task> pastSet = new TreeSet<>(taskComparator);
 
-          Header tomorrowHeader = new Header("Tomorrow");
+          Header tomorrowHeader = new Header(
+              androidContext.getString(R.string.listitem_headingtomorrow));
           tomorrowHeader.dateDue = LocalDate.now().plusDays(2).atStartOfDay();
           TreeSet<Task> tomorrowSet = new TreeSet<>(taskComparator);
 
-          Header laterWeekHeader = new Header("Later this week");
+          Header laterWeekHeader = new Header(
+              androidContext.getString(R.string.listitem_headingweeklater));
           laterWeekHeader.dateDue = LocalDate.now().plusWeeks(1).plusDays(1).atStartOfDay();
           TreeSet<Task> laterWeekSet = new TreeSet<>(taskComparator);
 
-          Header laterMonthHeader = new Header("Later this month");
+          Header laterMonthHeader = new Header(
+              androidContext.getString(R.string.listitem_headingmonthlater));
           laterMonthHeader.dateDue = LocalDate.now().plusMonths(1).plusDays(1).atStartOfDay();
           TreeSet<Task> laterMonthSet = new TreeSet<>(taskComparator);
 
-          Header laterYearHeader = new Header("Later this year");
+          Header laterYearHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyearlater));
           laterYearHeader.dateDue = LocalDate.now().plusYears(1).plusDays(1).atStartOfDay();
           TreeSet<Task> laterYearSet = new TreeSet<>(taskComparator);
 
-          Header futureHeader = new Header("Future");
+          Header futureHeader = new Header(
+              androidContext.getString(R.string.listitem_headingfuture));
           futureHeader.dateDue = LocalDateTime.MAX;
           TreeSet<Task> futureSet = new TreeSet<>(taskComparator);
 
-          Header noneHeader = new Header("No due date");
+          Header noneHeader = new Header(androidContext.getString(R.string.listitem_headingnodue));
           TreeSet<Task> noneSet = new TreeSet<>(taskComparator);
 
           for (Task task : tasks) {
@@ -570,51 +582,61 @@ public class DataModelHelper {
           // today, tomorrow, later this week, later this month, later this week, the future,
           // and available now
 
-          Header todayHeader = new Header("Today");
+          Header todayHeader = new Header(androidContext.getString(R.string.listitem_headingtoday));
           todayHeader.dateDefer = LocalDate.now().plusDays(1).atStartOfDay();
           TreeSet<Task> todaySet = new TreeSet<>(taskComparator);
 
-          Header yesterdayHeader = new Header("Yesterday");
+          Header yesterdayHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyesterday));
           yesterdayHeader.dateDefer = LocalDate.now().minusDays(1).atStartOfDay();
           TreeSet<Task> yesterdaySet = new TreeSet<>(taskComparator);
 
-          Header earlierWeekHeader = new Header("Earlier this week");
+          Header earlierWeekHeader = new Header(
+              androidContext.getString(R.string.listitem_headingweekearlier));
           earlierWeekHeader.dateDefer = LocalDate.now().minusWeeks(1).atStartOfDay();
           TreeSet<Task> earlierWeekSet = new TreeSet<>(taskComparator);
 
-          Header earlierMonthHeader = new Header("Earlier this month");
+          Header earlierMonthHeader = new Header(
+              androidContext.getString(R.string.listitem_headingmonthearlier));
           earlierMonthHeader.dateDefer = LocalDate.now().minusMonths(1).atStartOfDay();
           TreeSet<Task> earlierMonthSet = new TreeSet<>(taskComparator);
 
-          Header earlierYearHeader = new Header("Earlier this year");
+          Header earlierYearHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyearearlier));
           earlierYearHeader.dateDefer = LocalDate.now().minusYears(1).atStartOfDay();
           TreeSet<Task> earlierYearSet = new TreeSet<>(taskComparator);
 
-          Header pastHeader = new Header("Past");
+          Header pastHeader = new Header(androidContext.getString(R.string.listitem_headingpast));
           pastHeader.dateDefer = LocalDateTime.MIN;
           TreeSet<Task> pastSet = new TreeSet<>(taskComparator);
 
-          Header tomorrowHeader = new Header("Tomorrow");
+          Header tomorrowHeader = new Header(
+              androidContext.getString(R.string.listitem_headingtomorrow));
           tomorrowHeader.dateDefer = LocalDate.now().plusDays(2).atStartOfDay();
           TreeSet<Task> tomorrowSet = new TreeSet<>(taskComparator);
 
-          Header laterWeekHeader = new Header("Later this week");
+          Header laterWeekHeader = new Header(
+              androidContext.getString(R.string.listitem_headingweeklater));
           laterWeekHeader.dateDefer = LocalDate.now().plusWeeks(1).plusDays(1).atStartOfDay();
           TreeSet<Task> laterWeekSet = new TreeSet<>(taskComparator);
 
-          Header laterMonthHeader = new Header("Later this month");
+          Header laterMonthHeader = new Header(
+              androidContext.getString(R.string.listitem_headingmonthlater));
           laterMonthHeader.dateDefer = LocalDate.now().plusMonths(1).plusDays(1).atStartOfDay();
           TreeSet<Task> laterMonthSet = new TreeSet<>(taskComparator);
 
-          Header laterYearHeader = new Header("Later this year");
+          Header laterYearHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyearlater));
           laterYearHeader.dateDefer = LocalDate.now().plusYears(1).plusDays(1).atStartOfDay();
           TreeSet<Task> laterYearSet = new TreeSet<>(taskComparator);
 
-          Header futureHeader = new Header("Future");
+          Header futureHeader = new Header(
+              androidContext.getString(R.string.listitem_headingfuture));
           futureHeader.dateDefer = LocalDateTime.MAX;
           TreeSet<Task> futureSet = new TreeSet<>(taskComparator);
 
-          Header noneHeader = new Header("Available now");
+          Header noneHeader = new Header(
+              androidContext.getString(R.string.listitem_headingnodefer));
           TreeSet<Task> noneSet = new TreeSet<>(taskComparator);
 
           for (Task task : tasks) {
@@ -677,29 +699,34 @@ public class DataModelHelper {
 
           // We use today, yesterday, this week, this month, this year, and the past
 
-          Header todayHeader = new Header("Today");
+          Header todayHeader = new Header(androidContext.getString(R.string.listitem_headingtoday));
           todayHeader.dateCompleted = LocalDate.now().atStartOfDay();
           TreeSet<Task> todaySet = new TreeSet<>(taskComparator);
 
-          Header tomorrowHeader = new Header("Yesterday");
+          Header tomorrowHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyesterday));
           tomorrowHeader.dateCompleted = LocalDate.now().minusDays(1).atStartOfDay();
           TreeSet<Task> tomorrowSet = new TreeSet<>(taskComparator);
 
-          Header weekHeader = new Header("This week");
+          Header weekHeader = new Header(androidContext.getString(R.string.listitem_headingweek));
           weekHeader.dateCompleted = LocalDate.now().minusWeeks(1).atStartOfDay();
           TreeSet<Task> weekSet = new TreeSet<>(taskComparator);
 
-          Header monthHeader = new Header("This month");
+          Header monthHeader = new Header(androidContext.getString(R.string.listitem_headingmonth));
           monthHeader.dateCompleted = LocalDate.now().minusMonths(1).atStartOfDay();
           TreeSet<Task> monthSet = new TreeSet<>(taskComparator);
 
-          Header yearHeader = new Header("This year");
+          Header yearHeader = new Header(androidContext.getString(R.string.listitem_headingyear));
           yearHeader.dateCompleted = LocalDate.now().minusYears(1).atStartOfDay();
           TreeSet<Task> yearSet = new TreeSet<>(taskComparator);
 
-          Header pastHeader = new Header("Past");
+          Header pastHeader = new Header(androidContext.getString(R.string.listitem_headingpast));
           pastHeader.dateCompleted = LocalDateTime.MIN;
           TreeSet<Task> pastSet = new TreeSet<>(taskComparator);
+
+          Header noneHeader = new Header(
+              androidContext.getString(R.string.listitem_headingnocomplete));
+          TreeSet<Task> noneSet = new TreeSet<>(taskComparator);
 
           for (Task task : tasks) {
             if (filterTask(perspective, task)) {
@@ -720,6 +747,8 @@ public class DataModelHelper {
                 } else {
                   pastSet.add(task);
                 }
+              } else {
+                noneSet.add(task);
               }
             }
           }
@@ -730,6 +759,7 @@ public class DataModelHelper {
           entryMap.put(monthHeader, monthSet);
           entryMap.put(yearHeader, yearSet);
           entryMap.put(pastHeader, pastSet);
+          entryMap.put(noneHeader, noneSet);
           break;
         }
 
@@ -737,27 +767,28 @@ public class DataModelHelper {
 
           // We use today, yesterday, this week, this month, this year, and the past
 
-          Header todayHeader = new Header("Today");
+          Header todayHeader = new Header(androidContext.getString(R.string.listitem_headingtoday));
           todayHeader.dateAdded = LocalDate.now().atStartOfDay();
           TreeSet<Task> todaySet = new TreeSet<>(taskComparator);
 
-          Header tomorrowHeader = new Header("Yesterday");
+          Header tomorrowHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyesterday));
           tomorrowHeader.dateAdded = LocalDate.now().minusDays(1).atStartOfDay();
           TreeSet<Task> tomorrowSet = new TreeSet<>(taskComparator);
 
-          Header weekHeader = new Header("This week");
+          Header weekHeader = new Header(androidContext.getString(R.string.listitem_headingweek));
           weekHeader.dateAdded = LocalDate.now().minusWeeks(1).atStartOfDay();
           TreeSet<Task> weekSet = new TreeSet<>(taskComparator);
 
-          Header monthHeader = new Header("This month");
+          Header monthHeader = new Header(androidContext.getString(R.string.listitem_headingmonth));
           monthHeader.dateAdded = LocalDate.now().minusMonths(1).atStartOfDay();
           TreeSet<Task> monthSet = new TreeSet<>(taskComparator);
 
-          Header yearHeader = new Header("This year");
+          Header yearHeader = new Header(androidContext.getString(R.string.listitem_headingyear));
           yearHeader.dateAdded = LocalDate.now().minusYears(1).atStartOfDay();
           TreeSet<Task> yearSet = new TreeSet<>(taskComparator);
 
-          Header pastHeader = new Header("Past");
+          Header pastHeader = new Header(androidContext.getString(R.string.listitem_headingpast));
           pastHeader.dateAdded = LocalDateTime.MIN;
           TreeSet<Task> pastSet = new TreeSet<>(taskComparator);
 
@@ -797,27 +828,28 @@ public class DataModelHelper {
 
           // We use today, yesterday, this week, this month, this year, and the past
 
-          Header todayHeader = new Header("Today");
+          Header todayHeader = new Header(androidContext.getString(R.string.listitem_headingtoday));
           todayHeader.dateModified = LocalDate.now().atStartOfDay();
           TreeSet<Task> todaySet = new TreeSet<>(taskComparator);
 
-          Header tomorrowHeader = new Header("Yesterday");
+          Header tomorrowHeader = new Header(
+              androidContext.getString(R.string.listitem_headingyesterday));
           tomorrowHeader.dateModified = LocalDate.now().minusDays(1).atStartOfDay();
           TreeSet<Task> tomorrowSet = new TreeSet<>(taskComparator);
 
-          Header weekHeader = new Header("This week");
+          Header weekHeader = new Header(androidContext.getString(R.string.listitem_headingweek));
           weekHeader.dateModified = LocalDate.now().minusWeeks(1).atStartOfDay();
           TreeSet<Task> weekSet = new TreeSet<>(taskComparator);
 
-          Header monthHeader = new Header("This month");
+          Header monthHeader = new Header(androidContext.getString(R.string.listitem_headingmonth));
           monthHeader.dateModified = LocalDate.now().minusMonths(1).atStartOfDay();
           TreeSet<Task> monthSet = new TreeSet<>(taskComparator);
 
-          Header yearHeader = new Header("This year");
+          Header yearHeader = new Header(androidContext.getString(R.string.listitem_headingyear));
           yearHeader.dateModified = LocalDate.now().minusYears(1).atStartOfDay();
           TreeSet<Task> yearSet = new TreeSet<>(taskComparator);
 
-          Header pastHeader = new Header("Past");
+          Header pastHeader = new Header(androidContext.getString(R.string.listitem_headingpast));
           pastHeader.dateModified = LocalDateTime.MIN;
           TreeSet<Task> pastSet = new TreeSet<>(taskComparator);
 
@@ -854,7 +886,7 @@ public class DataModelHelper {
         }
 
         default: {
-          Header tasksHeader = new Header("Tasks");
+          Header tasksHeader = new Header(androidContext.getString(R.string.listitem_headingtasks));
           TreeSet<Task> treeSet = new TreeSet<>();
           for (Task task : tasks) {
             if (filterTask(perspective, task)) {
@@ -865,7 +897,7 @@ public class DataModelHelper {
         }
       }
     } else {
-      Header tasksHeader = new Header("Tasks");
+      Header tasksHeader = new Header(androidContext.getString(R.string.listitem_headingtasks));
       TreeSet<Task> treeSet = new TreeSet<>();
       for (Task task : tasks) {
         if (filterTask(perspective, task)) {

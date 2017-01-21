@@ -101,7 +101,7 @@ class ContextHelper {
     SQLiteDatabase db = dbHelper.getReadableDatabase();
     Context noContext = new Context();
 
-    noContext.name = androidContext.getString(R.string.no_context);
+    noContext.name = androidContext.getString(R.string.listitem_nocontext);
     noContext.countChildren = DatabaseUtils
         .queryNumEntries(db, Tasks.TABLE_NAME, Tasks.COLUMN_CONTEXT + " IS NULL");
     noContext.countAvailable = DatabaseUtils.queryNumEntries(db, Tasks.TABLE_NAME,

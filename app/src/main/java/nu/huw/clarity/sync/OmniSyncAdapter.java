@@ -210,7 +210,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
       Log.e(TAG, "Failed sync", e);
     }
 
-    Intent intent = new Intent(getContext().getString(R.string.sync_broadcast_intent));
+    Intent intent = new Intent(getContext().getString(R.string.sync_broadcastintent));
     LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
   }
 

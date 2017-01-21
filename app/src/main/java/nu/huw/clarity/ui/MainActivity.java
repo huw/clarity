@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity
 
     // Register sync receiver
     syncIntentFilter =
-        new IntentFilter(getApplicationContext().getString(R.string.sync_broadcast_intent));
+        new IntentFilter(getApplicationContext().getString(R.string.sync_broadcastintent));
 
     // Toolbar & Nav Drawer Setup
     setupToolbar();
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity
   private void registerSyncs() {
 
     Account account = new AccountManagerHelper(getApplicationContext()).getAccount();
-    String authority = getString(R.string.authority);
+    String authority = getString(R.string.sync_authority);
 
     ContentResolver.setSyncAutomatically(account, authority, true);
 

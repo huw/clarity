@@ -30,7 +30,8 @@ public class ErrorDialogFragment extends DialogFragment {
 
     Bundle args = getArguments();
     String message = args.getString("MESSAGE", "");
-    String positiveString = args.getString("BUTTON_STRING", getString(R.string.try_again));
+    String positiveString = args
+        .getString("BUTTON_STRING", getString(R.string.errordialogfragment_tryagain));
 
     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
     builder.setMessage(message);
@@ -64,7 +65,7 @@ public class ErrorDialogFragment extends DialogFragment {
     // the negative button is doing exactly the same thing. So
     // there's no need for duplicate buttons
 
-    if (!positiveString.equals(getString(R.string.got_it))) {
+    if (!positiveString.equals(getString(R.string.errordialogfragment_gotit))) {
 
       builder.setNegativeButton(android.R.string.cancel,
           new DialogInterface.OnClickListener() {

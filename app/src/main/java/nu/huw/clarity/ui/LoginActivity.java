@@ -115,22 +115,22 @@ public class LoginActivity extends AppCompatActivity
 
     // Check for a valid password.
     if (TextUtils.isEmpty(password)) {
-      textinputlayout_login_password.setError(getString(R.string.error_field_required));
+      textinputlayout_login_password.setError(getString(R.string.login_error_fieldrequired));
       focusView = textinputedittext_login_password;
       cancel = true;
     } else if (!isPasswordValid(password)) {
-      textinputlayout_login_password.setError(getString(R.string.error_invalid_password));
+      textinputlayout_login_password.setError(getString(R.string.login_error_invalidpassword));
       focusView = textinputedittext_login_password;
       cancel = true;
     }
 
     // Check for a valid email address.
     if (TextUtils.isEmpty(username)) {
-      textinputlayout_login_username.setError(getString(R.string.error_field_required));
+      textinputlayout_login_username.setError(getString(R.string.login_error_fieldrequired));
       focusView = textinputedittext_login_username;
       cancel = true;
     } else if (!isUsernameValid(username)) {
-      textinputlayout_login_username.setError(getString(R.string.error_invalid_username));
+      textinputlayout_login_username.setError(getString(R.string.login_error_invalidusername));
       focusView = textinputedittext_login_username;
       cancel = true;
     }

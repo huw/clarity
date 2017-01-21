@@ -16,7 +16,7 @@
     android:paddingRight="@dimen/horizontal_margin"
     android:ellipsize="middle"
     android:maxLines="2"
-    android:text="@string/project_complete"
+    android:text="@string/detail_projectcomplete"
     android:textColor="@color/secondary_text_light"
     android:textSize="@dimen/subhead_size"/>
 

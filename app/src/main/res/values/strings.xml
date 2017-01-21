@@ -2,42 +2,38 @@
   <string name="app_name">Clarity for OmniFocus</string>
   <string name="app_name_short">Clarity</string>
   <string name="account_name">Omni Sync</string>
-  <string name="account_type">nu.huw.clarity</string>
-  <string name="sync_broadcast_intent">nu.huw.ACTION_FINISHED_SYNC</string>
-  <string name="authority">nu.huw.clarity.sync</string>
+  <string name="account_type" translatable="false">nu.huw.clarity</string>
+  <string name="sync_broadcastintent" translatable="false">nu.huw.ACTION_FINISHED_SYNC</string>
+  <string name="sync_authority" translatable="false">nu.huw.clarity.sync</string>
 
   <!-- LoginActivity -->
   <string name="login_title">Welcome to Clarity</string>
   <string name="login_message">With Clarity for OmniFocus, you can focus on your tasks or write down killer ideas.</string>
   <string name="login_action">Sign in to the Omni Sync Server to begin.</string>
+  <string name="login_username">Username</string>
+  <string name="login_password">Password</string>
 
-  <string name="prompt_username">Username</string>
-  <string name="prompt_password">Password</string>
-  <string name="action_sign_in">Sign in</string>
-  <string name="error_invalid_password">Use at least 6 characters</string>
-  <string name="error_invalid_username">Use at least 2 characters and no spaces</string>
-  <string name="error_incorrect_password">This password is incorrect</string>
-  <string name="error_field_required">This field is required</string>
-  <string name="error_not_registered">This user isn\'t registered</string>
-  <string name="error_no_connection">You need a connection to sync.omnigroup.com to continue.</string>
-  <string name="error_no_ofocus">No OmniFocus data was found on your account. At the moment, Clarity can\'t create OmniFocus data from scratch, so to continue you\'ll need to sync with an official OmniFocus app.</string>
-  <string name="error_server_fault">There\'s a problem with the server</string>
+  <string name="login_signin">Sign in</string>
+  <string name="login_error_invalidpassword">Use at least 6 characters</string>
+  <string name="login_error_invalidusername">Use at least 2 characters and no spaces</string>
+  <string name="login_error_incorrectpassword">This password is incorrect</string>
+  <string name="login_error_fieldrequired">This field is required</string>
+  <string name="login_error_notregistered">This user isn\'t registered</string>
+  <string name="login_error_noconnection">You need a connection to sync.omnigroup.com to continue.</string>
+  <string name="login_error_noofocus">No OmniFocus data was found on your account. At the moment, Clarity can\'t create OmniFocus data from scratch, so to continue you\'ll need to sync with an official OmniFocus app.</string>
+  <string name="login_error_serverfault">There\'s a problem with the server</string>
 
   <!-- ErrorDialogFragment -->
-  <string name="try_again">Try again</string>
-  <string name="got_it">Got it</string>
-
-  <!-- Toolbar Menu -->
-  <string name="menu_sync">Synchronise</string>
-  <string name="menu_database">Reload Database</string>
+  <string name="errordialogfragment_tryagain">Try again</string>
+  <string name="errordialogfragment_gotit">Got it</string>
 
   <!-- Navigation Drawer -->
-  <string name="forecast">Forecast</string>
-  <string name="inbox">Inbox</string>
-  <string name="projects">Projects</string>
-  <string name="contexts">Contexts</string>
-  <string name="flagged">Flagged</string>
-  <string name="nearby">Nearby</string>
+  <string name="menu_forecast">Forecast</string>
+  <string name="menu_inbox">Inbox</string>
+  <string name="menu_projects">Projects</string>
+  <string name="menu_contexts">Contexts</string>
+  <string name="menu_flagged">Flagged</string>
+  <string name="menu_nearby">Nearby</string>
 
   <!-- List Items -->
   <string name="listitem_countavailableempty">no items available</string>
@@ -50,7 +46,7 @@
   <string name="listitem_countchildren">%d items</string>
   <string name="listitem_countduesoon">%d due soon</string>
   <string name="listitem_countoverdue">%d overdue</string>
-  <string name="no_context">No Context</string>
+  <string name="listitem_nocontext">No Context</string>
   <string name="listitem_sortdue">Due %s</string>
   <string name="listitem_sortdefer">Deferred until %s</string>
   <string name="listitem_sortcompleted">Completed %s</string>
@@ -58,41 +54,59 @@
   <string name="listitem_sortmodified">Modified %s</string>
   <string name="listitem_sortduration">%d minutes</string>
 
+  <!-- List Headers -->
+
+
   <!-- Empty States -->
-  <string name="empty_title">There\'s nothing here</string>
-  <string name="empty_congratulations">Pull down to sync\n(may take some time)\nor change
+  <string name="list_emptytitle">There\'s nothing here</string>
+  <string name="list_emptysubtitle">Pull down to sync\n(may take some time)\nor change
         perspectives \nfrom the menu</string>
 
   <!-- Detail View -->
-  <string name="task">Task</string>
-  <string name="context">Context</string>
-  <string name="project">Project</string>
-  <string name="folder">Folder</string>
-  <string name="prompt_name">Name</string>
-  <string name="flag">Flag</string>
-  <string name="duration">Estimated Duration</string>
-  <string name="defer">Defer Until</string>
-  <string name="due">Due</string>
-  <string name="repeat">Repeat</string>
-  <string name="status">Status</string>
-  <string name="project_type">Type</string>
-  <string name="project_complete">Complete when completing last action</string>
-
-  <string name="detail_go_project">Go to Project</string>
-  <string name="detail_go_context">Go to Context</string>
-
-  <string name="none">None</string>
-  <string name="repeating">Repeating</string>
-  <string name="minutes">min</string>
-
-  <!-- Status -->
-  <string name="status_active">Active</string>
-  <string name="status_on_hold">On Hold</string>
-  <string name="status_dropped">Dropped</string>
-
-  <!-- Project Type -->
-  <string name="project_parallel">Parallel</string>
-  <string name="project_sequential">Sequential</string>
-  <string name="project_single_actions">Single Actions</string>
+  <string name="detail_task">Task</string>
+  <string name="detail_context">Context</string>
+  <string name="detail_project">Project</string>
+  <string name="detail_folder">Folder</string>
+  <string name="detail_name">Name</string>
+  <string name="detail_flag">Flag</string>
+  <string name="detail_duration">Estimated Duration</string>
+  <string name="detail_defer">Defer Until</string>
+  <string name="detail_due">Due</string>
+  <string name="detail_repeat">Repeat</string>
+  <string name="detail_status">Status</string>
+  <string name="detail_projecttype">Type</string>
+  <string name="detail_projectcomplete">Complete when completing last action</string>
+  <string name="detail_gotoproject">Go to Project</string>
+  <string name="detail_gotocontext">Go to Context</string>
+  <string name="detail_none">None</string>
+  <string name="detail_repeating">Repeating</string>
+  <string name="detail_minutes">min</string>
+  <string name="detail_active">Active</string>
+  <string name="detail_onhold">On Hold</string>
+  <string name="detail_dropped">Dropped</string>
+  <string name="detail_projectparallel">Parallel</string>
+  <string name="detail_projectsequential">Sequential</string>
+  <string name="detail_projectsingleactions">Single Actions</string>
+  <string name="listitem_headingflagged">Flagged</string>
+  <string name="listitem_headingunflagged">Unflagged</string>
+  <string name="listitem_headingtoday">Today</string>
+  <string name="listitem_headingyesterday">Yesterday</string>
+  <string name="listitem_headingweekearlier">Earlier this week</string>
+  <string name="listitem_headingmonthearlier">Earlier this month</string>
+  <string name="listitem_headingyearearlier">Earlier this year</string>
+  <string name="listitem_headingpast">Past</string>
+  <string name="listitem_headingtomorrow">Tomorrow</string>
+  <string name="listitem_headingweeklater">Later this week</string>
+  <string name="listitem_headingmonthlater">Later this month</string>
+  <string name="listitem_headingyearlater">Later this year</string>
+  <string name="listitem_headingfuture">Future</string>
+  <string name="listitem_headingnodue">No due date</string>
+  <string name="listitem_headingnodefer">Available now</string>
+  <string name="listitem_headingweek">This week</string>
+  <string name="listitem_headingmonth">This month</string>
+  <string name="listitem_headingyear">This year</string>
+  <string name="listitem_headingnocomplete">Incomplete</string>
+  <string name="listitem_headingtasks">Tasks</string>
+  <string name="listitem_headingitems">Items</string>
 
 </resources>

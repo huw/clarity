@@ -117,7 +117,7 @@ public class ListFragment extends Fragment implements
     // Setup sync receiver
 
     if (context != null) {
-      syncIntentFilter = new IntentFilter(context.getString(R.string.sync_broadcast_intent));
+      syncIntentFilter = new IntentFilter(context.getString(R.string.sync_broadcastintent));
     }
 
     // Setup loader
@@ -155,7 +155,7 @@ public class ListFragment extends Fragment implements
       // Get view & account
 
       final Account account = AMHelper.getAccount();
-      final String authority = getString(R.string.authority);
+      final String authority = getString(R.string.sync_authority);
 
       // Set refresh ring colours
 
@@ -245,7 +245,7 @@ public class ListFragment extends Fragment implements
    */
   public boolean checkForSyncs() {
 
-    String authority = getString(R.string.authority);
+    String authority = getString(R.string.sync_authority);
 
     boolean active = false;
     for (SyncInfo syncInfo : ContentResolver.getCurrentSyncs()) {
