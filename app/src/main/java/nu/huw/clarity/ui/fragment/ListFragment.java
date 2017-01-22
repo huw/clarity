@@ -7,17 +7,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SyncInfo;
+import android.graphics.PorterDuff.Mode;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -149,6 +150,8 @@ public class ListFragment extends Fragment implements
 
     // Setup swipe-to-refresh
 
+    int spinnerColor = ContextCompat.getColor(getContext(), perspective.color);
+
     AccountManagerHelper AMHelper = new AccountManagerHelper(getContext());
     if (AMHelper.doesAccountExist()) {
 
@@ -159,10 +162,7 @@ public class ListFragment extends Fragment implements
 
       // Set refresh ring colours
 
-      TypedValue typedValue = new TypedValue();
-      getContext().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-      int color = typedValue.data;
-      swiperefreshlayout_list.setColorSchemeColors(color);
+      swiperefreshlayout_list.setColorSchemeColors(spinnerColor);
 
       // Set listener
 
@@ -178,6 +178,11 @@ public class ListFragment extends Fragment implements
 
       checkForSyncs();
     }
+
+    // Set the spinner colour to the current perspective
+    // http://stackoverflow.com/a/36828947/3208895
+
+    progressbar_list_spinner.getIndeterminateDrawable().setColorFilter(spinnerColor, Mode.SRC_IN);
 
     // Setup recycler view & adapter
 

@@ -3,10 +3,10 @@ package nu.huw.clarity.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +22,7 @@ import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
+import nu.huw.clarity.ui.adapter.DetailPagerAdapter;
 import nu.huw.clarity.ui.fragment.DetailFragment;
 import nu.huw.clarity.ui.misc.CheckCircle;
 
@@ -40,6 +41,10 @@ public class DetailActivity extends AppCompatActivity
   TextInputLayout textinputlayout_detail_name;
   @BindView(R.id.textinputedittext_detail_name)
   TextInputEditText textinputedittext_detail_name;
+  @BindView(R.id.tablayout_detail)
+  TabLayout tablayout_detail;
+  @BindView(R.id.viewpager_detail)
+  ViewPager viewpager_detail;
   private Entry entry;
   private Perspective perspective;
 
@@ -108,14 +113,6 @@ public class DetailActivity extends AppCompatActivity
     textinputedittext_detail_name.setHint(hintID);
     textinputlayout_detail_name.setHint(getResources().getString(hintID));
 
-    Fragment detailFragment = DetailFragment.newInstance(entry, perspective);
-
-    if (detailFragment != null) {
-      FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-      ft.replace(R.id.scrollview_detail_fragmentcontainer, detailFragment);
-      ft.commit();
-    }
-
     // Check circle
 
     if (entry instanceof Task) {
@@ -141,6 +138,23 @@ public class DetailActivity extends AppCompatActivity
     } else {
       // Remove the check circle
       checkcircle_detail.setVisibility(View.GONE);
+    }
+
+    // Setup view pager and tablayout automatically
+
+    DetailPagerAdapter viewPagerAdapter = new DetailPagerAdapter(getSupportFragmentManager(),
+        getApplicationContext(), perspective,
+        entry);
+    viewpager_detail.setAdapter(
+        new DetailPagerAdapter(getSupportFragmentManager(), getApplicationContext(), perspective,
+            entry));
+    tablayout_detail.setupWithViewPager(viewpager_detail);
+
+    if (viewPagerAdapter.getCount() <= 1) {
+
+      // Remove tab layout if only one tab
+
+      tablayout_detail.setVisibility(View.GONE);
     }
   }
 

@@ -55,7 +55,27 @@
   <string name="listitem_sortduration">%d minutes</string>
 
   <!-- List Headers -->
-
+  <string name="listitem_headingflagged">Flagged</string>
+  <string name="listitem_headingunflagged">Unflagged</string>
+  <string name="listitem_headingtoday">Today</string>
+  <string name="listitem_headingyesterday">Yesterday</string>
+  <string name="listitem_headingweekearlier">Earlier this week</string>
+  <string name="listitem_headingmonthearlier">Earlier this month</string>
+  <string name="listitem_headingyearearlier">Earlier this year</string>
+  <string name="listitem_headingpast">Past</string>
+  <string name="listitem_headingtomorrow">Tomorrow</string>
+  <string name="listitem_headingweeklater">Later this week</string>
+  <string name="listitem_headingmonthlater">Later this month</string>
+  <string name="listitem_headingyearlater">Later this year</string>
+  <string name="listitem_headingfuture">Future</string>
+  <string name="listitem_headingnodue">No due date</string>
+  <string name="listitem_headingnodefer">Available now</string>
+  <string name="listitem_headingweek">This week</string>
+  <string name="listitem_headingmonth">This month</string>
+  <string name="listitem_headingyear">This year</string>
+  <string name="listitem_headingnocomplete">Incomplete</string>
+  <string name="listitem_headingtasks">Tasks</string>
+  <string name="listitem_headingitems">Items</string>
 
   <!-- Empty States -->
   <string name="list_emptytitle">There\'s nothing here</string>
@@ -87,26 +107,8 @@
   <string name="detail_projectparallel">Parallel</string>
   <string name="detail_projectsequential">Sequential</string>
   <string name="detail_projectsingleactions">Single Actions</string>
-  <string name="listitem_headingflagged">Flagged</string>
-  <string name="listitem_headingunflagged">Unflagged</string>
-  <string name="listitem_headingtoday">Today</string>
-  <string name="listitem_headingyesterday">Yesterday</string>
-  <string name="listitem_headingweekearlier">Earlier this week</string>
-  <string name="listitem_headingmonthearlier">Earlier this month</string>
-  <string name="listitem_headingyearearlier">Earlier this year</string>
-  <string name="listitem_headingpast">Past</string>
-  <string name="listitem_headingtomorrow">Tomorrow</string>
-  <string name="listitem_headingweeklater">Later this week</string>
-  <string name="listitem_headingmonthlater">Later this month</string>
-  <string name="listitem_headingyearlater">Later this year</string>
-  <string name="listitem_headingfuture">Future</string>
-  <string name="listitem_headingnodue">No due date</string>
-  <string name="listitem_headingnodefer">Available now</string>
-  <string name="listitem_headingweek">This week</string>
-  <string name="listitem_headingmonth">This month</string>
-  <string name="listitem_headingyear">This year</string>
-  <string name="listitem_headingnocomplete">Incomplete</string>
-  <string name="listitem_headingtasks">Tasks</string>
-  <string name="listitem_headingitems">Items</string>
+  <string name="detail_tabinfo">Info</string>
+  <string name="detail_tabnote">Note</string>
+  <string name="detail_tabattachments">Attachments</string>
 
 </resources>
