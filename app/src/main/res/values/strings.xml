@@ -76,6 +76,9 @@
   <string name="listitem_headingnocomplete">Incomplete</string>
   <string name="listitem_headingtasks">Tasks</string>
   <string name="listitem_headingitems">Items</string>
+  <string name="listitem_headingnofolder">No folder</string>
+  <string name="listitem_headingnoproject">No project</string>
+  <string name="listitem_headingnocontext">No context</string>
 
   <!-- Empty States -->
   <string name="list_emptytitle">There\'s nothing here</string>

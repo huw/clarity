@@ -75,7 +75,7 @@ class PerspectiveHelper {
   /**
    * Gets a perspective object suitable for a placeholder
    */
-  public Perspective getPlaceholder() {
+  Perspective getPlaceholder() {
 
     Perspective perspective = getForecast();
     perspective.color = R.color.primary;

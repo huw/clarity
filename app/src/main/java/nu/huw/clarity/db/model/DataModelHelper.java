@@ -357,6 +357,10 @@ public class DataModelHelper {
 
         case "folder": {
 
+          Header noneHeader = new Header(
+              androidContext.getString(R.string.listitem_headingnofolder));
+          TreeSet<Task> noneSet = new TreeSet<>(taskComparator);
+
           // For folders, get tasks that have projects in each folder
 
           for (Header header : new FolderHelper(dbHelper).getFolderHeaders()) {
@@ -365,21 +369,36 @@ public class DataModelHelper {
 
             for (Task task : tasks) {
 
-              // If project parent is equal to the folder ID, and the task is valid, add it.
+              // If the task isn't filtered, then consider it.
+              // If the task is in a folder, and the folder is the current one, then add it.
+              // If the task isn't in a folder, and not already in the noneSet, then add it.
+              // Otherwise just fall through.
 
               Task project = task.getProject(androidContext);
-              if (project != null && project.parentID.equals(header.folderID) && filterTask(
-                  perspective, task)) {
-                treeSet.add(task);
+              if (filterTask(perspective, task)) {
+                if (project != null && project.parentID != null) {
+                  if (project.parentID.equals(header.folderID)) {
+                    treeSet.add(task);
+                  }
+                } else if (!noneSet.contains(task)) {
+                  noneSet.add(task);
+                }
               }
             }
 
             entryMap.put(header, treeSet);
           }
+
+          entryMap.put(noneHeader, noneSet);
+
           break;
         }
 
         case "project": {
+
+          Header noneHeader = new Header(
+              androidContext.getString(R.string.listitem_headingnoproject));
+          TreeSet<Task> noneSet = new TreeSet<>(taskComparator);
 
           // For projects, get tasks that match the project ID
 
@@ -392,16 +411,36 @@ public class DataModelHelper {
             // Filter
 
             for (Task task : tasks) {
-              if (task.projectID.equals(header.projectID) && filterTask(perspective, task)) {
-                treeSet.add(task);
+
+              // If the task isn't filtered, then consider it.
+              // If the task is in a project, and the project is the current one, then add it.
+              // If the task isn't in a project, and not already in the noneSet, then add it.
+              // Otherwise just fall through.
+
+              if (filterTask(perspective, task)) {
+                if (task.projectID != null) {
+                  if (task.projectID.equals(header.projectID)) {
+                    treeSet.add(task);
+                  }
+                } else if (!noneSet.contains(task)) {
+                  noneSet.add(task);
+                }
               }
+
             }
             entryMap.put(header, treeSet);
           }
+
+          entryMap.put(noneHeader, noneSet);
+
           break;
         }
 
         case "context": {
+
+          Header noneHeader = new Header(
+              androidContext.getString(R.string.listitem_headingnocontext));
+          TreeSet<Task> noneSet = new TreeSet<>(taskComparator);
 
           // For contexts, get tasks that match the context ID
 
@@ -414,12 +453,28 @@ public class DataModelHelper {
             // Filter
 
             for (Task task : tasks) {
-              if (task.contextID.equals(header.contextID) && filterTask(perspective, task)) {
-                treeSet.add(task);
+
+              // If the task isn't filtered, then consider it.
+              // If the task is in a context, and the context is the current one, then add it.
+              // If the task isn't in a context, and not already in the noneSet, then add it.
+              // Otherwise just fall through.
+
+              if (filterTask(perspective, task)) {
+                if (task.contextID != null) {
+                  if (task.contextID.equals(header.contextID)) {
+                    treeSet.add(task);
+                  }
+                } else if (!noneSet.contains(task)) {
+                  noneSet.add(task);
+                }
               }
+
             }
             entryMap.put(header, treeSet);
           }
+
+          entryMap.put(noneHeader, noneSet);
+
           break;
         }
 
