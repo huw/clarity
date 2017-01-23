@@ -20,15 +20,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import nu.huw.clarity.db.DatabaseContract.Attachments;
 import nu.huw.clarity.db.DatabaseContract.Base;
 import nu.huw.clarity.db.DatabaseContract.Contexts;
@@ -50,38 +46,32 @@ public class SyncDownParser {
 
   private static final String TAG = SyncDownParser.class.getSimpleName();
   private final DatabaseHelper mDBHelper;
+  private Transformer transformer = null;
 
   public SyncDownParser(Context context) {
 
     mDBHelper = new DatabaseHelper(context);
+
+    try {
+      transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+      transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+    } catch (TransformerConfigurationException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  private static String stringOf(Node node) {
+  private String stringOf(Node node) {
 
     if (node == null) {
       throw new IllegalArgumentException("Node is null");
     }
 
     try {
-      // Remove unwanted whitespaces
-      XPath xpath = XPathFactory.newInstance().newXPath();
-      XPathExpression expr = xpath.compile("//text()[normalize-space()='']");
-      NodeList nodeList = (NodeList) expr.evaluate(node, XPathConstants.NODESET);
-
-      for (int i = 0; i < nodeList.getLength(); ++i) {
-        Node nd = nodeList.item(i);
-        nd.getParentNode().removeChild(nd);
-      }
-
-      // Create and setup transformer
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-
-      // Turn the node into a string
       StringWriter writer = new StringWriter();
       transformer.transform(new DOMSource(node), new StreamResult(writer));
       return writer.toString();
-    } catch (TransformerException | XPathExpressionException e) {
+    } catch (TransformerException e) {
       throw new RuntimeException(e);
     }
   }
@@ -488,7 +478,10 @@ public class SyncDownParser {
         break;
 
       case "note":
-        //TODO: Parse notes
+        if (table.equals(Tasks.TABLE_NAME) && node.hasChildNodes()) {
+          name = Tasks.COLUMN_NOTE_XML;
+          value = stringOf(node);
+        }
         break;
 
       case "repetition-rule":
