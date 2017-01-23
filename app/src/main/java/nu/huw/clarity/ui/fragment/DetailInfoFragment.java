@@ -26,21 +26,21 @@ import org.threeten.bp.format.DateTimeFormatter;
  * and decides which layout XML to display depending on the type of entry passed to it, and then
  * populates it with the correct values.
  */
-public class DetailFragment extends Fragment {
+public class DetailInfoFragment extends Fragment {
 
-  private static final String TAG = DetailFragment.class.getSimpleName();
+  private static final String TAG = DetailInfoFragment.class.getSimpleName();
   private Entry entry;
   private Perspective perspective;
-  private OnDetailInteractionListener mListener;
+  private OnDetailInfoInteractionListener mListener;
   @ColorInt
   private int PRIMARY_TEXT_COLOR;
 
-  public DetailFragment() {
+  public DetailInfoFragment() {
   }
 
-  public static DetailFragment newInstance(Entry entry, Perspective perspective) {
+  public static DetailInfoFragment newInstance(Entry entry, Perspective perspective) {
 
-    DetailFragment fragment = new DetailFragment();
+    DetailInfoFragment fragment = new DetailInfoFragment();
     Bundle args = new Bundle();
     args.putParcelable("ENTRY", entry);
     args.putParcelable("PERSPECTIVE", perspective);
@@ -87,8 +87,8 @@ public class DetailFragment extends Fragment {
   @Override
   public void onAttach(android.content.Context context) {
     super.onAttach(context);
-    if (context instanceof OnDetailInteractionListener) {
-      mListener = (OnDetailInteractionListener) context;
+    if (context instanceof OnDetailInfoInteractionListener) {
+      mListener = (OnDetailInfoInteractionListener) context;
     } else {
       throw new RuntimeException(
           context.toString() + " must implement OnDetailInteractionListener");
@@ -329,7 +329,7 @@ public class DetailFragment extends Fragment {
     return view;
   }
 
-  public interface OnDetailInteractionListener {
+  public interface OnDetailInfoInteractionListener {
 
     void onContextClick(Entry entry, Perspective perspective);
 

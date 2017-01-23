@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset xmlns:android="http://schemas.android.com/apk/res/android">
+  <shape
+    android:shape="rectangle"
+    android:tint="@color/primary_orange">
+    <size
+      android:height="2dp"
+      android:width="2dp"/>
+    <solid
+      android:color="@color/primary_orange"/>
+  </shape>
+</inset>

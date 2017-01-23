@@ -110,5 +110,6 @@
   <string name="detail_tabinfo">Info</string>
   <string name="detail_tabnote">Note</string>
   <string name="detail_tabattachments">Attachments</string>
+  <string name="detail_note_hint">Tap to add a note</string>
 
 </resources>

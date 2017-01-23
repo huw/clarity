@@ -7,10 +7,14 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
-import nu.huw.clarity.ui.fragment.DetailFragment;
+import nu.huw.clarity.ui.fragment.DetailInfoFragment;
+import nu.huw.clarity.ui.fragment.DetailNoteFragment;
 
 public class DetailPagerAdapter extends FragmentPagerAdapter {
 
+  private static final int POSITION_INFO = 0;
+  private static final int POSITION_NOTE = 1;
+  private static final int POSITION_ATTACHMENT = 2;
   android.content.Context androidContext;
   Perspective perspective;
   Entry entry;
@@ -26,13 +30,13 @@ public class DetailPagerAdapter extends FragmentPagerAdapter {
   @Override
   public Fragment getItem(int position) {
     switch (position) {
-      case 2:
+      case POSITION_ATTACHMENT:
         //
-      case 1:
-        // return DetailFragment.newInstance(entry, perspective);
-      case 0:
+      case POSITION_NOTE:
+        return DetailNoteFragment.newInstance((Task) entry, perspective);
+      case POSITION_INFO:
       default:
-        return DetailFragment.newInstance(entry, perspective);
+        return DetailInfoFragment.newInstance(entry, perspective);
     }
   }
 
@@ -52,11 +56,11 @@ public class DetailPagerAdapter extends FragmentPagerAdapter {
   @Override
   public CharSequence getPageTitle(int position) {
     switch (position) {
-      case 2:
+      case POSITION_ATTACHMENT:
         return androidContext.getString(R.string.detail_tabattachments);
-      case 1:
+      case POSITION_NOTE:
         return androidContext.getString(R.string.detail_tabnote);
-      case 0:
+      case POSITION_INFO:
       default:
         return androidContext.getString(R.string.detail_tabinfo);
     }

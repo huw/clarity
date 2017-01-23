@@ -23,11 +23,11 @@ import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.adapter.DetailPagerAdapter;
-import nu.huw.clarity.ui.fragment.DetailFragment;
+import nu.huw.clarity.ui.fragment.DetailInfoFragment.OnDetailInfoInteractionListener;
 import nu.huw.clarity.ui.misc.CheckCircle;
 
 public class DetailActivity extends AppCompatActivity
-    implements DetailFragment.OnDetailInteractionListener {
+    implements OnDetailInfoInteractionListener {
 
   @BindView(R.id.relativelayout_detail_container)
   RelativeLayout relativelayout_detail_container;
