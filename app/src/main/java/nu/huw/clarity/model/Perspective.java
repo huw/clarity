@@ -55,7 +55,6 @@ public class Perspective extends Base {
     // res
     color = in.readInt();
     colorStateListID = in.readInt();
-    cursorDrawable = in.readInt();
     icon = in.readInt();
     menuID = in.readInt();
     themeID = in.readInt();
@@ -79,7 +78,6 @@ public class Perspective extends Base {
     // res
     out.writeInt(color);
     out.writeInt(colorStateListID);
-    out.writeInt(cursorDrawable);
     out.writeInt(icon);
     out.writeInt(menuID);
     out.writeInt(themeID);

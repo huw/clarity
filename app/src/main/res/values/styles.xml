@@ -26,22 +26,27 @@
 
   <style name="AppTheme.Red" parent="AppTheme">
     <item name="colorPrimary">@color/primary_red</item>
+    <item name="colorAccent">@color/primary_red</item>
   </style>
 
   <style name="AppTheme.BlueGrey" parent="AppTheme">
     <item name="colorPrimary">@color/primary_blue_grey</item>
+    <item name="colorAccent">@color/primary_blue_grey</item>
   </style>
 
   <style name="AppTheme.Blue" parent="AppTheme">
     <item name="colorPrimary">@color/primary_blue</item>
+    <item name="colorAccent">@color/primary_blue</item>
   </style>
 
   <style name="AppTheme.Orange" parent="AppTheme">
     <item name="colorPrimary">@color/primary_orange</item>
+    <item name="colorAccent">@color/primary_orange</item>
   </style>
 
   <style name="AppTheme.Green" parent="AppTheme">
     <item name="colorPrimary">@color/primary_green</item>
+    <item name="colorAccent">@color/primary_green</item>
   </style>
 
   <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>

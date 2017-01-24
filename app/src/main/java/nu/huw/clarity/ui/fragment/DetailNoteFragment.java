@@ -4,14 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatEditText;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.EditText;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import java.lang.reflect.Field;
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
@@ -20,7 +18,7 @@ public class DetailNoteFragment extends Fragment {
 
   private static final String TAG = DetailInfoFragment.class.getSimpleName();
   @BindView(R.id.edittext_detail_note)
-  AppCompatEditText edittext_detail_note;
+  EditText edittext_detail_note;
   private Task task;
   private Perspective perspective;
 
@@ -63,14 +61,6 @@ public class DetailNoteFragment extends Fragment {
     if (task.noteXML != null) {
       edittext_detail_note.setText(task.noteXML);
     }
-
-    // Set cursor colour
-
-    try {
-      Field f = TextView.class.getDeclaredField("mCursorDrawableRes");
-      f.setAccessible(true);
-      f.set(edittext_detail_note, perspective.cursorDrawable);
-    } catch (NoSuchFieldException | IllegalAccessException ignored) {}
 
     return view;
   }

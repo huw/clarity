@@ -58,26 +58,16 @@ public class DetailActivity extends AppCompatActivity
       actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-    // Set the theme to the theme we just had back in MainActivity
-    if (perspective != null) {
-      setTheme(perspective.themeID);
-    }
-
     // Set background colours depending on the view we just came from
     TypedValue typedValue = new TypedValue();
     getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-    appbarlayout_detail.setBackgroundColor(typedValue.data);
     relativelayout_detail_container.setBackgroundColor(typedValue.data);
   }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_detail);
-    ButterKnife.bind(this);
     Intent intent = getIntent();
-
     if (intent.hasExtra("ENTRY")) {
       entry = intent.getParcelableExtra("ENTRY");
     } else {
@@ -89,6 +79,18 @@ public class DetailActivity extends AppCompatActivity
     } else {
       throw new IllegalArgumentException("Intent must contain 'PERSPECTIVE'");
     }
+
+    // Set the theme to the theme we just had back in MainActivity
+
+    if (perspective != null) {
+      setTheme(perspective.themeID);
+    }
+
+    // Set content view __AFTER__ theme
+
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_detail);
+    ButterKnife.bind(this);
 
     setupToolbar();
 

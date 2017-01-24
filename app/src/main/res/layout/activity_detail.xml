@@ -6,7 +6,6 @@
   android:id="@+id/relativelayout_detail_container"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="@color/primary"
   android:fitsSystemWindows="true"
   tools:context="nu.huw.clarity.ui.DetailActivity">
 
@@ -14,7 +13,6 @@
     android:id="@+id/appbarlayout_detail"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/primary"
     android:focusableInTouchMode="true"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 

@@ -91,7 +91,7 @@ public class SyncDownParser {
       document = db.parse(input);
 
       document.getDocumentElement().normalize();
-      NodeList nodes = document.getChildNodes().item(0).getChildNodes();
+      NodeList nodes = document.getFirstChild().getChildNodes();
 
       // For each element in DOM
 
