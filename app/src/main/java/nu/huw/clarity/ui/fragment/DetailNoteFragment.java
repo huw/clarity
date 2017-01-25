@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.EditText;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
+import nu.huw.clarity.db.model.NoteHelper;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 
@@ -59,7 +61,9 @@ public class DetailNoteFragment extends Fragment {
     // Set text
 
     if (task.noteXML != null) {
-      edittext_detail_note.setText(task.noteXML);
+      String string = NoteHelper.noteXMLtoString(task.noteXML);
+      edittext_detail_note.setText(string);
+      edittext_detail_note.setMovementMethod(LinkMovementMethod.getInstance()); // enable links
     }
 
     return view;

@@ -12,9 +12,11 @@
     android:paddingBottom="20dp"
     android:paddingStart="?listPreferredItemPaddingLeft"
     android:paddingEnd="?listPreferredItemPaddingRight"
+    android:autoLink="web|email"
     android:background="@null"
     android:gravity="start"
     android:hint="@string/detail_note_hint"
-    android:inputType="text|textAutoComplete|textAutoCorrect|textMultiLine"/>
+    android:inputType="text|textAutoComplete|textAutoCorrect|textMultiLine"
+    android:linksClickable="true"/>
 
 </LinearLayout>
