@@ -11,6 +11,7 @@ import com.dd.plist.NSObject;
 import com.dd.plist.NSString;
 import com.dd.plist.PropertyListFormatException;
 import com.dd.plist.PropertyListParser;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -46,10 +47,12 @@ public class SyncDownParser {
 
   private static final String TAG = SyncDownParser.class.getSimpleName();
   private final DatabaseHelper mDBHelper;
+  private Context androidContext;
   private Transformer transformer = null;
 
   public SyncDownParser(Context context) {
 
+    androidContext = context;
     mDBHelper = new DatabaseHelper(context);
 
     try {
@@ -265,6 +268,17 @@ public class SyncDownParser {
        */
       case "name":
         name = DatabaseContract.Entries.COLUMN_NAME;
+
+        if (table.equals(Attachments.TABLE_NAME)) {
+
+          // Save file path as well
+
+          File file = new File(androidContext.getFilesDir(), "data/" + id + "/" + value);
+          if (file.exists()) {
+            values.put(Attachments.COLUMN_PATH, file.getPath());
+          }
+        }
+
         break;
 
       case "rank":

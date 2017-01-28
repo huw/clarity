@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -185,14 +186,50 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
               this.getContext().getCacheDir());
           decrypter.decryptFile(file, decryptedFile);
 
-          // Read that file as a zip file, and then parse its `contents.xml` into the
-          // database adder/parser/thing.
+          // Save any attachments to the normal files directory
 
           ZipFile zipFile = new ZipFile(decryptedFile);
+          Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
+          while (zipEntries.hasMoreElements()) {
+            ZipEntry entry = zipEntries.nextElement();
+
+            // Skip contents.xml
+
+            if (entry.getName().equals("contents.xml")) continue;
+            File entryFile = new File(getContext().getFilesDir(), entry.getName());
+
+            // Preserve directory structure
+
+            if (entry.isDirectory()) {
+              entryFile.mkdirs();
+            } else {
+              File parent = entryFile.getParentFile();
+
+              if (!parent.exists()) {
+                parent.mkdirs();
+              }
+
+              InputStream inputStream = zipFile.getInputStream(entry);
+              RandomAccessFile outputStream = new RandomAccessFile(entryFile, "rw");
+
+              // Copy input stream to output stream, bitwise
+              byte data[] = new byte[4096];
+              int count;
+              while ((count = inputStream.read(data)) != -1) {
+                outputStream.write(data, 0, count);
+              }
+
+              inputStream.close();
+              outputStream.close();
+            }
+          }
+
+          // Finally start the parser
+
           ZipEntry contentsXml = zipFile.getEntry("contents.xml");
           InputStream input = zipFile.getInputStream(contentsXml);
-
           new SyncDownParser(getContext()).parse(input);
+
         } catch (IOException e) {
           Log.e(TAG, "Error reading downloaded zip file", e);
         } catch (Exception e) {

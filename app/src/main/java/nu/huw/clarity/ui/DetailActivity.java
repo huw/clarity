@@ -1,11 +1,15 @@
 package nu.huw.clarity.ui;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,20 +18,24 @@ import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import nu.huw.clarity.BuildConfig;
 import nu.huw.clarity.R;
+import nu.huw.clarity.model.Attachment;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
+import nu.huw.clarity.ui.adapter.AttachmentListAdapter.OnAttachmentListInteractionListener;
 import nu.huw.clarity.ui.adapter.DetailPagerAdapter;
 import nu.huw.clarity.ui.fragment.DetailInfoFragment.OnDetailInfoInteractionListener;
 import nu.huw.clarity.ui.misc.CheckCircle;
 
 public class DetailActivity extends AppCompatActivity
-    implements OnDetailInfoInteractionListener {
+    implements OnDetailInfoInteractionListener, OnAttachmentListInteractionListener {
 
   @BindView(R.id.relativelayout_detail_container)
   RelativeLayout relativelayout_detail_container;
@@ -200,5 +208,26 @@ public class DetailActivity extends AppCompatActivity
         intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
         intent.putExtra("THEME_ID", themeID);
         startActivity(intent);*/
+  }
+
+  @Override
+  public void onAttachmentInteraction(@NonNull Attachment attachment) {
+
+    // Open the file with the default mime type
+
+    Uri fileURI = FileProvider
+        .getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider",
+            attachment.file);
+    Intent newIntent = new Intent(Intent.ACTION_VIEW);
+    String mimeType = getApplicationContext().getContentResolver().getType(fileURI);
+    newIntent.setDataAndType(fileURI, mimeType);
+    newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    try {
+      startActivity(newIntent);
+    } catch (ActivityNotFoundException e) {
+      Toast.makeText(getApplicationContext(), "No handler for this type of file", Toast.LENGTH_LONG)
+          .show(); // TODO: Change to a snackbar
+    }
+
   }
 }

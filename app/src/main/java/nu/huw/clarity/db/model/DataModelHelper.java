@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import nu.huw.clarity.BuildConfig;
 import nu.huw.clarity.R;
 import nu.huw.clarity.db.DatabaseHelper;
+import nu.huw.clarity.model.Attachment;
 import nu.huw.clarity.model.Comparators;
 import nu.huw.clarity.model.Comparators.HeaderTypeComparator;
 import nu.huw.clarity.model.Context;
@@ -39,6 +40,7 @@ public class DataModelHelper {
   private static final Duration DURATION_1H = Duration.ofHours(1);
   private DatabaseHelper dbHelper;
   private android.content.Context androidContext;
+  private AttachmentHelper attachmentHelper;
   private ContextHelper contextHelper;
   private FolderHelper folderHelper;
   private PerspectiveHelper perspectiveHelper;
@@ -1047,6 +1049,17 @@ public class DataModelHelper {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Get all attachments from the current task
+   */
+  public List<Attachment> getAttachmentsFromTask(Task task) {
+
+    if (attachmentHelper == null) {
+      attachmentHelper = new AttachmentHelper(dbHelper);
+    }
+    return attachmentHelper.getAttachmentsFromParent(task);
   }
 
   /**

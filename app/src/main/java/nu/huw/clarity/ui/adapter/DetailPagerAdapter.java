@@ -7,6 +7,7 @@ import nu.huw.clarity.R;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
+import nu.huw.clarity.ui.fragment.DetailAttachmentFragment;
 import nu.huw.clarity.ui.fragment.DetailInfoFragment;
 import nu.huw.clarity.ui.fragment.DetailNoteFragment;
 
@@ -31,7 +32,7 @@ public class DetailPagerAdapter extends FragmentPagerAdapter {
   public Fragment getItem(int position) {
     switch (position) {
       case POSITION_ATTACHMENT:
-        //
+        return DetailAttachmentFragment.newInstance((Task) entry, perspective);
       case POSITION_NOTE:
         return DetailNoteFragment.newInstance((Task) entry, perspective);
       case POSITION_INFO:

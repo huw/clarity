@@ -2,6 +2,7 @@ package nu.huw.clarity.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.io.File;
 
 /**
  * Attachments.
@@ -22,7 +23,7 @@ public class Attachment extends Base {
       };
   public String name;
   public String parentID;
-  public String path;
+  public File file;
 
   public Attachment() {
   }
@@ -32,7 +33,7 @@ public class Attachment extends Base {
     super(in);
     name = in.readString();
     parentID = in.readString();
-    path = in.readString();
+    file = new File(in.readString());
   }
 
   @Override
@@ -41,6 +42,6 @@ public class Attachment extends Base {
     super.writeToParcel(out, flags);
     out.writeString(name);
     out.writeString(parentID);
-    out.writeString(path);
+    out.writeString(file.getPath());
   }
 }

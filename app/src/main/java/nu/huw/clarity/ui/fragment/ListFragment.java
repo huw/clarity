@@ -143,6 +143,12 @@ public class ListFragment extends Fragment implements
 
     Context context = getContext();
 
+    if (perspective == null) {
+      if (args == null) args = getArguments();
+      perspective = args.getParcelable("PERSPECTIVE");
+      parentEntry = args.getParcelable("ENTRY");
+    }
+
     // Inflate view
 
     view = inflater.inflate(R.layout.fragment_list, container, false);
