@@ -66,6 +66,8 @@ public class TreeOperations {
     updateAttributesForContext(parentID);
     Log.v(TAG, "Updating attributes for projects/tasks");
     updateAttributesForSubtree(parentID);
+    Log.v(TAG, "Updating due soon / overdue tags");
+    updateDueSoonAndOverdue();
     Log.v(TAG, "Updating counts for everything");
     updateCountsFromTop();
 
@@ -282,12 +284,6 @@ public class TreeOperations {
       if (childDateDefer != null) {
         if (getDeferred(childDateDefer)) childDeferred = true;
         childValues.put(Tasks.COLUMN_DEFERRED, childDeferred);
-      }
-
-      // dueSoon and overdue are also handled by a separate function:
-
-      if (childDateCompleted == null && childDateDue != null) {
-        childValues.putAll(getDueValues(childDateDue));
       }
 
       // Now save the appropriate values from the parent/project/child into the database
@@ -721,30 +717,38 @@ public class TreeOperations {
   }
 
   /**
-   * Given a date from the column Tasks.DATE_DUE, return a set of ContentValues that can be used
-   * to update a database row for that due date.
-   *
-   * @param dueString ISO 8601 timestamp
-   * @return Values for the columns Tasks.OVERDUE or Tasks.DUE_SOON. May be empty.
+   * Based on the current time, will update the due soon and overdue flags for everything in the
+   * database.
    */
-  private ContentValues getDueValues(@NonNull String dueString) {
+  public void updateDueSoonAndOverdue() {
 
-    ContentValues values = new ContentValues();
+    // Get date strings for raw SQL comparison
+
     Instant now = Instant.now();
-    Instant due = Instant.parse(dueString);
+    String[] dueSoonString = new String[]{now.plus(DUE_SOON_DURATION).toString()};
+    String[] overdueString = new String[]{now.toString()};
 
-    // This used to be done with date objects, but what's the point?
-    // We're comparing accurate representations using integers. May as well use math.
-    // So this pretty simply decides if the task is overdue, then subtracts 7 days
-    // and updates dueSoon if the new 'due' is before now.
+    // Setup ContentValues for updating overdue and due soon
 
-    if (now.isAfter(due)) {
-      values.put(Tasks.COLUMN_OVERDUE, true);
-    } else {
-      due = due.minus(DUE_SOON_DURATION);
-      values.put(Tasks.COLUMN_DUE_SOON, now.isAfter(due));
-    }
+    ContentValues dueSoonValue = new ContentValues();
+    ContentValues overdueValue = new ContentValues();
+    dueSoonValue.put(Tasks.COLUMN_DUE_SOON, "1");
+    overdueValue.put(Tasks.COLUMN_OVERDUE, "1");
 
-    return values;
+    // Run queries
+    // The queries here are cheaper ways of achieving an ordinary comparison. Since ISO 8601 date
+    // strings are formatted left-to-right descending, they can be lexicographically compared by
+    // the SQLite engine.
+
+    SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+    db.update(Tasks.TABLE_NAME, overdueValue,
+        Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND " + Tasks.COLUMN_DATE_DUE_EFFECTIVE + " <= ?",
+        overdueString);
+    db.update(Tasks.TABLE_NAME, dueSoonValue,
+        Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND " + Tasks.COLUMN_OVERDUE + " = 0 AND "
+            + Tasks.COLUMN_DATE_DUE_EFFECTIVE + " <= ?", dueSoonString);
+
+    db.close();
   }
 }

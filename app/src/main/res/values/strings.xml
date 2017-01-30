@@ -114,5 +114,6 @@
   <string name="detail_tabnote">Note</string>
   <string name="detail_tabattachments">Attachments</string>
   <string name="detail_note_hint">Tap to add a note</string>
+  <string name="notification_duenow">Due now</string>
 
 </resources>

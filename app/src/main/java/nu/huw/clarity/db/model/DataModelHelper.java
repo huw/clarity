@@ -1113,4 +1113,12 @@ public class DataModelHelper {
 
     return taskHelper.getTaskFromID(id);
   }
+
+  /**
+   * Get a list of tasks that are currently overdue
+   */
+  public List<Task> getNewOverdueTasks() {
+    if (taskHelper == null) taskHelper = new TaskHelper(dbHelper);
+    return taskHelper.getNewOverdue();
+  }
 }

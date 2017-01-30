@@ -12,6 +12,7 @@ import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Header;
 import nu.huw.clarity.model.Task;
+import org.threeten.bp.Instant;
 
 class TaskHelper {
 
@@ -23,6 +24,7 @@ class TaskHelper {
   private static final String IS_PROJECT = Tasks.COLUMN_PROJECT + " =  1";
   private static final String IS_NOT_PROJECT = Tasks.COLUMN_PROJECT + " =  0";
   private static final String IN_INBOX = Tasks.COLUMN_INBOX + " = 1";
+  private static final String IS_NOT_OVERDUE = Tasks.COLUMN_OVERDUE + " = 0";
   private DatabaseHelper dbHelper;
 
   TaskHelper(DatabaseHelper dbHelper) {
@@ -95,6 +97,15 @@ class TaskHelper {
       return getTasksFromSelection(IS_NOT_PROJECT + " AND " + CONTEXT_ARG,
           new String[]{context.id});
     }
+  }
+
+  /**
+   * Gets a list of all tasks that are overdue but don't have the flag set yet
+   */
+  List<Task> getNewOverdue() {
+    String[] overdueString = new String[]{Instant.now().toString()};
+    return getTasksFromSelection(
+        IS_NOT_OVERDUE + " AND " + Tasks.COLUMN_DATE_DUE_EFFECTIVE + " <= ?", overdueString);
   }
 
   /**

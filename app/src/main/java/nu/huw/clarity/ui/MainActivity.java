@@ -14,6 +14,11 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.BigTextStyle;
+import android.support.v4.app.NotificationCompat.Builder;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
@@ -21,17 +26,22 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import java.util.List;
+import java.util.Random;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
+import nu.huw.clarity.db.TreeOperations;
 import nu.huw.clarity.db.model.DataModelHelper;
+import nu.huw.clarity.db.model.NoteHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
+import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.fragment.ListFragment;
 
 public class MainActivity extends AppCompatActivity
@@ -98,6 +108,61 @@ public class MainActivity extends AppCompatActivity
     getSupportFragmentManager().beginTransaction()
         .add(R.id.framelayout_main_container, currentFragment)
         .commit();
+
+    testNotifications();
+  }
+
+  private void testNotifications() {
+
+    Context androidContext = getApplicationContext();
+    TreeOperations treeOperations = new TreeOperations(androidContext);
+    DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+
+    // We have to get the list of newly overdued tasks first, then update all their overdue flags.
+    // In that order.
+
+    List<Task> tasks = dataModelHelper.getNewOverdueTasks();
+    treeOperations.updateDueSoonAndOverdue();
+    treeOperations.updateCountsFromTop();
+
+    NotificationManagerCompat notificationManager = NotificationManagerCompat
+        .from(getApplicationContext());
+    Random random = new Random();
+
+    Log.d(TAG, "" + tasks.size());
+
+    for (Task task : tasks) {
+
+      String notification_duenow = getApplicationContext()
+          .getString(R.string.notification_duenow);
+
+      // Initialise notification
+
+      NotificationCompat.Builder builder = new Builder(getApplicationContext())
+          .setSmallIcon(R.drawable.ic_notification)
+          .setContentTitle(task.name)
+          .setContentText(notification_duenow)
+          .setColor(ContextCompat.getColor(getApplicationContext(), R.color.primary))
+          .setCategory(NotificationCompat.CATEGORY_REMINDER)
+          .setVisibility(NotificationCompat.VISIBILITY_PRIVATE);
+
+      // Set an expandable style with the task's note text if necessary
+      // Note that the original 'due now' text remains
+
+      if (task.noteXML != null) {
+
+        String noteText = NoteHelper.noteXMLtoString(task.noteXML);
+        String expandedText = notification_duenow + " • " + noteText;
+
+        if (!noteText.isEmpty()) {
+          builder.setStyle(new BigTextStyle().bigText(expandedText));
+        }
+
+      }
+
+      notificationManager.notify(random.nextInt(), builder.build());
+    }
+
   }
 
   private void setupToolbar() {
