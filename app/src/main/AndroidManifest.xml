@@ -26,6 +26,13 @@
       </intent-filter>
     </activity>
     <activity android:name=".ui.LoginActivity"/>
+    <activity
+      android:name=".ui.DetailActivity"
+      android:parentActivityName=".ui.MainActivity">
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".ui.MainActivity"/>
+    </activity>
 
     <service
       android:exported="false"
@@ -65,8 +72,6 @@
         android:name="android.support.FILE_PROVIDER_PATHS"
         android:resource="@xml/provider_paths"/>
     </provider>
-
-    <activity android:name=".ui.DetailActivity"/>
   </application>
 
 </manifest>

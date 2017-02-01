@@ -105,7 +105,7 @@ class TaskHelper {
   List<Task> getNewOverdue() {
     String[] overdueString = new String[]{Instant.now().toString()};
     return getTasksFromSelection(
-        IS_NOT_OVERDUE + " AND " + Tasks.COLUMN_DATE_DUE_EFFECTIVE + " <= ?", overdueString);
+        IS_NOT_OVERDUE + " AND " + Tasks.COLUMN_DATE_DUE_EFFECTIVE + " > ?", overdueString);
   }
 
   /**

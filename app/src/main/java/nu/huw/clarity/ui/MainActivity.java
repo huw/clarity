@@ -3,6 +3,7 @@ package nu.huw.clarity.ui;
 import android.accounts.Account;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -18,6 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.BigTextStyle;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
@@ -26,14 +28,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import java.util.List;
-import java.util.Random;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.TreeOperations;
@@ -84,8 +84,7 @@ public class MainActivity extends AppCompatActivity
     perspectiveList = dmHelper.getPerspectives(false);
 
     // Register sync receiver
-    syncIntentFilter =
-        new IntentFilter(getApplicationContext().getString(R.string.sync_broadcastintent));
+    syncIntentFilter = new IntentFilter(getString(R.string.sync_broadcastintent));
 
     // Toolbar & Nav Drawer Setup
     setupToolbar();
@@ -109,6 +108,12 @@ public class MainActivity extends AppCompatActivity
         .add(R.id.framelayout_main_container, currentFragment)
         .commit();
 
+
+  }
+
+  @Override
+  protected void onPostResume() {
+    super.onPostResume();
     testNotifications();
   }
 
@@ -117,6 +122,9 @@ public class MainActivity extends AppCompatActivity
     Context androidContext = getApplicationContext();
     TreeOperations treeOperations = new TreeOperations(androidContext);
     DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
+    NotificationManagerCompat notificationManager = NotificationManagerCompat
+        .from(getApplicationContext());
+    int ID = 0;
 
     // We have to get the list of newly overdued tasks first, then update all their overdue flags.
     // In that order.
@@ -125,16 +133,43 @@ public class MainActivity extends AppCompatActivity
     treeOperations.updateDueSoonAndOverdue();
     treeOperations.updateCountsFromTop();
 
-    NotificationManagerCompat notificationManager = NotificationManagerCompat
-        .from(getApplicationContext());
-    Random random = new Random();
+    // Display a summary notification
 
-    Log.d(TAG, "" + tasks.size());
+    if (tasks.size() >= 4) { // default number for grouping
+
+      String notification_duesummarytitle = getString(R.string.notification_duesummarytitle);
+      String notification_duesummarytext = getString(R.string.notification_duesummarytext,
+          tasks.size());
+
+      // Result intent: Home screen
+
+      Intent intent = new Intent(this, MainActivity.class);
+      PendingIntent pendingIntent = PendingIntent
+          .getActivity(this, ID, intent, Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+      // Build notification
+
+      NotificationCompat.Builder builder = new Builder(getApplicationContext())
+          .setSmallIcon(R.drawable.ic_notification)
+          .setContentTitle(notification_duesummarytitle)
+          .setContentText(notification_duesummarytext)
+          .setContentIntent(pendingIntent)
+          .setColor(ContextCompat.getColor(getApplicationContext(), R.color.primary))
+          .setCategory(NotificationCompat.CATEGORY_REMINDER)
+          .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+          .setAutoCancel(true)
+          .setGroupSummary(true)
+          .setGroup("group_key_overdue");
+
+      notificationManager.notify(ID, builder.build());
+      ID++;
+    }
+
+    // Display a notification for each returned task
 
     for (Task task : tasks) {
 
-      String notification_duenow = getApplicationContext()
-          .getString(R.string.notification_duenow);
+      String notification_duenow = getString(R.string.notification_duenow);
 
       // Initialise notification
 
@@ -144,7 +179,9 @@ public class MainActivity extends AppCompatActivity
           .setContentText(notification_duenow)
           .setColor(ContextCompat.getColor(getApplicationContext(), R.color.primary))
           .setCategory(NotificationCompat.CATEGORY_REMINDER)
-          .setVisibility(NotificationCompat.VISIBILITY_PRIVATE);
+          .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+          .setAutoCancel(true)
+          .setGroup("group_key_overdue");
 
       // Set an expandable style with the task's note text if necessary
       // Note that the original 'due now' text remains
@@ -157,10 +194,24 @@ public class MainActivity extends AppCompatActivity
         if (!noteText.isEmpty()) {
           builder.setStyle(new BigTextStyle().bigText(expandedText));
         }
-
       }
 
-      notificationManager.notify(random.nextInt(), builder.build());
+      // Set notification actions/intents
+
+      Intent intent = new Intent(this, DetailActivity.class);
+      intent.putExtra("ENTRY", task);
+      intent.putExtra("PERSPECTIVE", perspective);
+
+      TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+      stackBuilder.addNextIntentWithParentStack(intent);
+      PendingIntent pendingIntent = stackBuilder
+          .getPendingIntent(ID, PendingIntent.FLAG_UPDATE_CURRENT);
+      builder.setContentIntent(pendingIntent);
+
+      // Give the notification a unique ID
+
+      notificationManager.notify(ID, builder.build());
+      ID++;
     }
 
   }

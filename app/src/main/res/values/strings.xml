@@ -114,6 +114,10 @@
   <string name="detail_tabnote">Note</string>
   <string name="detail_tabattachments">Attachments</string>
   <string name="detail_note_hint">Tap to add a note</string>
+
+  <!-- Notifications -->
   <string name="notification_duenow">Due now</string>
+  <string name="notification_duesummarytext">%d items due</string>
+  <string name="notification_duesummarytitle">Clarity for OmniFocus</string>
 
 </resources>
