@@ -735,12 +735,20 @@ public class TreeOperations {
     dueSoonValue.put(Tasks.COLUMN_DUE_SOON, "1");
     overdueValue.put(Tasks.COLUMN_OVERDUE, "1");
 
+    ContentValues dueSoonClear = new ContentValues();
+    ContentValues overdueClear = new ContentValues();
+    dueSoonClear.put(Tasks.COLUMN_DUE_SOON, "0");
+    overdueClear.put(Tasks.COLUMN_OVERDUE, "0");
+
     // Run queries
     // The queries here are cheaper ways of achieving an ordinary comparison. Since ISO 8601 date
     // strings are formatted left-to-right descending, they can be lexicographically compared by
     // the SQLite engine.
 
     SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+    db.update(Tasks.TABLE_NAME, overdueClear, null, null);
+    db.update(Tasks.TABLE_NAME, dueSoonClear, null, null);
 
     db.update(Tasks.TABLE_NAME, overdueValue,
         Tasks.COLUMN_DATE_COMPLETED + " IS NULL AND " + Tasks.COLUMN_DATE_DUE_EFFECTIVE + " <= ?",

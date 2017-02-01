@@ -3,12 +3,15 @@ package nu.huw.clarity.ui;
 import android.accounts.Account;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -20,7 +23,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +34,7 @@ import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.db.model.DataModelHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
+import nu.huw.clarity.notification.NotificationService;
 import nu.huw.clarity.ui.fragment.ListFragment;
 
 public class MainActivity extends AppCompatActivity implements
@@ -180,20 +183,30 @@ public class MainActivity extends AppCompatActivity implements
   @Override
   public void onPause() {
 
-    // Register the sync receiver
+    // Deegister the sync receiver
 
     super.onPause();
-    LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(syncReceiver);
+    LocalBroadcastManager.getInstance(this).unregisterReceiver(syncReceiver);
   }
 
   @Override
   public void onResume() {
 
-    // Deregister the sync receiver
+    // Register the sync receiver
 
     super.onResume();
-    LocalBroadcastManager.getInstance(getApplicationContext())
-        .registerReceiver(syncReceiver, syncIntentFilter);
+    LocalBroadcastManager.getInstance(this).registerReceiver(syncReceiver, syncIntentFilter);
+
+    // Register the notification service
+    // Look for new notifications every 5 minutes
+
+    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+    Intent intent = new Intent(this, NotificationService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+
+    alarmManager.cancel(pendingIntent);
+    alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        SystemClock.elapsedRealtime() + 5 * 1000, 5 * 60 * 1000, pendingIntent);
   }
 
   @Override
@@ -305,7 +318,6 @@ public class MainActivity extends AppCompatActivity implements
     // Go through the list of candidate perspectives and try to find one matching the Menu ID
 
     for (Perspective candidate : perspectiveList) {
-      Log.d(TAG, candidate.menuID + " " + menuID);
       if (candidate.menuID == menuID) {
         newPerspective = candidate;
       }

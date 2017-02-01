@@ -229,6 +229,7 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
           ZipEntry contentsXml = zipFile.getEntry("contents.xml");
           InputStream input = zipFile.getInputStream(contentsXml);
           new SyncDownParser(getContext()).parse(input);
+          zipFile.close();
 
         } catch (IOException e) {
           Log.e(TAG, "Error reading downloaded zip file", e);
@@ -301,6 +302,8 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
       }
     } catch (Exception e) {
       Log.e(TAG, "Unexpected " + e.getClass().getName() + ": " + e.getMessage(), e);
+    } finally {
+      client.getHttpConnectionManager().closeIdleConnections(0);
     }
 
     return null;
@@ -313,9 +316,10 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
    */
   private List<File> getFilesToDownload() {
 
+    HttpClient client = getHttpClient();
+
     try {
       List<File> filesToDownload = new ArrayList<>();
-      HttpClient client = getHttpClient();
 
       // Just to be clear, a DavMethod is an extension of an HttpMethod, and is used
       // to send requests to servers. Like you'd execute a GetMethod to get a file
@@ -374,6 +378,8 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
       }
     } catch (IOException | DavException e) {
       Log.e(TAG, "Problem creating/sending request", e);
+    } finally {
+      client.getHttpConnectionManager().closeIdleConnections(0);
     }
 
     return null;

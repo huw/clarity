@@ -151,6 +151,7 @@ class DocumentKey {
       RandomAccessFile file = new RandomAccessFile(wrapKeyFile, "r");
       secret = new byte[(int) file.length()];
       file.readFully(secret);
+      file.close();
     }
 
     SecretKeySpec derivedKey = new SecretKeySpec(secret, "AES");

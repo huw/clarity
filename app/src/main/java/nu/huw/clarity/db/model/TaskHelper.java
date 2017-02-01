@@ -25,6 +25,7 @@ class TaskHelper {
   private static final String IS_NOT_PROJECT = Tasks.COLUMN_PROJECT + " =  0";
   private static final String IN_INBOX = Tasks.COLUMN_INBOX + " = 1";
   private static final String IS_NOT_OVERDUE = Tasks.COLUMN_OVERDUE + " = 0";
+  private static final String IS_NOT_COMPLETE = Tasks.COLUMN_DATE_COMPLETED + " IS NULL";
   private DatabaseHelper dbHelper;
 
   TaskHelper(DatabaseHelper dbHelper) {
@@ -105,7 +106,8 @@ class TaskHelper {
   List<Task> getNewOverdue() {
     String[] overdueString = new String[]{Instant.now().toString()};
     return getTasksFromSelection(
-        IS_NOT_OVERDUE + " AND " + Tasks.COLUMN_DATE_DUE_EFFECTIVE + " > ?", overdueString);
+        IS_NOT_COMPLETE + " AND " + IS_NOT_OVERDUE + " AND " + Tasks.COLUMN_DATE_DUE_EFFECTIVE
+            + " <= ?", overdueString);
   }
 
   /**

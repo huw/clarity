@@ -80,6 +80,8 @@ class DownloadFileTask extends AsyncTask<Object, Void, File> {
       }
     } catch (IOException e) {
       Log.e(TAG, "Error reading/writing file", e);
+    } finally {
+      client.getHttpConnectionManager().closeIdleConnections(0);
     }
 
     return null;
