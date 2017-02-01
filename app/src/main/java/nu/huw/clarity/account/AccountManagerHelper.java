@@ -3,6 +3,7 @@ package nu.huw.clarity.account;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import nu.huw.clarity.R;
 
 /**
@@ -22,15 +23,21 @@ public class AccountManagerHelper {
     this.accountManager = AccountManager.get(context);
   }
 
-  public boolean doesAccountExist() {
+  public boolean accountExists() {
 
     return accountManager.getAccountsByType(context.getString(R.string.account_type)).length !=
         0;
   }
 
+  @Nullable
   public Account getAccount() {
 
-    return accountManager.getAccountsByType(context.getString(R.string.account_type))[0];
+    Account[] accounts = accountManager.getAccountsByType(context.getString(R.string.account_type));
+    if (accounts.length > 0) {
+      return accounts[0];
+    } else {
+      return null;
+    }
   }
 
   public String getUsername() {

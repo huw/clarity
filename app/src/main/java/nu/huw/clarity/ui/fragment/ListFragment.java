@@ -159,7 +159,7 @@ public class ListFragment extends Fragment implements
     int spinnerColor = ContextCompat.getColor(getContext(), perspective.color);
 
     AccountManagerHelper AMHelper = new AccountManagerHelper(getContext());
-    if (AMHelper.doesAccountExist()) {
+    if (AMHelper.accountExists()) {
 
       // Get view & account
 

@@ -2,6 +2,7 @@ package nu.huw.clarity.db.model;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import java.util.HashMap;
 import java.util.Random;
 import nu.huw.clarity.R;
@@ -50,6 +51,7 @@ class PerspectiveHelper {
   /**
    * Gets a Forecast perspective object
    */
+  @NonNull
   Perspective getForecast() {
 
     Perspective perspective = new Perspective();

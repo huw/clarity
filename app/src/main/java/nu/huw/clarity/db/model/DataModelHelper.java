@@ -1,5 +1,6 @@
 package nu.huw.clarity.db.model;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import java.util.ArrayList;
@@ -1019,6 +1020,7 @@ public class DataModelHelper {
    * Get the special Forecast perspective
    */
 
+  @NonNull
   public Perspective getForecastPerspective() {
 
     if (perspectiveHelper == null) {

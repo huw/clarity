@@ -159,4 +159,8 @@ public class Entry extends Base implements Comparable<Entry> {
     }
     return null;
   }
+
+  public boolean hasChildren() {
+    return countChildren > 0;
+  }
 }

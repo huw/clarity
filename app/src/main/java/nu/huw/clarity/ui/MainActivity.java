@@ -3,7 +3,6 @@ package nu.huw.clarity.ui;
 import android.accounts.Account;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -14,20 +13,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.BigTextStyle;
-import android.support.v4.app.NotificationCompat.Builder;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,19 +29,16 @@ import butterknife.ButterKnife;
 import java.util.List;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
-import nu.huw.clarity.db.TreeOperations;
 import nu.huw.clarity.db.model.DataModelHelper;
-import nu.huw.clarity.db.model.NoteHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
-import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.fragment.ListFragment;
 
-public class MainActivity extends AppCompatActivity
-    implements ListFragment.OnListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements
+    ListFragment.OnListFragmentInteractionListener {
 
-  private static final int LOG_IN_FIRST_REQUEST = 1;
   private static final String TAG = MainActivity.class.getSimpleName();
+  private static final int LOG_IN_FIRST_REQUEST = 1; // Used to launch LoginActivity
 
   @BindView(R.id.toolbar_main)
   Toolbar toolbar_main;
@@ -57,258 +47,175 @@ public class MainActivity extends AppCompatActivity
   @BindView(R.id.navigationview_main_drawer)
   NavigationView navigationview_main_drawer;
 
-  private Fragment newFragment;
-  private Fragment currentFragment;
-  private boolean isChangingFragment;
   private Perspective perspective;
-  private List<Perspective> perspectiveList;
   private IntentFilter syncIntentFilter;
+  private ListFragment fragment;
+  private boolean isChangingFragment;
+  private List<Perspective> perspectiveList;
   private BroadcastReceiver syncReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-      refreshMenu();
+      refreshNavigationDrawerMenu();
     }
   };
 
+  /**
+   * Essentially a constructor. Called every time a new instance of the activity is created—just
+   * that sometimes new instances are created when doing non-creation things like rotating the
+   * screen. Get it?
+   */
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-    ButterKnife.bind(this);
-
-    // Get some perspective
-    DataModelHelper dmHelper = new DataModelHelper(getApplicationContext());
-    perspective = dmHelper.getPlaceholderPerspective();
-    perspectiveList = dmHelper.getPerspectives(false);
 
     // Register sync receiver
+
     syncIntentFilter = new IntentFilter(getString(R.string.sync_broadcastintent));
 
-    // Toolbar & Nav Drawer Setup
-    setupToolbar();
-    setupNavDrawer();
+    // Determine whether to prompt a login
+    // If there are no syncing accounts, then a login should be prompted
+    // If there is a syncing account, then we should register the sync service
 
-    if (savedInstanceState != null) {
+    AccountManagerHelper accountManagerHelper = new AccountManagerHelper(this);
+    if (!accountManagerHelper.accountExists()) {
+      Intent intent = new Intent(this, LoginActivity.class);
+      startActivityForResult(intent, LOG_IN_FIRST_REQUEST);
       return;
     }
 
-    if (!new AccountManagerHelper(getApplicationContext()).doesAccountExist()) {
-      // If there are no syncing accounts, sign in
-      startActivityForResult(new Intent(this, LoginActivity.class), LOG_IN_FIRST_REQUEST);
-    } else {
-      registerSyncs();
+    registerSyncService();
+
+    // Initialise view
+
+    setContentView(R.layout.activity_main);
+    ButterKnife.bind(this);
+
+    // Setup toolbar
+
+    setSupportActionBar(toolbar_main);
+    final ActionBar actionBar = getSupportActionBar();
+    if (actionBar != null) {
+
+      // Set navigation menu burger menu button hamburger
+
+      actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white);
+      actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-    // Add list fragment
+    // Setup navigation drawer (pt. 1)
 
-    currentFragment = ListFragment.newInstance(perspective, null);
-    getSupportFragmentManager().beginTransaction()
-        .add(R.id.framelayout_main_container, currentFragment)
-        .commit();
+    navigationview_main_drawer.setItemIconTintList(null);
+    Perspective checkedDrawerItem = refreshNavigationDrawerMenu();
 
+    // Add the list fragment based on the passed intent (if at all)
+
+    Intent intent = getIntent();
+    if (intent.hasExtra("PERSPECTIVE")) {
+      // If the intent has a perspective, then set that
+      perspective = intent.getParcelableExtra("PERSPECTIVE");
+    } else if (savedInstanceState != null && savedInstanceState.containsKey("PERSPECTIVE")) {
+      // If the saved instance state has a perspective, set that
+      perspective = savedInstanceState.getParcelable("PERSPECTIVE");
+    } else {
+      // Change the perspective to the first menu item
+      perspective = checkedDrawerItem;
+    }
+
+    if (intent.hasExtra("ENTRY") && (perspective.id.equals("ProcessProjects") || perspective.id
+        .equals("ProcessContexts"))) {
+      Entry entry = intent.getParcelableExtra("ENTRY");
+      ListFragment fragment;
+
+      // If the entry has children, then we should display a view where we can appropriately show
+      // them (with the entry as a header).
+      // If the entry doesn't have children, then display its parent entry.
+      // But if the parent doesn't exist, then display the root view for that perspective.
+
+      if (entry.hasChildren()) {
+        fragment = ListFragment.newInstance(perspective, entry);
+      } else {
+        Entry parent = entry.getParent(this);
+        if (parent != null) {
+          fragment = ListFragment.newInstance(perspective, parent);
+        } else {
+          fragment = ListFragment.newInstance(perspective, null);
+        }
+      }
+
+      getSupportFragmentManager()
+          .beginTransaction()
+          .replace(R.id.framelayout_main_container, fragment)
+          .commit();
+
+    } else {
+      fragment = ListFragment.newInstance(perspective, null);
+      getSupportFragmentManager()
+          .beginTransaction()
+          .replace(R.id.framelayout_main_container, fragment)
+          .commit();
+    }
+
+    // Setup navigation drawer (pt. 2)
+    // This also involves setting the current checked item in the drawer, the toolbar title, and the
+    // toolbar colour depending on which item is selected.
+
+    navigationview_main_drawer.setCheckedItem(perspective.menuID);
+    setTitle(perspective.name);
+    changeColors(null, perspective);
+
+    navigationview_main_drawer
+        .setNavigationItemSelectedListener(new MainActivity.NavigationViewListener());
+    drawerlayout_main.addDrawerListener(new MainActivity.DrawerListener());
 
   }
 
   @Override
-  protected void onPostResume() {
-    super.onPostResume();
-    testNotifications();
+  protected void onSaveInstanceState(Bundle out) {
+    out.putParcelable("PERSPECTIVE", perspective);
+    super.onSaveInstanceState(out);
   }
 
-  private void testNotifications() {
+  @Override
+  public void onPause() {
 
-    Context androidContext = getApplicationContext();
-    TreeOperations treeOperations = new TreeOperations(androidContext);
-    DataModelHelper dataModelHelper = new DataModelHelper(androidContext);
-    NotificationManagerCompat notificationManager = NotificationManagerCompat
-        .from(getApplicationContext());
-    int ID = 0;
+    // Register the sync receiver
 
-    // We have to get the list of newly overdued tasks first, then update all their overdue flags.
-    // In that order.
-
-    List<Task> tasks = dataModelHelper.getNewOverdueTasks();
-    treeOperations.updateDueSoonAndOverdue();
-    treeOperations.updateCountsFromTop();
-
-    // Display a summary notification
-
-    if (tasks.size() >= 4) { // default number for grouping
-
-      String notification_duesummarytitle = getString(R.string.notification_duesummarytitle);
-      String notification_duesummarytext = getString(R.string.notification_duesummarytext,
-          tasks.size());
-
-      // Result intent: Home screen
-
-      Intent intent = new Intent(this, MainActivity.class);
-      PendingIntent pendingIntent = PendingIntent
-          .getActivity(this, ID, intent, Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-      // Build notification
-
-      NotificationCompat.Builder builder = new Builder(getApplicationContext())
-          .setSmallIcon(R.drawable.ic_notification)
-          .setContentTitle(notification_duesummarytitle)
-          .setContentText(notification_duesummarytext)
-          .setContentIntent(pendingIntent)
-          .setColor(ContextCompat.getColor(getApplicationContext(), R.color.primary))
-          .setCategory(NotificationCompat.CATEGORY_REMINDER)
-          .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-          .setAutoCancel(true)
-          .setGroupSummary(true)
-          .setGroup("group_key_overdue");
-
-      notificationManager.notify(ID, builder.build());
-      ID++;
-    }
-
-    // Display a notification for each returned task
-
-    for (Task task : tasks) {
-
-      String notification_duenow = getString(R.string.notification_duenow);
-
-      // Initialise notification
-
-      NotificationCompat.Builder builder = new Builder(getApplicationContext())
-          .setSmallIcon(R.drawable.ic_notification)
-          .setContentTitle(task.name)
-          .setContentText(notification_duenow)
-          .setColor(ContextCompat.getColor(getApplicationContext(), R.color.primary))
-          .setCategory(NotificationCompat.CATEGORY_REMINDER)
-          .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-          .setAutoCancel(true)
-          .setGroup("group_key_overdue");
-
-      // Set an expandable style with the task's note text if necessary
-      // Note that the original 'due now' text remains
-
-      if (task.noteXML != null) {
-
-        String noteText = NoteHelper.noteXMLtoString(task.noteXML);
-        String expandedText = notification_duenow + " • " + noteText;
-
-        if (!noteText.isEmpty()) {
-          builder.setStyle(new BigTextStyle().bigText(expandedText));
-        }
-      }
-
-      // Set notification actions/intents
-
-      Intent intent = new Intent(this, DetailActivity.class);
-      intent.putExtra("ENTRY", task);
-      intent.putExtra("PERSPECTIVE", perspective);
-
-      TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-      stackBuilder.addNextIntentWithParentStack(intent);
-      PendingIntent pendingIntent = stackBuilder
-          .getPendingIntent(ID, PendingIntent.FLAG_UPDATE_CURRENT);
-      builder.setContentIntent(pendingIntent);
-
-      // Give the notification a unique ID
-
-      notificationManager.notify(ID, builder.build());
-      ID++;
-    }
-
+    super.onPause();
+    LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(syncReceiver);
   }
 
-  private void setupToolbar() {
+  @Override
+  public void onResume() {
 
-    setSupportActionBar(toolbar_main);
-    final ActionBar actionBar = getSupportActionBar();
+    // Deregister the sync receiver
 
-    if (actionBar != null) {
-      actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white);
-      actionBar.setDisplayHomeAsUpEnabled(true);
-    }
+    super.onResume();
+    LocalBroadcastManager.getInstance(getApplicationContext())
+        .registerReceiver(syncReceiver, syncIntentFilter);
   }
 
-  private void setupNavDrawer() {
-
-    // Keep all icons as their original colours
-    navigationview_main_drawer.setItemIconTintList(null);
-
-    refreshMenu();
-
-    // Colour and set the checked item
-    Perspective oldPerspective = perspective;
-    MenuItem firstItem = navigationview_main_drawer.getMenu().getItem(0);
-    updatePerspective(firstItem.getItemId());
-
-    navigationview_main_drawer.setCheckedItem(firstItem.getItemId());
-    setTitle(firstItem.getTitle());
-    changeColors(oldPerspective);
-
-    navigationview_main_drawer.setNavigationItemSelectedListener(new NavigationViewListener());
-    drawerlayout_main.addDrawerListener(new DrawerListener());
-  }
-
-  private void updatePerspective(int menuID) {
-
-    Perspective newPerspective = null;
-    for (Perspective candidate : perspectiveList) {
-      if (candidate.menuID == menuID) {
-        newPerspective = candidate;
-      }
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == LOG_IN_FIRST_REQUEST && resultCode == LoginActivity.RESULT_OK) {
+      registerSyncService();
+      if (fragment != null) fragment.checkForSyncs();
     }
-
-    if (newPerspective == null) {
-      newPerspective = new DataModelHelper(getApplicationContext()).getForecastPerspective();
-    }
-    perspective = newPerspective;
-  }
-
-  private void refreshMenu() {
-
-    // Build menu
-    // We have a default menu for before the sync finishes, but as soon as that's done we
-    // build the menu appropriately based on the user's own perspective choices.
-
-    perspectiveList = new DataModelHelper(getApplicationContext()).getPerspectives(false);
-
-    Menu menu = navigationview_main_drawer.getMenu();
-    menu.clear();
-
-    for (Perspective menuItem : perspectiveList) {
-      menu.add(R.id.menugroup_main_drawer, menuItem.menuID, Menu.NONE, menuItem.name);
-      menu.findItem(menuItem.menuID).setIcon(menuItem.icon).setCheckable(true);
-    }
-
-    // Re-select the current perspective in the menu
-    navigationview_main_drawer.setCheckedItem(perspective.menuID);
   }
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-
     getMenuInflater().inflate(R.menu.toolbar, menu);
     return true;
   }
 
   @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-    if (requestCode == LOG_IN_FIRST_REQUEST) {
-
-      if (resultCode == LoginActivity.RESULT_OK) {
-
-        // OK to start syncing
-
-        registerSyncs();    // Also requests a new sync
-
-        if (currentFragment instanceof ListFragment) {
-          ((ListFragment) currentFragment).checkForSyncs();
-        }
-      }
-    }
-  }
-
-  @Override
   public boolean onOptionsItemSelected(MenuItem item) {
+
+    // Called when we click an item in the toolbar
+    // If the item is the home menu burger menu hamburger
+    // Then open the navigation drawer
 
     switch (item.getItemId()) {
       case android.R.id.home:
@@ -322,6 +229,9 @@ public class MainActivity extends AppCompatActivity
   @Override
   public void onBackPressed() {
 
+    // Close the navigation drawer if it's open
+    // Otherwise default behaviour
+
     if (drawerlayout_main.isDrawerOpen(GravityCompat.START)) {
       drawerlayout_main.closeDrawer(GravityCompat.START);
     } else {
@@ -332,20 +242,26 @@ public class MainActivity extends AppCompatActivity
   @Override
   public void onItemListInteraction(@NonNull Entry entry, @Nullable Perspective perspective) {
 
-    newFragment = ListFragment.newInstance(perspective, entry);
+    // We've clicked a list item and want to show its children
+    // Create the new list fragment and add it to the back stack
 
-    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-    ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
-    ft.replace(R.id.framelayout_main_container, newFragment);
-    ft.addToBackStack(null);
-    ft.commit();
+    ListFragment newFragment = ListFragment.newInstance(perspective, entry);
 
-    currentFragment = newFragment;
+    getSupportFragmentManager()
+        .beginTransaction()
+        .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+        .replace(R.id.framelayout_main_container, newFragment)
+        .addToBackStack(null)
+        .commit();
 
+    fragment = newFragment;
   }
 
   @Override
   public void onItemDetailInteraction(@NonNull Entry entry, @Nullable Perspective perspective) {
+
+    // We've clicked a list item and want to show its details
+    // Create the detail activity and show it
 
     Intent intent = new Intent(this, DetailActivity.class);
     intent.putExtra("ENTRY", entry);
@@ -354,24 +270,113 @@ public class MainActivity extends AppCompatActivity
 
   }
 
-  private void changeColors(Perspective oldPerspective) {
+  /**
+   * Using the account manager, register a periodic sync using the normal service if that sync
+   * doesn't exist.
+   */
+  private void registerSyncService() {
+
+    AccountManagerHelper accountManagerHelper = new AccountManagerHelper(this);
+    Account account = accountManagerHelper.getAccount();
+
+    if (account != null) {
+      String authority = getString(R.string.sync_authority);
+
+      if (ContentResolver.getPeriodicSyncs(account, authority).isEmpty()) {
+
+        long ONE_HOUR = 60L * 60L; // One hour
+        ContentResolver.setSyncAutomatically(account, authority, true);
+        ContentResolver.addPeriodicSync(account, authority, new Bundle(), ONE_HOUR);
+
+      }
+    }
+  }
+
+  /**
+   * Given a Menu ID from the navigation drawer, return the matching perspective from the list of
+   * available perspectives.
+   */
+  @NonNull
+  private Perspective getPerspectiveForMenuID(int menuID) {
+
+    DataModelHelper dataModelHelper = new DataModelHelper(this);
+    Perspective newPerspective = null;
+
+    // Go through the list of candidate perspectives and try to find one matching the Menu ID
+
+    for (Perspective candidate : perspectiveList) {
+      Log.d(TAG, candidate.menuID + " " + menuID);
+      if (candidate.menuID == menuID) {
+        newPerspective = candidate;
+      }
+    }
+
+    // Otherwise make the new perspective the Forecast
+
+    if (newPerspective == null) {
+      newPerspective = dataModelHelper.getForecastPerspective();
+    }
+
+    return newPerspective;
+  }
+
+  /**
+   * Refresh the navigation drawer menu by getting a new list of perspectives
+   */
+  @NonNull
+  private Perspective refreshNavigationDrawerMenu() {
+
+    // We have a default menu for before the sync finishes, but once it's done we should build a
+    // menu based on the user's existing perspective choices and order.
+
+    DataModelHelper dataModelHelper = new DataModelHelper(this);
+    perspectiveList = dataModelHelper.getPerspectives(false);
+    Menu menu = navigationview_main_drawer.getMenu();
+    menu.clear();
+
+    // For each perspective, add it to the menu by name
+    // Then set its icon and make it checkable programmatically
+
+    for (Perspective perspective : perspectiveList) {
+      menu.add(R.id.menugroup_main_drawer, perspective.menuID, Menu.NONE, perspective.name);
+      menu.findItem(perspective.menuID).setIcon(perspective.icon).setCheckable(true);
+    }
+
+    // Re-select the current perspective in the menu
+
+    if (perspective == null || perspective.menuID == 0) {
+      navigationview_main_drawer.setCheckedItem(perspectiveList.get(0).menuID);
+      return perspectiveList.get(0);
+    } else {
+      navigationview_main_drawer.setCheckedItem(perspective.menuID);
+      return perspective;
+    }
+  }
+
+  /**
+   * Given two perspectives, changes the toolbar and navigation drawer colours to suit.
+   */
+  private void changeColors(@Nullable Perspective fromPerspective,
+      @NonNull Perspective toPerspective) {
+
+    if (fromPerspective == null) fromPerspective = toPerspective;
+
+    setTheme(toPerspective.themeID);
 
     // Get the current header colour
-    int colorFrom = ResourcesCompat.getColor(getResources(), oldPerspective.color, null);
 
-    // Set the navigationview_main_drawer highlight color to the current perspective's
-    navigationview_main_drawer.setItemTextColor(ResourcesCompat.getColorStateList(getResources(),
-        perspective.colorStateListID, null));
+    int colorFrom = ContextCompat.getColor(this, fromPerspective.color);
+    int colorTo = ContextCompat.getColor(this, toPerspective.color);
 
-    // Now to figure out the colour we're transitioning to, we get the _new_ primary theme
-    // colour, which has been changed, and save it into a new value.
+    // Set the navigationview_main_drawer highlight colour to the new perspective's
 
-    setTheme(perspective.themeID);
-    int colorTo = ResourcesCompat.getColor(getResources(), perspective.color, null);
+    navigationview_main_drawer
+        .setItemTextColor(ContextCompat.getColorStateList(this, toPerspective.colorStateListID));
 
-    // Animation tweens the two colours together according to Material Design principles.
-    ValueAnimator toolbarAnimation =
-        ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+    // Animations tweens the two colours together according to Material's principles
+
+    ValueAnimator toolbarAnimation = ValueAnimator
+        .ofObject(new ArgbEvaluator(), colorFrom, colorTo);
     toolbarAnimation.setDuration(300);
 
     toolbarAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -395,91 +400,61 @@ public class MainActivity extends AppCompatActivity
     toolbarAnimation.start();
   }
 
-  private void registerSyncs() {
-
-    Account account = new AccountManagerHelper(getApplicationContext()).getAccount();
-    String authority = getString(R.string.sync_authority);
-
-    ContentResolver.setSyncAutomatically(account, authority, true);
-
-    if (ContentResolver.getPeriodicSyncs(account, authority).size() == 0) {
-
-      long seconds = 60L * 60L;   // One hour
-
-      ContentResolver.addPeriodicSync(account, authority, new Bundle(), seconds);
-    }
-  }
-
-  /**
-   * These functions help initialise the sync receiver
-   */
-  @Override
-  public void onResume() {
-
-    super.onResume();
-    LocalBroadcastManager.getInstance(getApplicationContext())
-        .registerReceiver(syncReceiver, syncIntentFilter);
-  }
-
-  @Override
-  public void onPause() {
-
-    super.onPause();
-    LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(syncReceiver);
-  }
-
-  /**
-   * The Navigation Item Selected listener determines what to do when we select a menu item,
-   * and returns a reference to that menu item so we can do stuff with it.
-   */
   class NavigationViewListener implements NavigationView.OnNavigationItemSelectedListener {
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem menuItem) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
 
-      // Get perspective for new item
-      Perspective oldPerspective = perspective;
-      updatePerspective(menuItem.getItemId());
+      // Get the perspective for the new item
 
-      changeColors(oldPerspective);
-      setTitle(menuItem.getTitle());
+      Perspective fromPerspective = perspective;
+      Perspective toPerspective = getPerspectiveForMenuID(menuItem.getItemId());
 
-      newFragment = ListFragment.newInstance(perspective, null);
+      changeColors(fromPerspective, toPerspective);
+      setTitle(toPerspective.name);
+
+      // Begin the fragment transition by removing the current fragment
+      // (in conjunction with DrawerListener)
+
       isChangingFragment = true;
-      currentFragment = new Fragment();
+      getSupportFragmentManager()
+          .beginTransaction()
+          .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+          .replace(R.id.framelayout_main_container, new Fragment())
+          .commit();
 
-      FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-      ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in,
-          R.anim.fade_out);
-      ft.replace(R.id.framelayout_main_container, currentFragment);
-      ft.commit();
+      // Finish up
 
       drawerlayout_main.closeDrawer(GravityCompat.START);
+      perspective = toPerspective;
       return true;
     }
   }
 
-  class DrawerListener implements android.support.v4.widget.DrawerLayout.DrawerListener {
+  class DrawerListener implements DrawerLayout.DrawerListener {
 
     @Override
-    public void onDrawerClosed(View view) {
+    public void onDrawerClosed(View drawerView) {
 
       if (isChangingFragment) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in,
-            R.anim.fade_out);
-        ft.replace(R.id.framelayout_main_container, newFragment);
-        ft.commit();
 
-        // Note: 'showProgess(false)' is called after the data has loaded in ListFragment
+        // End the fragment transition by adding the new fragment
+        // (in conjunction with NavigationViewListener)
 
-        currentFragment = newFragment;
+        ListFragment newFragment = ListFragment.newInstance(perspective, null);
+        getSupportFragmentManager()
+            .beginTransaction()
+            .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+            .replace(R.id.framelayout_main_container, newFragment)
+            .commit();
+
+        fragment = newFragment;
         isChangingFragment = false;
       }
     }
 
     @Override
-    public void onDrawerStateChanged(int newState) {
+    public void onDrawerOpened(View drawerView) {
     }
 
     @Override
@@ -487,7 +462,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDrawerOpened(View drawerView) {
+    public void onDrawerStateChanged(int newState) {
     }
   }
 }
