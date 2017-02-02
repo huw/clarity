@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.app.ActivityManager.TaskDescription;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -11,6 +12,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.ColorRes;
@@ -412,6 +417,17 @@ public class MainActivity extends AppCompatActivity implements
 
     navigationview_main_drawer.invalidate();
     toolbarAnimation.start();
+
+    // Change the colour of the title bar in the recents menu
+
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+
+      String title = getString(R.string.app_name_short);
+      Bitmap appIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+
+      TaskDescription taskDescription = new TaskDescription(title, appIcon, colorTo);
+      setTaskDescription(taskDescription);
+    }
   }
 
   class NavigationViewListener implements NavigationView.OnNavigationItemSelectedListener {
