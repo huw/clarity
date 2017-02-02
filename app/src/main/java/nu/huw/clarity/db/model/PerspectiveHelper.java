@@ -3,6 +3,7 @@ package nu.huw.clarity.db.model;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Random;
 import nu.huw.clarity.R;
@@ -22,6 +23,17 @@ class PerspectiveHelper {
     this.dbHelper = dbHelper;
     this.androidContext = context;
     this.random = new Random();
+  }
+
+  @Nullable
+  Perspective getPerspectiveFromID(String ID) {
+    HashMap<String, Perspective> perspectives = getPerspectivesFromSelection(
+        Perspectives.COLUMN_ID + " = ?", new String[]{ID});
+    if (perspectives.containsKey(ID)) {
+      return perspectives.get(ID);
+    } else {
+      return null;
+    }
   }
 
   /**

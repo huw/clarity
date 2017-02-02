@@ -23,6 +23,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.BuildConfig;
 import nu.huw.clarity.R;
+import nu.huw.clarity.db.model.DataModelHelper;
 import nu.huw.clarity.model.Attachment;
 import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
@@ -183,31 +184,25 @@ public class DetailActivity extends AppCompatActivity
   @Override
   public void onContextClick(Entry entry, Perspective perspective) {
 
-    Intent intent = new Intent(this, DetailActivity.class);
-    intent.putExtra("ENTRY", entry);
-    intent.putExtra("PERSPECTIVE", perspective);
-    startActivity(intent);
+    DataModelHelper dataModelHelper = new DataModelHelper(this);
 
-        /*Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("ENTRY_ID", id);
-        intent.putExtra("TABLE_NAME", DatabaseContract.Contexts.TABLE_NAME);
-        intent.putExtra("THEME_ID", themeID);
-        startActivity(intent);*/
+    Intent intent = new Intent(this, MainActivity.class);
+    intent.putExtra("ENTRY", entry);
+    intent.putExtra("PERSPECTIVE", dataModelHelper.getContextsPerspective());
+    intent.putExtra("BACK_BUTTON", true);
+    startActivity(intent);
   }
 
   @Override
   public void onProjectClick(Entry entry, Perspective perspective) {
 
-    Intent intent = new Intent(this, DetailActivity.class);
-    intent.putExtra("ENTRY", entry);
-    intent.putExtra("PERSPECTIVE", perspective);
-    startActivity(intent);
+    DataModelHelper dataModelHelper = new DataModelHelper(this);
 
-        /*Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("ENTRY_ID", id);
-        intent.putExtra("TABLE_NAME", DatabaseContract.Tasks.TABLE_NAME);
-        intent.putExtra("THEME_ID", themeID);
-        startActivity(intent);*/
+    Intent intent = new Intent(this, MainActivity.class);
+    intent.putExtra("ENTRY", entry);
+    intent.putExtra("PERSPECTIVE", dataModelHelper.getProjectsPerspective());
+    intent.putExtra("BACK_BUTTON", true);
+    startActivity(intent);
   }
 
   @Override

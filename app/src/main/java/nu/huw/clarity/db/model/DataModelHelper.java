@@ -1017,9 +1017,30 @@ public class DataModelHelper {
   }
 
   /**
+   * Gets the perspective with the ID "ProcessProjects" (or null if it doesn't exist)
+   */
+  @Nullable
+  public Perspective getProjectsPerspective() {
+    if (perspectiveHelper == null) {
+      perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
+    }
+    return perspectiveHelper.getPerspectiveFromID("ProcessProjects");
+  }
+
+  /**
+   * Gets the perspective with the ID "ProcessContexts" (or null if it doesn't exist)
+   */
+  @Nullable
+  public Perspective getContextsPerspective() {
+    if (perspectiveHelper == null) {
+      perspectiveHelper = new PerspectiveHelper(dbHelper, androidContext);
+    }
+    return perspectiveHelper.getPerspectiveFromID("ProcessContexts");
+  }
+
+  /**
    * Get the special Forecast perspective
    */
-
   @NonNull
   public Perspective getForecastPerspective() {
 

@@ -3,6 +3,7 @@ package nu.huw.clarity.ui;
 import android.accounts.Account;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -12,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -118,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements
     if (intent.hasExtra("PERSPECTIVE")) {
       // If the intent has a perspective, then set that
       perspective = intent.getParcelableExtra("PERSPECTIVE");
+      if (perspective == null) perspective = checkedDrawerItem;
     } else if (savedInstanceState != null && savedInstanceState.containsKey("PERSPECTIVE")) {
       // If the saved instance state has a perspective, set that
       perspective = savedInstanceState.getParcelable("PERSPECTIVE");
@@ -377,8 +380,8 @@ public class MainActivity extends AppCompatActivity implements
 
     // Get the current header colour
 
-    int colorFrom = ContextCompat.getColor(this, fromPerspective.color);
-    int colorTo = ContextCompat.getColor(this, toPerspective.color);
+    @ColorRes int colorFrom = ContextCompat.getColor(this, fromPerspective.color);
+    @ColorRes int colorTo = ContextCompat.getColor(this, toPerspective.color);
 
     // Set the navigationview_main_drawer highlight colour to the new perspective's
 
@@ -391,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements
         .ofObject(new ArgbEvaluator(), colorFrom, colorTo);
     toolbarAnimation.setDuration(300);
 
-    toolbarAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    toolbarAnimation.addUpdateListener(new AnimatorUpdateListener() {
       @Override
       public void onAnimationUpdate(ValueAnimator animator) {
 
@@ -408,7 +411,6 @@ public class MainActivity extends AppCompatActivity implements
     });
 
     navigationview_main_drawer.invalidate();
-
     toolbarAnimation.start();
   }
 
