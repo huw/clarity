@@ -3,6 +3,8 @@ package nu.huw.clarity.notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -79,6 +81,8 @@ public class NotificationService extends Service {
   private class NotificationTask extends AsyncTask<Void, Void, List<Task>> {
 
     DataModelHelper dataModelHelper = new DataModelHelper(getApplicationContext());
+    Bitmap background_wearable = BitmapFactory
+        .decodeResource(getResources(), R.drawable.background_wearable);
 
     /**
      * Update the database in a background thread. Return a list of tasks which are now overdue.
@@ -109,6 +113,11 @@ public class NotificationService extends Service {
           .from(getApplicationContext());
       int ID = 0;
 
+      // Build a wearable extender to add extra functionality for wearables
+
+      NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender()
+          .setBackground(background_wearable);
+
       // Display a summary notification
 
       if (tasks.size() >= 4) { // default number for grouping
@@ -135,7 +144,8 @@ public class NotificationService extends Service {
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true)
             .setGroupSummary(true)
-            .setGroup(GROUP_KEY_OVERDUE);
+            .setGroup(GROUP_KEY_OVERDUE)
+            .extend(wearableExtender);
 
         notificationManager.notify(ID, builder.build());
         ID++;
@@ -157,7 +167,8 @@ public class NotificationService extends Service {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true)
-            .setGroup(GROUP_KEY_OVERDUE);
+            .setGroup(GROUP_KEY_OVERDUE)
+            .extend(wearableExtender);
 
         // Set an expandable style with the task's note text if necessary
         // Note that the original 'due now' text remains
