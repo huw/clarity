@@ -13,4 +13,5 @@
   <dimen name="check_circle_size">40dp</dimen>
   <dimen name="listitem_padding_arrow">2dp</dimen>
   <dimen name="listitem_padding_folder">8dp</dimen>
+  <dimen name="textinputlayout_margin">4dp</dimen>
 </resources>

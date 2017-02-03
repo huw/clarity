@@ -12,6 +12,7 @@
   <string name="login_action">Sign in to the Omni Sync Server to begin.</string>
   <string name="login_username">Username</string>
   <string name="login_password">Password</string>
+  <string name="login_passphrase">Encryption Passphrase</string>
 
   <string name="login_signin">Sign in</string>
   <string name="login_error_invalidpassword">Use at least 6 characters</string>
@@ -119,5 +120,8 @@
   <string name="notification_duenow">Due now</string>
   <string name="notification_duesummarytext">%d items due</string>
   <string name="notification_duesummarytitle">Clarity for OmniFocus</string>
+  <string name="login_omnisync">Use the Omni Sync Server</string>
+  <string name="login_privateserver">Use my own server</string>
+  <string name="login_encryptionsame">Use this passphrase for encryption</string>
 
 </resources>

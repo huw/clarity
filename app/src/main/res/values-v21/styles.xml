@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorAccent">@color/primary</item>
-        <item name="android:colorEdgeEffect">@android:color/tertiary_text_light</item>
-        <item name="android:buttonStyle">@style/ColouredButton</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
-    </style>
+  <!-- Do not include ButtonStyle here -->
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:colorPrimary">@color/primary</item>
+    <item name="android:colorPrimaryDark">@color/primary_dark</item>
+    <item name="android:colorAccent">@color/primary</item>
+    <item name="android:textColorPrimary">@color/primary_text_light</item>
+    <item name="android:textColorSecondary">@color/secondary_text_light</item>
+    <item name="android:textColorTertiary">@color/disabled_text_light</item>
+    <item name="android:colorEdgeEffect">@android:color/tertiary_text_light</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="android:windowTranslucentStatus">true</item>
+  </style>
+
+  <style name="ThemeOverlay.AppTheme.Dark" parent="ThemeOverlay.AppCompat.Dark">
+    <item name="colorPrimary">@color/primary_text_dark</item>
+    <item name="colorPrimaryDark">?attr/colorPrimary</item>
+    <item name="colorAccent">?attr/colorPrimary</item>
+    <item name="android:colorForeground">?attr/colorPrimary</item>
+    <item name="android:colorBackground">@color/primary</item>
+    <item name="colorButtonNormal">?attr/colorControlNormal</item>
+    <item name="colorSwitchThumbNormal">?attr/colorPrimary</item>
+    <item name="colorControlNormal">@color/disabled_text_dark</item>
+    <item name="colorControlHighlight">?attr/colorPrimary</item>
+    <item name="colorControlActivated">?attr/colorPrimary</item>
+    <item name="android:textColor">?attr/colorPrimary</item>
+  </style>
 
 </resources>

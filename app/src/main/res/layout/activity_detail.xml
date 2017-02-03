@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toStartOf="@+id/checkcircle_detail"
-        android:theme="@style/WhiteAccent">
+        android:theme="@style/ThemeOverlay.AppTheme.Dark">
 
         <android.support.design.widget.TextInputEditText
           android:id="@+id/textinputedittext_detail_name"

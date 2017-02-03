@@ -43,7 +43,9 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
     try {
       URI newHost = verifyOmniSyncHost(client, bundle);
 
-      verifyLogin(client, bundle, newHost);
+      if (newHost != null) {
+        verifyLogin(client, bundle, newHost);
+      }
     } catch (UnknownHostException e) {
       bundle.putBoolean("SUCCESS", false);
       bundle.putInt("ERROR_LOGIN", R.string.login_error_noconnection);
@@ -92,7 +94,6 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
         DavConstants.DEPTH_1);
 
     client.executeMethod(findServerMethod);
-    findServerMethod.releaseConnection();
 
     // Only use 3xx codes which have a HEADER_LOCATION response
     int statusCode = findServerMethod.getStatusCode();
@@ -108,12 +109,18 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
       bundle.putString("SERVER_DOMAIN", newHost.getHost());
       bundle.putString("SERVER_PORT", String.valueOf(newHost.getPort()));
 
+      findServerMethod.releaseConnection();
+      client.getHttpConnectionManager().closeIdleConnections(0);
+
       return newHost;
     } else if (findServerMethod.getStatusText().equals("No such user")) {
 
       bundle.putBoolean("SUCCESS", false);
       bundle.putInt("ERROR_USERNAME", R.string.login_error_notregistered);
       Log.w(TAG, "User not registered");
+
+      findServerMethod.releaseConnection();
+      client.getHttpConnectionManager().closeIdleConnections(0);
 
       return null;
     } else {
@@ -123,6 +130,9 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
       bundle.putBoolean("ERROR_LOGIN_RETRY", true);
       Log.e(TAG, "Unexpected status " + findServerMethod.getStatusCode() + ": " +
           findServerMethod.getStatusText());
+
+      findServerMethod.releaseConnection();
+      client.getHttpConnectionManager().closeIdleConnections(0);
 
       return null;
     }
@@ -148,7 +158,6 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
     HttpMethod testLoginMethod = new HeadMethod(host.toString() + "OmniFocus.ofocus/");
 
     client.executeMethod(testLoginMethod);
-    testLoginMethod.releaseConnection();
 
     int statusCode = testLoginMethod.getStatusCode();
 
@@ -183,6 +192,9 @@ public class OmniSyncLoginTask extends AsyncTask<Void, Void, Bundle> {
             testLoginMethod.getStatusText());
         break;
     }
+
+    client.getHttpConnectionManager().closeIdleConnections(0);
+    testLoginMethod.releaseConnection();
   }
 
   public interface TaskListener {
