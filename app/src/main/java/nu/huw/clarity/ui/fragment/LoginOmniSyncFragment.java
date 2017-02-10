@@ -286,10 +286,17 @@ public class LoginOmniSyncFragment extends Fragment implements SyncLoginTaskList
         break;
 
       case SyncLoginTask.PASSPHRASE_INCORRECT:
-        textinputlayout_loginomnisync_passphrase.setErrorEnabled(true);
-        textinputlayout_loginomnisync_passphrase
-            .setError(getString(R.string.login_error_passphraseincorrect));
-        textinputlayout_loginomnisync_passphrase.requestFocus();
+        if (switch_loginomnisync_encryption.isChecked()) {
+          textinputlayout_loginomnisync_password.setErrorEnabled(true);
+          textinputlayout_loginomnisync_password
+              .setError(getString(R.string.login_error_passphraseincorrect));
+          textinputlayout_loginomnisync_password.requestFocus();
+        } else {
+          textinputlayout_loginomnisync_passphrase.setErrorEnabled(true);
+          textinputlayout_loginomnisync_passphrase
+              .setError(getString(R.string.login_error_passphraseincorrect));
+          textinputlayout_loginomnisync_passphrase.requestFocus();
+        }
         break;
 
     }

@@ -9,13 +9,16 @@
   <!-- LoginActivity -->
   <string name="login_title">Welcome to Clarity</string>
   <string name="login_message">With Clarity for OmniFocus, you can focus on your tasks or write down killer ideas.</string>
+  <string name="login_server">Server Address</string>
   <string name="login_username">Username</string>
   <string name="login_password">Password</string>
   <string name="login_passphrase">Encryption Passphrase</string>
 
   <string name="login_omnisync">Use the Omni Sync Server</string>
-  <string name="login_privateserver">Use my own server</string>
+  <string name="login_privateserver">Use another server</string>
   <string name="login_encryptionsame">Use this password for encryption</string>
+  <string name="login_serverhint">Write the full URL to your data, e.g. ‘https://sync.omnigroup.com:443/username’</string>
+  <string name="login_errorserverurlinvalid">This server URL is invalid</string>
   <string name="login_errorusernamerequired">Enter a username</string>
   <string name="login_errorpasswordrequired">Enter a password</string>
   <string name="login_errorpassphraserequired">Enter a passphrase</string>

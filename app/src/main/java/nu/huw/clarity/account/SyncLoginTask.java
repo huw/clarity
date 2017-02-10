@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import java.io.File;
+import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import nu.huw.clarity.crypto.OmniSyncDecrypter;
 import nu.huw.clarity.sync.DownloadHelper;
@@ -188,8 +189,11 @@ public class SyncLoginTask extends AsyncTask<Void, Void, Integer> {
     } catch (InvalidKeyException e) {
       Log.e(TAG, "Invalid passphrase", e);
       return PASSPHRASE_INCORRECT;
+    } catch (IllegalStateException | UnknownHostException e) {
+      Log.e(TAG, "Invalid server URL", e);
+      return SERVER_INVALID;
     } catch (Exception e) {
-      Log.e(TAG, "Problem executing web request", e);
+      Log.e(TAG, "Problem executing web request " + e.getClass() + " " + e.getMessage(), e);
       return SERVER_FAULT;
     } finally {
       client.getHttpConnectionManager().closeIdleConnections(0);

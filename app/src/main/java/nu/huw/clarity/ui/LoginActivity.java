@@ -6,9 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
 import nu.huw.clarity.ui.fragment.LoginOmniSyncFragment.OnOmniSyncLoginSuccessListener;
+import nu.huw.clarity.ui.fragment.LoginOtherSyncFragment.OnOtherSyncLoginSuccessListener;
 import nu.huw.clarity.ui.fragment.LoginServerFragment;
 
-public class LoginActivity extends AppCompatActivity implements OnOmniSyncLoginSuccessListener {
+public class LoginActivity extends AppCompatActivity implements OnOmniSyncLoginSuccessListener,
+    OnOtherSyncLoginSuccessListener {
 
   private static final String TAG = LoginActivity.class.getSimpleName();
   static int RESULT_OK = 1;
@@ -47,5 +49,10 @@ public class LoginActivity extends AppCompatActivity implements OnOmniSyncLoginS
   public void onOmniSyncLoginSuccess() {
     setResult(RESULT_OK);
     finish();
+  }
+
+  @Override
+  public void onOtherSyncLoginSuccess() {
+    onOmniSyncLoginSuccess();
   }
 }

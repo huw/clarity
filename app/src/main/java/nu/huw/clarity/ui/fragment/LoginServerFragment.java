@@ -17,6 +17,8 @@ public class LoginServerFragment extends Fragment {
   private static final String TAG = LoginServerFragment.class.getSimpleName();
   @BindView(R.id.button_login_omnisync)
   Button button_login_omnisync;
+  @BindView(R.id.button_login_othersync)
+  Button button_login_othersync;
   private Unbinder unbinder;
 
   public LoginServerFragment() {
@@ -54,6 +56,23 @@ public class LoginServerFragment extends Fragment {
             .beginTransaction()
             .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
             .replace(R.id.framelayout_login_container, loginOmniSyncFragment)
+            .addToBackStack(null)
+            .commit();
+      }
+    });
+
+    button_login_othersync.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+
+        LoginOtherSyncFragment loginOtherSyncFragment = LoginOtherSyncFragment.newInstance();
+
+        // Perform transition
+
+        getFragmentManager()
+            .beginTransaction()
+            .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+            .replace(R.id.framelayout_login_container, loginOtherSyncFragment)
             .addToBackStack(null)
             .commit();
       }
