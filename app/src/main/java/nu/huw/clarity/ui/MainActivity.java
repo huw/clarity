@@ -92,10 +92,9 @@ public class MainActivity extends AppCompatActivity implements
     if (!accountManagerHelper.accountExists()) {
       Intent intent = new Intent(this, LoginActivity.class);
       startActivityForResult(intent, LOG_IN_FIRST_REQUEST);
-      return;
+    } else {
+      registerSyncService();
     }
-
-    registerSyncService();
 
     // Initialise view
 

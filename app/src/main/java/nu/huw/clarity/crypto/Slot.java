@@ -7,6 +7,15 @@ package nu.huw.clarity.crypto;
  */
 class Slot {
 
+  static final int NONE = 0;
+  static final int ACTIVE_AESWRAP = 1;
+  static final int RETIRED_AESWRAP = 2;
+  static final int ACTIVE_AESCTRHMAC = 3;
+  static final int RETIRED_AESCTRHMAC = 4;
+  static final int ACTIVE_PLAINTEXT = 5;
+  static final int RETIRED_PLAINTEXT = 6;
+
+
   byte type;
   int id;
   byte[] contents;
@@ -27,17 +36,17 @@ class Slot {
 
     switch (type) {
 
-      case 1:
+      case ACTIVE_AESWRAP:
         return "ActiveAESWrap";         // (Obsolete) Currently active AES-wrap key
-      case 2:
+      case RETIRED_AESWRAP:
         return "RetiredAESWrap";        // (Obsolete) Old AES-wrap key (from rollover)
-      case 3:
+      case ACTIVE_AESCTRHMAC:
         return "ActiveAES_CTR_HMAC";    // Active CTR + HMAC key
-      case 4:
+      case RETIRED_AESCTRHMAC:
         return "RetiredAES_CTR_HMAC";   // Old CTR + HMAC key
-      case 5:
+      case ACTIVE_PLAINTEXT:
         return "PlaintextMask";         // Filename patterns which should not be encrypted
-      case 6:
+      case RETIRED_PLAINTEXT:
         return "RetiredPlaintextMask";  // Filename patterns which have legacy
       // unencrypted entries
       default:

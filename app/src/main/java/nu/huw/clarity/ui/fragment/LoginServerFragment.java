@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import nu.huw.clarity.R;
@@ -13,6 +15,8 @@ import nu.huw.clarity.R;
 public class LoginServerFragment extends Fragment {
 
   private static final String TAG = LoginServerFragment.class.getSimpleName();
+  @BindView(R.id.button_login_omnisync)
+  Button button_login_omnisync;
   private Unbinder unbinder;
 
   public LoginServerFragment() {
@@ -35,6 +39,25 @@ public class LoginServerFragment extends Fragment {
 
     View view = inflater.inflate(R.layout.fragment_login_server, container, false);
     unbinder = ButterKnife.bind(this, view);
+
+    // When the user clicks the 'Use the omni sync server' button, open that screen
+
+    button_login_omnisync.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+
+        LoginOmniSyncFragment loginOmniSyncFragment = LoginOmniSyncFragment.newInstance();
+
+        // Perform transition
+
+        getFragmentManager()
+            .beginTransaction()
+            .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+            .replace(R.id.framelayout_login_container, loginOmniSyncFragment)
+            .addToBackStack(null)
+            .commit();
+      }
+    });
 
     return view;
   }

@@ -1,12 +1,20 @@
 package nu.huw.clarity.crypto;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import com.dd.plist.PropertyListFormatException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
+import javax.crypto.NoSuchPaddingException;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 
-@SuppressWarnings("ResultOfMethodCallIgnored")
 public class OmniSyncDecrypter {
 
   private static final String TAG = OmniSyncDecrypter.class.getSimpleName();
@@ -21,11 +29,12 @@ public class OmniSyncDecrypter {
    * @param metadataFile File object representing the location of the sync metadata
    * @param passphrase String of the passphrase used to encrypt the data
    */
-  public OmniSyncDecrypter(File metadataFile, String passphrase, Context context)
-      throws Exception {
+  public OmniSyncDecrypter(@NonNull File metadataFile, @NonNull String passphrase,
+      @NonNull Context context, boolean reset)
+      throws IOException, PropertyListFormatException, ParseException, SAXException, ParserConfigurationException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
 
     documentKey = getDocumentKey(metadataFile);
-    documentKey.usePassword(passphrase, context);
+    documentKey.usePassword(passphrase, context, reset);
   }
 
   /**
@@ -75,7 +84,8 @@ public class OmniSyncDecrypter {
     documentKey.decryptFile(inputFile.getName(), inputFile, outputFile);
   }
 
-  private DocumentKey getDocumentKey(File metadataFile) throws Exception {
+  private DocumentKey getDocumentKey(@NonNull File metadataFile)
+      throws IOException, PropertyListFormatException, ParseException, ParserConfigurationException, SAXException {
 
     if (metadataFile.exists()) {
 

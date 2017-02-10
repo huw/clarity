@@ -3,80 +3,101 @@ package nu.huw.clarity.account;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import nu.huw.clarity.R;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 
 /**
  * Convenience methods for the Account Manager
- *
- * TODO: Multiple accounts
  */
 public class AccountManagerHelper {
 
   private static final String TAG = AccountManagerHelper.class.getSimpleName();
-  private Context context;
+  private Context androidContext;
   private AccountManager accountManager;
 
-  public AccountManagerHelper(Context context) {
+  public AccountManagerHelper(@NonNull Context androidContext) {
+    this.androidContext = androidContext;
+    this.accountManager = AccountManager.get(androidContext);
+  }
 
-    this.context = context;
-    this.accountManager = AccountManager.get(context);
+  public AccountManager getAccountManager() {
+    return accountManager;
   }
 
   public boolean accountExists() {
+    return accountManager.getAccountsByType(androidContext.getString(R.string.account_type)).length
+        != 0;
+  }
 
-    return accountManager.getAccountsByType(context.getString(R.string.account_type)).length !=
-        0;
+  @NonNull
+  public Account getAccount() {
+    Account[] accounts = accountManager
+        .getAccountsByType(androidContext.getString(R.string.account_type));
+    if (accounts.length > 0) {
+      return accounts[0];
+    }
+    throw new NullPointerException("No account found");
+  }
+
+  @NonNull
+  public String getUsername() {
+    return getAccount().name;
+  }
+
+  @NonNull
+  public String getPassword() {
+    return accountManager.getPassword(getAccount());
+  }
+
+  @NonNull
+  public String getPassphrase() {
+    return accountManager.getUserData(getAccount(), "PASSPHRASE");
   }
 
   @Nullable
-  public Account getAccount() {
-
-    Account[] accounts = accountManager.getAccountsByType(context.getString(R.string.account_type));
-    if (accounts.length > 0) {
-      return accounts[0];
+  public Uri getServerUri() {
+    String uriString = accountManager.getUserData(getAccount(), "URI");
+    if (uriString != null) {
+      return Uri.parse(uriString);
     } else {
       return null;
     }
   }
 
-  public String getUsername() {
-
-    return getAccount().name;
-  }
-
-  public String getPassword() {
-
-    return accountManager.getPassword(getAccount());
-  }
-
-  public String getServerDomain() {
-
-    return accountManager.getUserData(getAccount(), "SERVER_DOMAIN");
-  }
-
-  public int getServerPort() {
-
-    return Integer.parseInt(accountManager.getUserData(getAccount(), "SERVER_PORT"));
-  }
-
-  public String getBaseURI() {
-
-    return "https://" + getServerDomain();
-  }
-
-  /**
-   * The Ofocus URI is the location of the OmniFocus.ofocus folder which contains all of the
-   * useful syncing data. It is found at: `https://sync<your number>.omnigroup
-   * .com/<username>/OmniFocus.ofocus/`
-   */
-  public String getOfocusURI() {
-
-    return getBaseURI() + "/" + getUsername() + "/OmniFocus.ofocus/";
+  @NonNull
+  public Uri getOfocusUri() {
+    Uri uri = Uri.parse(accountManager.getUserData(getAccount(), "URI"));
+    return uri.buildUpon().appendPath("OmniFocus.ofocus").build();
   }
 
   public void setUserData(String key, String value) {
-
     accountManager.setUserData(getAccount(), key, value);
+  }
+
+  /**
+   * Gets a valid instance of an HttpClient, already configured with the user's data
+   */
+  @NonNull
+  public HttpClient getHttpClient() {
+
+    HttpClient client = new HttpClient();
+    Uri serverUri = getServerUri();
+
+    if (serverUri != null) {
+      UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(getUsername(),
+          getPassword());
+      AuthScope newHostScope = new AuthScope(serverUri.getHost(), serverUri.getPort(),
+          AuthScope.ANY_REALM);
+
+      client.getState().setCredentials(newHostScope, credentials);
+      client.getParams().setAuthenticationPreemptive(true);
+    }
+
+    return client;
   }
 }

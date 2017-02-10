@@ -7,6 +7,7 @@ import com.dd.plist.NSDictionary;
 import com.dd.plist.NSNumber;
 import com.dd.plist.NSObject;
 import com.dd.plist.NSString;
+import com.dd.plist.PropertyListFormatException;
 import com.dd.plist.PropertyListParser;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,6 +18,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.crypto.Cipher;
@@ -24,15 +26,21 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 
 class DocumentKey {
+
+  private static final int AES_128_SIZE = 16;
+  private static final int AES_256_SIZE = 32;
 
   private byte[] FILE_MAGIC = "OmniFileEncryption\00\00".getBytes();
   private NSDictionary metadata;
   private byte[] unwrapped;
   private ArrayList<Slot> secrets = new ArrayList<>();
 
-  DocumentKey(byte[] blob) throws Exception {
+  DocumentKey(byte[] blob)
+      throws IOException, PropertyListFormatException, ParseException, ParserConfigurationException, SAXException {
 
     NSObject parsed = PropertyListParser.parse(blob);
 
@@ -66,14 +74,15 @@ class DocumentKey {
    *
    * @param passphrase The user's passphrase
    */
-  void usePassword(String passphrase, Context context) throws Exception {
+  void usePassword(String passphrase, Context context, boolean reset)
+      throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException {
 
     // Establish algorithm & method
 
     String method = ((NSString) metadata.get("method")).getContent();
     String algorithm = ((NSString) metadata.get("algorithm")).getContent();
 
-    unwrapped = unwrapKey(passphrase, context.getFilesDir());
+    unwrapped = unwrapKey(passphrase, context.getFilesDir(), reset);
 
     // Generate list of file type secrets
 
@@ -135,7 +144,7 @@ class DocumentKey {
    * @param passphrase The user's passphrase
    * @return byte[] from unwrapping AES key
    */
-  private byte[] unwrapKey(String passphrase, File fileDir)
+  private byte[] unwrapKey(String passphrase, File fileDir, boolean reset)
       throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
       IOException, InvalidKeyException {
 
@@ -145,7 +154,7 @@ class DocumentKey {
 
     // Read secret key if it exists, generate it if it doesn't
 
-    if (!wrapKeyFile.exists()) {
+    if (!wrapKeyFile.exists() || reset) {
       secret = generateWrapKey(passphrase, wrapKeyFile);
     } else {
       RandomAccessFile file = new RandomAccessFile(wrapKeyFile, "r");
@@ -165,6 +174,10 @@ class DocumentKey {
       key = cipher.unwrap(encryptedKey, "AES/CTR/NOPADDING", Cipher.SECRET_KEY).getEncoded();
     } catch (InvalidKeyException e) {
 
+      if (reset) {
+        throw e;
+      }
+
       // Saved key is invalid, regenerate
 
       secret = generateWrapKey(passphrase, wrapKeyFile);
@@ -172,6 +185,10 @@ class DocumentKey {
       Cipher cipher = Cipher.getInstance("AESWRAP");
       cipher.init(Cipher.UNWRAP_MODE, derivedKey);
       key = cipher.unwrap(encryptedKey, "AES/CTR/NOPADDING", Cipher.SECRET_KEY).getEncoded();
+    }
+
+    if (!validateSlots(key)) {
+      throw new InvalidKeyException("Key slots did not validate");
     }
 
     return key;
@@ -240,6 +257,51 @@ class DocumentKey {
 
       throw new Exception("Key slot type " + String.valueOf(slot.type) + " not found");
     }
+  }
+
+  /**
+   * Validates whether the slots in the unwrapped key are correct according to Omni's format.
+   * Similar to <a href="https://github.com/omnigroup/OmniGroup/blob/master/Frameworks/OmniFileStore/OFSDocumentKey.m">
+   * OFSDocumentKey.m</a>
+   */
+  private boolean validateSlots(byte[] unwrapped) {
+
+    int length = unwrapped.length;
+    int position = 0;
+
+    while (position != length) {
+
+      if (position > length) return false; // Length is not a multiple of 4
+      byte slottype = unwrapped[position];
+
+      if (slottype == Slot.NONE) { // Padding slot type; end lookup
+        break;
+      }
+      if (position + 4 > length) { // Length is not a multiple of 4
+        return false;
+      }
+
+      int slotlength = 4 * unwrapped[position + 1];
+      switch (slottype) {
+        case Slot.ACTIVE_AESCTRHMAC:
+        case Slot.RETIRED_AESCTRHMAC:
+          if (slotlength < AES_128_SIZE
+              || slotlength > AES_256_SIZE) { // Slots do not contain valid data
+            return false;
+          }
+      }
+
+      position += 4 + slotlength;
+    }
+
+    while (position < length) {
+      if (unwrapped[position] != 0) { // Verify that padding is all zeroes
+        return false;
+      }
+      position++;
+    }
+
+    return true;
   }
 
   /**

@@ -2,95 +2,116 @@
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="wrap_content"
-  android:layout_height="wrap_content"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
   android:paddingTop="@dimen/vertical_margin"
   android:paddingBottom="@dimen/vertical_margin"
   android:paddingStart="@dimen/horizontal_margin"
   android:paddingEnd="@dimen/horizontal_margin"
-  android:animateLayoutChanges="true"
-  android:background="@color/primary"
+  android:clipChildren="false"
+  android:clipToPadding="false"
   android:orientation="vertical"
   android:theme="@style/ThemeOverlay.AppTheme.Dark"
   tools:context=".ui.LoginActivity">
 
-  <android.support.design.widget.TextInputLayout
-    android:id="@+id/textinputlayout_loginomnisync_username"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <android.support.design.widget.TextInputEditText
-      android:id="@+id/textinputedittext_loginomnisync_username"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:hint="@string/login_username"
-      android:inputType="text"
-      android:maxLines="1"/>
-
-  </android.support.design.widget.TextInputLayout>
-
-  <android.support.design.widget.TextInputLayout
-    android:id="@+id/textinputlayout_loginomnisync_password"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/textinputlayout_loginomnisync_username">
-
-    <android.support.design.widget.TextInputEditText
-      android:id="@+id/textinputedittext_loginomnisync_password"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:hint="@string/login_password"
-      android:inputType="textPassword"
-      android:maxLines="1"/>
-
-  </android.support.design.widget.TextInputLayout>
-
-  <TextView
-    android:id="@+id/textview_loginomnisync_encryptionlabel"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/vertical_margin"
-    android:layout_marginStart="@dimen/textinputlayout_margin"
-    android:layout_alignBaseline="@+id/switch_loginomnisync_encryption"
-    android:layout_toStartOf="@id/switch_loginomnisync_encryption"
-    android:text="@string/login_encryptionsame"/>
-
-  <Switch
-    android:id="@id/switch_loginomnisync_encryption"
+  <ProgressBar
+    android:id="@+id/progressbar_loginomnisync_spinner"
+    style="@style/Base.Widget.AppCompat.ProgressBar"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/vertical_margin"
-    android:layout_marginEnd="@dimen/textinputlayout_margin"
-    android:layout_alignParentEnd="true"
-    android:layout_below="@id/textinputlayout_loginomnisync_password"
-    android:checked="true"/>
+    android:layout_centerHorizontal="true"
+    android:layout_centerVertical="true"
+    android:visibility="gone"/>
 
-  <android.support.design.widget.TextInputLayout
-    android:id="@+id/textinputlayout_loginomnisync_passphrase"
-    android:layout_width="match_parent"
+  <RelativeLayout
+    android:id="@+id/relativelayout_loginomnisync_form"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_below="@id/switch_loginomnisync_encryption"
-    android:visibility="gone">
+    android:layout_centerInParent="true"
+    android:animateLayoutChanges="true">
 
-    <android.support.design.widget.TextInputEditText
-      android:id="@+id/textinputedittext_loginomnisync_passphrase"
+    <android.support.design.widget.TextInputLayout
+      android:id="@+id/textinputlayout_loginomnisync_username"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+      <android.support.design.widget.TextInputEditText
+        android:id="@+id/textinputedittext_loginomnisync_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/login_username"
+        android:inputType="text"
+        android:maxLines="1"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+      android:id="@+id/textinputlayout_loginomnisync_password"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:hint="@string/login_passphrase"
-      android:inputType="textPassword"
-      android:maxLines="1"/>
+      android:layout_below="@id/textinputlayout_loginomnisync_username">
 
-  </android.support.design.widget.TextInputLayout>
+      <android.support.design.widget.TextInputEditText
+        android:id="@+id/textinputedittext_loginomnisync_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/login_password"
+        android:inputType="textPassword"
+        android:maxLines="1"/>
 
-  <Button
-    android:id="@+id/button_loginomnisync_signin"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/vertical_margin"
-    android:layout_marginStart="@dimen/textinputlayout_margin"
-    android:layout_marginEnd="@dimen/textinputlayout_margin"
-    android:layout_below="@id/textinputlayout_loginomnisync_passphrase"
-    android:background="@color/primary_dark"
-    android:text="@string/login_signin"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <TextView
+      android:id="@+id/textview_loginomnisync_encryptionlabel"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/vertical_margin"
+      android:layout_marginStart="@dimen/textinputlayout_margin"
+      android:layout_alignBaseline="@+id/switch_loginomnisync_encryption"
+      android:layout_toStartOf="@id/switch_loginomnisync_encryption"
+      android:text="@string/login_encryptionsame"/>
+
+    <Switch
+      android:id="@id/switch_loginomnisync_encryption"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/vertical_margin"
+      android:layout_marginEnd="@dimen/textinputlayout_margin"
+      android:layout_alignParentEnd="true"
+      android:layout_below="@id/textinputlayout_loginomnisync_password"
+      android:checked="true"/>
+
+    <android.support.design.widget.TextInputLayout
+      android:id="@+id/textinputlayout_loginomnisync_passphrase"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/switch_loginomnisync_encryption"
+      android:visibility="gone">
+
+      <android.support.design.widget.TextInputEditText
+        android:id="@+id/textinputedittext_loginomnisync_passphrase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/login_passphrase"
+        android:inputType="textPassword"
+        android:maxLines="1"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+      android:id="@+id/button_loginomnisync_signin"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/vertical_margin"
+      android:layout_marginStart="@dimen/textinputlayout_margin"
+      android:layout_marginEnd="@dimen/textinputlayout_margin"
+      android:layout_below="@id/textinputlayout_loginomnisync_passphrase"
+      android:background="@color/primary_dark"
+      android:enabled="true"
+      android:text="@string/login_signin"
+      android:transitionName="transition_login_button"
+      tools:targetApi="lollipop"/>
+
+  </RelativeLayout>
 
 </RelativeLayout>

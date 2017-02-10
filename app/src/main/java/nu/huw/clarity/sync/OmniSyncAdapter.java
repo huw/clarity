@@ -1,7 +1,6 @@
 package nu.huw.clarity.sync;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.Context;
@@ -29,10 +28,8 @@ import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.crypto.OmniSyncDecrypter;
 import nu.huw.clarity.db.SyncDownParser;
 import nu.huw.clarity.db.TreeOperations;
+import nu.huw.clarity.sync.DownloadHelper.DownloadFileTask;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -49,14 +46,14 @@ import org.apache.jackrabbit.webdav.version.DeltaVConstants;
 class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
 
   private static final String TAG = OmniSyncAdapter.class.getSimpleName();
-  private final AccountManager accountManager;
-  private final AccountManagerHelper AMHelper;
+  private final AccountManagerHelper accountManagerHelper;
+  private final DownloadHelper downloadHelper;
 
   OmniSyncAdapter(Context context, boolean autoInitialise) {
 
     super(context, autoInitialise);
-    accountManager = AccountManager.get(context);
-    AMHelper = new AccountManagerHelper(context);
+    accountManagerHelper = new AccountManagerHelper(context);
+    downloadHelper = new DownloadHelper(context);
   }
 
   /**
@@ -81,30 +78,6 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
       Log.v(TAG, response.getHref() + " has no content-type property, assuming invalid");
       return false;
     }
-  }
-
-  /**
-   * This function will create a new HttpClient and automatically add the account's credentials in
-   * an appropriate form.
-   *
-   * It's really useful, because we can just call `getHttpClient()` and run WebDAV/HTTP methods on
-   * it straightaway, without having to configure it.
-   *
-   * This code will be the appropriate setup code 100% of the time, AFTER AN ACCOUNT HAS BEEN
-   * MADE.
-   */
-  private HttpClient getHttpClient() {
-
-    HttpClient client = new HttpClient();
-
-    UsernamePasswordCredentials credentials =
-        new UsernamePasswordCredentials(AMHelper.getUsername(), AMHelper.getPassword());
-    AuthScope newHostScope = new AuthScope(AMHelper.getServerDomain(), AMHelper.getServerPort(),
-        AuthScope.ANY_REALM);
-
-    client.getState().setCredentials(newHostScope, credentials);
-    client.getParams().setAuthenticationPreemptive(true);
-    return client;
   }
 
   private List<DownloadFileTask> downloadFiles(List<File> nameList) {
@@ -133,8 +106,8 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
       // starting to download in the background threads. Then return
       // a list of these objects to be called up later.
 
-      DownloadFileTask download = new DownloadFileTask();
-      download.executeOnExecutor(downloadPool, file, getContext(), getHttpClient());
+      DownloadFileTask download = downloadHelper.new DownloadFileTask(file.getName(), true, null);
+      download.executeOnExecutor(downloadPool);
       downloadList.add(download);
     }
 
@@ -148,15 +121,15 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
   public void onPerformSync(Account account, Bundle extras, String authority,
       ContentProviderClient provider, SyncResult syncResult) {
 
-    File metadataFile = downloadFile("encrypted");
+    File metadataFile = downloadHelper.downloadFile("encrypted", true);
 
     try {
 
       Log.i(TAG, "Loading encryption metadata...");
 
-      String passphrase = accountManager.getPassword(account);
+      String passphrase = accountManagerHelper.getPassword();
       final OmniSyncDecrypter decrypter =
-          new OmniSyncDecrypter(metadataFile, passphrase, getContext());
+          new OmniSyncDecrypter(metadataFile, passphrase, getContext(), false);
 
       // Get list of files to download
 
@@ -253,70 +226,13 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
   }
 
   /**
-   * Downloads the file at `OmniFocus.ofocus/{name}` into a temporary location. Returns path.
-   *
-   * @param name Name of the file, relative to the `OmniFocus.ofocus/` folder
-   * @return File object representing path of downloaded file
-   */
-  private File downloadFile(String name) {
-
-    HttpClient client = getHttpClient();
-    GetMethod getFileMethod = new GetMethod(AMHelper.getOfocusURI() + name);
-
-    try {
-
-      client.executeMethod(getFileMethod);
-
-      if (getFileMethod.getStatusCode() == 200) {
-
-        // Basically, we make a GetMethod using standard procedure. Then we
-        // open its results up into a stream (making sure NOT to call
-        // `.releaseConnection()` until we're done), and bitwise copy the in
-        // stream to the out stream. THEN we close everything. File downloaded.
-
-        InputStream input = getFileMethod.getResponseBodyAsStream();
-        File file = File.createTempFile(name, null, this.getContext().getCacheDir());
-        RandomAccessFile output = new RandomAccessFile(file, "rw");
-
-        // Copy input stream to output stream, bitwise
-        byte data[] = new byte[4096];
-        int count;
-        while ((count = input.read(data)) != -1) {
-          output.write(data, 0, count);
-        }
-
-        // Be extra careful not to cross streams
-        // First time this joke has been made, ever
-
-        input.close();
-        output.close();
-
-        getFileMethod.releaseConnection();
-
-        Log.v(TAG, name + " successfully downloaded (" + file.length() + " bytes)");
-
-        return file;
-      } else {
-        Log.e(TAG, "Unexpected WebDAV status " + getFileMethod.getStatusCode() + ": " +
-            getFileMethod.getStatusText());
-      }
-    } catch (Exception e) {
-      Log.e(TAG, "Unexpected " + e.getClass().getName() + ": " + e.getMessage(), e);
-    } finally {
-      client.getHttpConnectionManager().closeIdleConnections(0);
-    }
-
-    return null;
-  }
-
-  /**
    * Gets a list of files to download from the server
    *
    * @return List of files to download, as `File` objects
    */
   private List<File> getFilesToDownload() {
 
-    HttpClient client = getHttpClient();
+    HttpClient client = accountManagerHelper.getHttpClient();
 
     try {
       List<File> filesToDownload = new ArrayList<>();
@@ -327,7 +243,8 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
       // files in a folder or telling the server to copy/move a file.
 
       DavMethod listAllFiles =
-          new PropFindMethod(AMHelper.getOfocusURI(), DavConstants.PROPFIND_ALL_PROP,
+          new PropFindMethod(accountManagerHelper.getOfocusUri().toString(),
+              DavConstants.PROPFIND_ALL_PROP,
               DavConstants.DEPTH_1);
       client.executeMethod(listAllFiles);
       listAllFiles.releaseConnection();
@@ -348,8 +265,8 @@ class OmniSyncAdapter extends AbstractThreadedSyncAdapter {
               new URI(listAllFiles.getResponseHeader(DeltaVConstants.HEADER_LOCATION)
                   .getValue());
 
-          AMHelper.setUserData("SERVER_DOMAIN", newHost.getHost());
-          AMHelper.setUserData("SERVER_PORT", String.valueOf(newHost.getPort()));
+          accountManagerHelper.setUserData("SERVER_DOMAIN", newHost.getHost());
+          accountManagerHelper.setUserData("SERVER_PORT", String.valueOf(newHost.getPort()));
 
           // TODO: RESTART SYNC
         } catch (URISyntaxException e) {

@@ -5,9 +5,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
+import nu.huw.clarity.ui.fragment.LoginOmniSyncFragment.OnOmniSyncLoginSuccessListener;
 import nu.huw.clarity.ui.fragment.LoginServerFragment;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements OnOmniSyncLoginSuccessListener {
 
   private static final String TAG = LoginActivity.class.getSimpleName();
   static int RESULT_OK = 1;
@@ -22,7 +23,6 @@ public class LoginActivity extends AppCompatActivity {
     // Setup server picker fragment
 
     LoginServerFragment loginServerFragment = LoginServerFragment.newInstance();
-    //LoginOmniSyncFragment loginServerFragment = LoginOmniSyncFragment.newInstance();
 
     getSupportFragmentManager()
         .beginTransaction()
@@ -32,6 +32,20 @@ public class LoginActivity extends AppCompatActivity {
 
   @Override
   public void onBackPressed() {
-    moveTaskToBack(false);
+
+    // If there's things on the backstack, go back to them.
+    // Then quit.
+
+    if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+      super.onBackPressed();
+    } else {
+      moveTaskToBack(true);
+    }
+  }
+
+  @Override
+  public void onOmniSyncLoginSuccess() {
+    setResult(RESULT_OK);
+    finish();
   }
 }

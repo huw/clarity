@@ -9,24 +9,24 @@
   <!-- LoginActivity -->
   <string name="login_title">Welcome to Clarity</string>
   <string name="login_message">With Clarity for OmniFocus, you can focus on your tasks or write down killer ideas.</string>
-  <string name="login_action">Sign in to the Omni Sync Server to begin.</string>
   <string name="login_username">Username</string>
   <string name="login_password">Password</string>
   <string name="login_passphrase">Encryption Passphrase</string>
 
-  <string name="login_signin">Sign in</string>
-  <string name="login_error_invalidpassword">Use at least 6 characters</string>
-  <string name="login_error_invalidusername">Use at least 2 characters and no spaces</string>
-  <string name="login_error_incorrectpassword">This password is incorrect</string>
-  <string name="login_error_fieldrequired">This field is required</string>
-  <string name="login_error_notregistered">This user isn\'t registered</string>
-  <string name="login_error_noconnection">You need a connection to sync.omnigroup.com to continue.</string>
-  <string name="login_error_noofocus">No OmniFocus data was found on your account. At the moment, Clarity can\'t create OmniFocus data from scratch, so to continue you\'ll need to sync with an official OmniFocus app.</string>
-  <string name="login_error_serverfault">There\'s a problem with the server</string>
+  <string name="login_omnisync">Use the Omni Sync Server</string>
+  <string name="login_privateserver">Use my own server</string>
+  <string name="login_encryptionsame">Use this password for encryption</string>
+  <string name="login_errorusernamerequired">Enter a username</string>
+  <string name="login_errorpasswordrequired">Enter a password</string>
+  <string name="login_errorpassphraserequired">Enter a passphrase</string>
 
-  <!-- ErrorDialogFragment -->
-  <string name="errordialogfragment_tryagain">Try again</string>
-  <string name="errordialogfragment_gotit">Got it</string>
+  <string name="login_signin">Sign in</string>
+  <string name="login_error_serverinvalid">This server URL is incorrect</string>
+  <string name="login_error_serverfault">There\'s a problem with the server. Please try again.</string>
+  <string name="login_error_servernoofocus">No OmniFocus data was found at this location</string>
+  <string name="login_error_usernameincorrect">This user does not exist</string>
+  <string name="login_error_passwordincorrect">This password is incorrect</string>
+  <string name="login_error_passphraseincorrect">This passphrase is incorrect</string>
 
   <!-- Navigation Drawer -->
   <string name="menu_forecast">Forecast</string>
@@ -120,8 +120,5 @@
   <string name="notification_duenow">Due now</string>
   <string name="notification_duesummarytext">%d items due</string>
   <string name="notification_duesummarytitle">Clarity for OmniFocus</string>
-  <string name="login_omnisync">Use the Omni Sync Server</string>
-  <string name="login_privateserver">Use my own server</string>
-  <string name="login_encryptionsame">Use this passphrase for encryption</string>
 
 </resources>
