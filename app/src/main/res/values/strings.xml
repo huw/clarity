@@ -25,7 +25,7 @@
 
   <string name="login_signin">Sign in</string>
   <string name="login_error_serverinvalid">This server URL is incorrect</string>
-  <string name="login_error_serverfault">There\'s a problem with the server. Please try again.</string>
+  <string name="login_error_serverfault">There’s a problem with the server. Please try again.</string>
   <string name="login_error_servernoofocus">No OmniFocus data was found at this location</string>
   <string name="login_error_usernameincorrect">This user does not exist</string>
   <string name="login_error_passwordincorrect">This password is incorrect</string>
@@ -85,7 +85,7 @@
   <string name="listitem_headingnocontext">No context</string>
 
   <!-- Empty States -->
-  <string name="list_emptytitle">There\'s nothing here</string>
+  <string name="list_emptytitle">There’s nothing here</string>
   <string name="list_emptysubtitle">Pull down to sync\n(may take some time)\nor change
         perspectives \nfrom the menu</string>
 
@@ -123,5 +123,8 @@
   <string name="notification_duenow">Due now</string>
   <string name="notification_duesummarytext">%d items due</string>
   <string name="notification_duesummarytitle">Clarity for OmniFocus</string>
+  <string name="sync_errortitle">Log in again</string>
+  <string name="sync_errorpassphrase">Your passphrase has changed</string>
+  <string name="sync_errorconnection">Couldn’t connect to the sync server</string>
 
 </resources>

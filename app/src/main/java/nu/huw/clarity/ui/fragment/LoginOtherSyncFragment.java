@@ -120,6 +120,22 @@ public class LoginOtherSyncFragment extends Fragment implements SyncLoginTaskLis
       }
     });
 
+    // Fill in fields if account exists
+
+    if (accountManagerHelper.accountExists()) {
+
+      Uri serverUri = accountManagerHelper.getServerUri();
+      if (serverUri != null) {
+        textinputedittext_loginothersync_server
+            .setText(accountManagerHelper.getServerUri().toString());
+      }
+
+      textinputedittext_loginothersync_username.setText(accountManagerHelper.getUsername());
+      textinputedittext_loginothersync_password.setText(accountManagerHelper.getPassword());
+      textinputedittext_loginothersync_passphrase.setText(accountManagerHelper.getPassphrase());
+
+    }
+
     return view;
   }
 
@@ -227,6 +243,7 @@ public class LoginOtherSyncFragment extends Fragment implements SyncLoginTaskLis
 
     Account account = new Account(username, getString(R.string.account_type));
     Bundle userData = new Bundle();
+    userData.putString("TYPE", AccountManagerHelper.TYPE_OTHERSYNC);
     userData.putString("PASSPHRASE", passphrase);
     userData.putString("URI", serverUri.toString());
 

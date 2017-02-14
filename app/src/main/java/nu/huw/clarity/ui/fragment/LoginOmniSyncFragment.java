@@ -115,6 +115,16 @@ public class LoginOmniSyncFragment extends Fragment implements SyncLoginTaskList
       }
     });
 
+    // Fill in fields if account exists
+
+    if (accountManagerHelper.accountExists()) {
+
+      textinputedittext_loginomnisync_username.setText(accountManagerHelper.getUsername());
+      textinputedittext_loginomnisync_password.setText(accountManagerHelper.getPassword());
+      textinputedittext_loginomnisync_passphrase.setText(accountManagerHelper.getPassphrase());
+
+    }
+
     return view;
   }
 
@@ -235,6 +245,7 @@ public class LoginOmniSyncFragment extends Fragment implements SyncLoginTaskList
 
     Account account = new Account(username, getString(R.string.account_type));
     Bundle userData = new Bundle();
+    userData.putString("TYPE", AccountManagerHelper.TYPE_OMNISYNC);
     userData.putString("PASSPHRASE", passphrase);
     userData.putString("URI", serverUri.toString());
 

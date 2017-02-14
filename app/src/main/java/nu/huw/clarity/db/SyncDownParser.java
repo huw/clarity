@@ -81,8 +81,6 @@ public class SyncDownParser {
 
   public void parse(InputStream input) {
 
-    Log.v(TAG, "New file encountered");
-
     try {
 
       // Load XML into DOM
@@ -132,8 +130,6 @@ public class SyncDownParser {
           parseEntry(tableName, node);
         }
       }
-
-      Log.i(TAG, "End of document");
 
       input.close();
     } catch (ParserConfigurationException | SAXException e) {

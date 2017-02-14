@@ -89,8 +89,9 @@ public class MainActivity extends AppCompatActivity implements
     // If there is a syncing account, then we should register the sync service
 
     AccountManagerHelper accountManagerHelper = new AccountManagerHelper(this);
-    if (/*!accountManagerHelper.accountExists()*/true) {
+    if (!accountManagerHelper.accountExists()) {
       Intent intent = new Intent(this, LoginActivity.class);
+      intent.putExtra(LoginActivity.KEY_REQUEST, LoginActivity.VALUE_NOACCOUNT);
       startActivityForResult(intent, LOG_IN_FIRST_REQUEST);
     } else {
       registerSyncService();

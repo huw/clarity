@@ -23,6 +23,7 @@ import nu.huw.clarity.db.model.NoteHelper;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.DetailActivity;
 import nu.huw.clarity.ui.MainActivity;
+import org.threeten.bp.ZoneId;
 
 /**
  * Thanks to: http://it-ride.blogspot.com.au/2010/10/android-implementing-notification.html
@@ -169,6 +170,13 @@ public class NotificationService extends Service {
             .setAutoCancel(true)
             .setGroup(GROUP_KEY_OVERDUE)
             .extend(wearableExtender);
+
+        // Set the notification time to the task's overdue date
+
+        if (task.dateDueEffective != null) {
+          builder.setWhen(
+              task.dateDueEffective.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        }
 
         // Set an expandable style with the task's note text if necessary
         // Note that the original 'due now' text remains

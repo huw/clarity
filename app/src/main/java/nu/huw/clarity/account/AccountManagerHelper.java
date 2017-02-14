@@ -16,6 +16,9 @@ import org.apache.commons.httpclient.auth.AuthScope;
  */
 public class AccountManagerHelper {
 
+  public static final String TYPE_OMNISYNC = "OMNISYNC";
+  public static final String TYPE_OTHERSYNC = "OTHERSYNC";
+
   private static final String TAG = AccountManagerHelper.class.getSimpleName();
   private Context androidContext;
   private AccountManager accountManager;
@@ -55,6 +58,15 @@ public class AccountManagerHelper {
   }
 
   @NonNull
+  public String getType() {
+    String type = accountManager.getUserData(getAccount(), "TYPE");
+    if (type == null || !(type.equals(TYPE_OMNISYNC) || type.equals(TYPE_OTHERSYNC))) {
+      type = TYPE_OMNISYNC;
+    }
+    return type;
+  }
+
+  @NonNull
   public String getPassphrase() {
     return accountManager.getUserData(getAccount(), "PASSPHRASE");
   }
@@ -75,7 +87,7 @@ public class AccountManagerHelper {
     return uri.buildUpon().appendPath("OmniFocus.ofocus").build();
   }
 
-  public void setUserData(String key, String value) {
+  public void setUserData(@NonNull String key, @Nullable String value) {
     accountManager.setUserData(getAccount(), key, value);
   }
 
