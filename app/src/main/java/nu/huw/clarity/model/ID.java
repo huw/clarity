@@ -1,6 +1,7 @@
 package nu.huw.clarity.model;
 
 import android.net.Uri;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -17,6 +18,16 @@ public class ID {
       .compile("^[0-9]{14}=[a-zA-Z0-9_-]{11}\\+[a-zA-Z0-9_-]{11}\\.zip$");
   private static final Pattern mergeFilePattern = Pattern
       .compile("^[0-9]{14}=[a-zA-Z0-9_-]{11}\\+[a-zA-Z0-9_-]{11}\\+[a-zA-Z0-9_-]{11}\\.zip$");
+  private static final String alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
+  private static SecureRandom random = new SecureRandom();
+
+  public static String generate() {
+    StringBuilder sb = new StringBuilder(11);
+    for (int i = 0; i < 11; i++) {
+      sb.append(alphabet.charAt(random.nextInt(64)));
+    }
+    return sb.toString();
+  }
 
   public static boolean validate(String string) {
     return validate(string, true);

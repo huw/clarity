@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,16 +38,22 @@ import nu.huw.clarity.account.AccountManagerHelper;
 import nu.huw.clarity.crypto.OmniSyncDecrypter;
 import nu.huw.clarity.db.SyncDownParser;
 import nu.huw.clarity.db.TreeOperations;
+import nu.huw.clarity.model.Client;
 import nu.huw.clarity.model.ID;
 import nu.huw.clarity.sync.DownloadHelper.DownloadConnectionException;
 import nu.huw.clarity.sync.DownloadHelper.DownloadFileTask;
 import nu.huw.clarity.sync.DownloadHelper.DownloadRedirectException;
 import nu.huw.clarity.ui.LoginActivity;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.DavMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.client.methods.PutMethod;
+import org.threeten.bp.Instant;
 
 class SyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -312,10 +319,10 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
 
       if (filesToDownload.size() > 0) {
         tailIdentifier = ID.getDestination(filesToDownload.get(filesToDownload.size() - 1));
-        sharedPreferences.edit().putString("TAIL_IDENTIFIER", tailIdentifier).apply();
+        sharedPreferences.edit().putString("TAIL_IDENTIFIER", tailIdentifier).commit();
       }
 
-    } catch (Exception/*IOException | DavException*/ e) {
+    } catch (IOException | DavException e) {
       Log.e(TAG, "There was a problem with the web request", e);
       syncResult.stats.numIoExceptions++;
       return;
@@ -453,6 +460,44 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     ////////////////////////////
     // Organise .client files //
     ////////////////////////////
+
+    Log.v(TAG, "Organising .client files");
+
+    if (filesToDownload.size() > 0) {
+
+      sharedPreferences.edit().putString("LAST_SYNC_DATE", Instant.now().toString()).commit();
+      Client clientFile = new Client(getContext());
+
+      try {
+
+        // Convert client file to put request
+
+        Uri putUri = omniSyncUri.buildUpon().appendPath(clientFile.filename).build();
+        PutMethod putMethod = new PutMethod(putUri.toString());
+        RequestEntity requestEntity = new StringRequestEntity(clientFile.toPlistString(),
+            "document",
+            null);
+        putMethod.setRequestEntity(requestEntity);
+
+        // Execute request
+
+        client.executeMethod(putMethod);
+
+        int statusCode = putMethod.getStatusCode();
+        if (statusCode != 201) {
+          putMethod.releaseConnection();
+          throw new IOException(
+              "Unexpected status " + statusCode + " " + putMethod.getStatusText());
+        }
+        putMethod.releaseConnection();
+      } catch (UnsupportedEncodingException e) {
+        Log.e(TAG, e.getMessage(), e);
+      } catch (IOException e) {
+        Log.e(TAG, "Failed to upload client file", e);
+      } finally {
+        client.getHttpConnectionManager().closeIdleConnections(0);
+      }
+    }
 
     ///////////////////////////
 

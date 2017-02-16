@@ -97,6 +97,7 @@ public class DownloadHelper {
 
           return file;
         } catch (IOException e) {
+          getFileMethod.releaseConnection();
           throw new DownloadIOException(e);
         }
       } else if ((statusCode >= 301 && statusCode <= 304) || statusCode == 307
@@ -122,11 +123,13 @@ public class DownloadHelper {
 
         accountManagerHelper.setUserData("URI", builder.build().toString());
 
+        getFileMethod.releaseConnection();
         throw new DownloadRedirectException("Caught and saved redirection");
       } else {
         Log.e(TAG,
             "Error code " + statusCode + " " + getFileMethod.getStatusText() + " " + getFileMethod
                 .getPath());
+        getFileMethod.releaseConnection();
         throw new DownloadConnectionException("Server returned an unexpected response");
       }
     } catch (DownloadConnectionException | DownloadRedirectException | DownloadIOException e) {
