@@ -156,6 +156,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     // Get list of downloadable files
 
     List<Uri> filesToDownload;
+    boolean didDownloadFiles = false;
 
     try {
 
@@ -320,6 +321,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
       if (filesToDownload.size() > 0) {
         tailIdentifier = ID.getDestination(filesToDownload.get(filesToDownload.size() - 1));
         sharedPreferences.edit().putString("TAIL_IDENTIFIER", tailIdentifier).commit();
+        didDownloadFiles = true;
       }
 
     } catch (IOException | DavException e) {
@@ -330,13 +332,26 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
       client.getHttpConnectionManager().closeIdleConnections(0);
     }
 
+    ////////////////
+    // Wipe cache //
+    ////////////////
+
+    Log.v(TAG, "Clearing out the cache");
+
+    if (didDownloadFiles) {
+      File[] files = getContext().getCacheDir().listFiles();
+      for (File file : files) {
+        file.delete();
+      }
+    }
+
     /////////////////////////////
     // Download necessary data //
     /////////////////////////////
 
     Log.v(TAG, "Downloading files");
 
-    if (filesToDownload.size() > 0) {
+    if (didDownloadFiles) {
 
       // The setup we want for the threading is as follows:
       // | 1  | 2 - n-1  |   n   |
@@ -400,9 +415,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             // Preserve directory structure
 
-            if (entry.isDirectory()) {
-              entryFile.mkdirs();
-            } else {
+            if (!entry.isDirectory()) {
               File parent = entryFile.getParentFile();
 
               if (!parent.exists()) {
@@ -453,7 +466,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     Log.v(TAG, "Organising data using tree operations");
 
-    if (filesToDownload.size() > 0) {
+    if (didDownloadFiles) {
       new TreeOperations(getContext()).updateSubtree(null);
     }
 
@@ -463,7 +476,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     Log.v(TAG, "Organising .client files");
 
-    if (filesToDownload.size() > 0) {
+    if (didDownloadFiles) {
 
       sharedPreferences.edit().putString("LAST_SYNC_DATE", Instant.now().toString()).commit();
       Client clientFile = new Client(getContext());
@@ -492,8 +505,10 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         putMethod.releaseConnection();
       } catch (UnsupportedEncodingException e) {
         Log.e(TAG, e.getMessage(), e);
+        syncResult.stats.numParseExceptions++;
       } catch (IOException e) {
         Log.e(TAG, "Failed to upload client file", e);
+        syncResult.stats.numIoExceptions++;
       } finally {
         client.getHttpConnectionManager().closeIdleConnections(0);
       }
