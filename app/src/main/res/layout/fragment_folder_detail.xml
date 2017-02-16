@@ -1,4 +1,4 @@
-<LinearLayout
+<ScrollView
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
@@ -6,6 +6,13 @@
   android:orientation="vertical"
   tools:context=".ui.fragment.DetailInfoFragment">
 
-  <include layout="@layout/item_detail_status"/>
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-</LinearLayout>
+    <include layout="@layout/item_detail_status"/>
+
+  </LinearLayout>
+
+</ScrollView>

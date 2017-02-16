@@ -1,4 +1,4 @@
-<LinearLayout
+<ScrollView
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
@@ -6,18 +6,25 @@
   android:orientation="vertical"
   tools:context=".ui.fragment.DetailInfoFragment">
 
-  <include layout="@layout/item_detail_project"/>
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-  <include layout="@layout/item_detail_context"/>
+    <include layout="@layout/item_detail_project"/>
 
-  <include layout="@layout/item_detail_flag"/>
+    <include layout="@layout/item_detail_context"/>
 
-  <include layout="@layout/item_detail_duration"/>
+    <include layout="@layout/item_detail_flag"/>
 
-  <include layout="@layout/item_detail_defer"/>
+    <include layout="@layout/item_detail_duration"/>
 
-  <include layout="@layout/item_detail_due"/>
+    <include layout="@layout/item_detail_defer"/>
 
-  <include layout="@layout/item_detail_repeat"/>
+    <include layout="@layout/item_detail_due"/>
 
-</LinearLayout>
+    <include layout="@layout/item_detail_repeat"/>
+
+  </LinearLayout>
+
+</ScrollView>

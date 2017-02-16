@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements
   private Perspective perspective;
   private Perspective backPerspective;
   private IntentFilter syncIntentFilter;
-  private ListFragment fragment;
+  private Fragment fragment;
   private boolean isChangingFragment;
   private List<Perspective> perspectiveList;
   private BroadcastReceiver syncReceiver = new BroadcastReceiver() {
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements
       intent.putExtra(LoginActivity.KEY_REQUEST, LoginActivity.VALUE_NOACCOUNT);
       startActivityForResult(intent, LOG_IN_FIRST_REQUEST);
     } else {
-      registerSyncService();
+      registerSyncService(false);
     }
 
     // Initialise view
@@ -136,39 +136,46 @@ public class MainActivity extends AppCompatActivity implements
       perspective = checkedDrawerItem;
     }
 
-    if (intent.hasExtra("ENTRY") && (perspective.id.equals("ProcessProjects") || perspective.id
-        .equals("ProcessContexts"))) {
-      Entry entry = intent.getParcelableExtra("ENTRY");
-      ListFragment fragment;
+    // Check for a saved fragment from the instance state
+    // If we have a saved state, that's great -- use the fragment
+    // But if we didn't save that fragment for whatever reason, check to see if it's null and
+    // replace it based on the current perspective
 
-      // If the entry has children, then we should display a view where we can appropriately show
-      // them (with the entry as a header).
-      // If the entry doesn't have children, then display its parent entry.
-      // But if the parent doesn't exist, then display the root view for that perspective.
-
-      if (entry.hasChildren()) {
-        fragment = ListFragment.newInstance(perspective, entry);
-      } else {
-        Entry parent = entry.getParent(this);
-        if (parent != null) {
-          fragment = ListFragment.newInstance(perspective, parent);
-        } else {
-          fragment = ListFragment.newInstance(perspective, null);
-        }
-      }
-
-      getSupportFragmentManager()
-          .beginTransaction()
-          .replace(R.id.framelayout_main_container, fragment)
-          .commit();
-
-    } else {
-      fragment = ListFragment.newInstance(perspective, null);
-      getSupportFragmentManager()
-          .beginTransaction()
-          .replace(R.id.framelayout_main_container, fragment)
-          .commit();
+    if (savedInstanceState != null) {
+      fragment = getSupportFragmentManager().getFragment(savedInstanceState, "FRAGMENT");
     }
+
+    if (fragment == null) {
+      if (intent.hasExtra("ENTRY") && (perspective.id.equals("ProcessProjects") || perspective.id
+          .equals("ProcessContexts"))) {
+        Entry entry = intent.getParcelableExtra("ENTRY");
+        ListFragment fragment;
+
+        // If the entry has children, then we should display a view where we can appropriately show
+        // them (with the entry as a header).
+        // If the entry doesn't have children, then display its parent entry.
+        // But if the parent doesn't exist, then display the root view for that perspective.
+
+        if (entry.hasChildren()) {
+          fragment = ListFragment.newInstance(perspective, entry);
+        } else {
+          Entry parent = entry.getParent(this);
+          if (parent != null) {
+            fragment = ListFragment.newInstance(perspective, parent);
+          } else {
+            fragment = ListFragment.newInstance(perspective, null);
+          }
+        }
+        fragment.setRetainInstance(true);
+      } else {
+        fragment = ListFragment.newInstance(perspective, null);
+      }
+    }
+
+    getSupportFragmentManager()
+        .beginTransaction()
+        .replace(R.id.framelayout_main_container, fragment)
+        .commit();
 
     // Setup navigation drawer (pt. 2)
     // This also involves setting the current checked item in the drawer, the toolbar title, and the
@@ -187,6 +194,9 @@ public class MainActivity extends AppCompatActivity implements
   @Override
   protected void onSaveInstanceState(Bundle out) {
     out.putParcelable("PERSPECTIVE", perspective);
+    if (fragment.isAdded()) {
+      getSupportFragmentManager().putFragment(out, "FRAGMENT", fragment);
+    }
     super.onSaveInstanceState(out);
   }
 
@@ -222,8 +232,10 @@ public class MainActivity extends AppCompatActivity implements
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == LOG_IN_FIRST_REQUEST && resultCode == LoginActivity.RESULT_OK) {
-      registerSyncService();
-      if (fragment != null) fragment.checkForSyncs();
+      registerSyncService(true);
+      if (fragment != null && fragment instanceof ListFragment) {
+        ((ListFragment) fragment).checkForSyncs();
+      }
     }
   }
 
@@ -274,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements
     // Create the new list fragment and add it to the back stack
 
     ListFragment newFragment = ListFragment.newInstance(perspective, entry);
+    newFragment.setRetainInstance(true);
 
     getSupportFragmentManager()
         .beginTransaction()
@@ -302,21 +315,30 @@ public class MainActivity extends AppCompatActivity implements
    * Using the account manager, register a periodic sync using the normal service if that sync
    * doesn't exist.
    */
-  private void registerSyncService() {
+  private void registerSyncService(boolean requestSync) {
 
     AccountManagerHelper accountManagerHelper = new AccountManagerHelper(this);
     Account account = accountManagerHelper.getAccount();
 
-    if (account != null) {
-      String authority = getString(R.string.sync_authority);
+    String authority = getString(R.string.sync_authority);
+    if (ContentResolver.getPeriodicSyncs(account, authority).isEmpty()) {
 
-      if (ContentResolver.getPeriodicSyncs(account, authority).isEmpty()) {
+      long ONE_HOUR = 60L * 60L; // One hour
+      ContentResolver.setSyncAutomatically(account, authority, true);
+      ContentResolver.addPeriodicSync(account, authority, new Bundle(), ONE_HOUR);
 
-        long ONE_HOUR = 60L * 60L; // One hour
-        ContentResolver.setSyncAutomatically(account, authority, true);
-        ContentResolver.addPeriodicSync(account, authority, new Bundle(), ONE_HOUR);
+    }
 
-      }
+    // Immediately sync after logging in
+
+    if (requestSync) {
+
+      Bundle syncSettings = new Bundle();
+      syncSettings.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+      syncSettings.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+      ContentResolver.requestSync(account, authority, syncSettings);
+
     }
   }
 
@@ -448,6 +470,7 @@ public class MainActivity extends AppCompatActivity implements
     navigationview_main_drawer.setCheckedItem(toPerspective.menuID);
 
     ListFragment newFragment = ListFragment.newInstance(toPerspective, null);
+    newFragment.setRetainInstance(true);
 
     getSupportFragmentManager()
         .beginTransaction()
@@ -476,10 +499,12 @@ public class MainActivity extends AppCompatActivity implements
       // (in conjunction with DrawerListener)
 
       isChangingFragment = true;
+      Fragment fragment = new Fragment();
+      fragment.setRetainInstance(true);
       getSupportFragmentManager()
           .beginTransaction()
           .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
-          .replace(R.id.framelayout_main_container, new Fragment())
+          .replace(R.id.framelayout_main_container, fragment)
           .commit();
 
       // Finish up
@@ -501,6 +526,8 @@ public class MainActivity extends AppCompatActivity implements
         // (in conjunction with NavigationViewListener)
 
         ListFragment newFragment = ListFragment.newInstance(perspective, null);
+        newFragment.setRetainInstance(true);
+
         getSupportFragmentManager()
             .beginTransaction()
             .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)

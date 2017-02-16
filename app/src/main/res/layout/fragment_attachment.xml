@@ -8,6 +8,8 @@
     android:id="@+id/listview_detail_attachments"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:divider="@drawable/divider_line"/>
+    android:divider="@drawable/divider_line"
+    android:fadeScrollbars="true"
+    android:scrollbars="vertical"/>
 
 </LinearLayout>
