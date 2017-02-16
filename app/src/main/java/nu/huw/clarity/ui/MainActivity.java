@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements
   NavigationView navigationview_main_drawer;
 
   private Perspective perspective;
+  private Perspective backPerspective;
   private IntentFilter syncIntentFilter;
   private ListFragment fragment;
   private boolean isChangingFragment;
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements
 
     navigationview_main_drawer.setItemIconTintList(null);
     Perspective checkedDrawerItem = refreshNavigationDrawerMenu();
+    backPerspective = checkedDrawerItem;
 
     // Add the list fragment based on the passed intent (if at all)
 
@@ -251,10 +253,15 @@ public class MainActivity extends AppCompatActivity implements
   public void onBackPressed() {
 
     // Close the navigation drawer if it's open
-    // Otherwise default behaviour
+    // Or return to the default perspective if we're not there
+    // Otherwise just close the activity
 
     if (drawerlayout_main.isDrawerOpen(GravityCompat.START)) {
       drawerlayout_main.closeDrawer(GravityCompat.START);
+    } else if (getSupportFragmentManager().getBackStackEntryCount() == 0
+        && perspective != backPerspective) {
+      changePerspectives(perspective, backPerspective);
+      perspective = backPerspective;
     } else {
       super.onBackPressed();
     }
@@ -428,6 +435,28 @@ public class MainActivity extends AppCompatActivity implements
       TaskDescription taskDescription = new TaskDescription(title, appIcon, colorTo);
       setTaskDescription(taskDescription);
     }
+  }
+
+  /**
+   * Changes between the two given perspectives, including selecting the correct menu item, colours,
+   * and title.
+   */
+  private void changePerspectives(Perspective fromPerspective, Perspective toPerspective) {
+
+    changeColors(fromPerspective, toPerspective);
+    setTitle(toPerspective.name);
+    navigationview_main_drawer.setCheckedItem(toPerspective.menuID);
+
+    ListFragment newFragment = ListFragment.newInstance(toPerspective, null);
+
+    getSupportFragmentManager()
+        .beginTransaction()
+        .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+        .replace(R.id.framelayout_main_container, newFragment)
+        .commit();
+
+    fragment = newFragment;
+
   }
 
   class NavigationViewListener implements NavigationView.OnNavigationItemSelectedListener {
