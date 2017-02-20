@@ -4,11 +4,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import nu.huw.clarity.R;
+import nu.huw.clarity.model.Context;
 import nu.huw.clarity.model.Entry;
+import nu.huw.clarity.model.Folder;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.model.Task;
 import nu.huw.clarity.ui.fragment.DetailAttachmentFragment;
-import nu.huw.clarity.ui.fragment.DetailInfoFragment;
+import nu.huw.clarity.ui.fragment.DetailInfoContextFragment;
+import nu.huw.clarity.ui.fragment.DetailInfoFolderFragment;
+import nu.huw.clarity.ui.fragment.DetailInfoProjectFragment;
+import nu.huw.clarity.ui.fragment.DetailInfoTaskFragment;
 import nu.huw.clarity.ui.fragment.DetailNoteFragment;
 
 public class DetailPagerAdapter extends FragmentPagerAdapter {
@@ -37,7 +42,22 @@ public class DetailPagerAdapter extends FragmentPagerAdapter {
         return DetailNoteFragment.newInstance((Task) entry, perspective);
       case POSITION_INFO:
       default:
-        return DetailInfoFragment.newInstance(entry, perspective);
+
+        if (entry != null) {
+          if (entry instanceof Task) {
+            if (((Task) entry).isProject) {
+              return DetailInfoProjectFragment.newInstance(entry, perspective);
+            } else {
+              return DetailInfoTaskFragment.newInstance(entry, perspective);
+            }
+          } else if (entry instanceof Context) {
+            return DetailInfoContextFragment.newInstance(entry, perspective);
+          } else if (entry instanceof Folder) {
+            return DetailInfoFolderFragment.newInstance(entry, perspective);
+          }
+        }
+
+        throw new NullPointerException("Supplied entry is null or invalid");
     }
   }
 

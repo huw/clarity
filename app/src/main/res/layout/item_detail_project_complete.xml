@@ -20,7 +20,7 @@
     android:textColor="@color/secondary_text_light"
     android:textSize="@dimen/subhead_size"/>
 
-  <android.support.v7.widget.SwitchCompat
+  <Switch
     android:id="@id/switch_detailitem_projectcomplete"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
