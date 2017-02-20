@@ -13,7 +13,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.BigTextStyle;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import java.util.List;
 import nu.huw.clarity.R;
@@ -21,8 +20,7 @@ import nu.huw.clarity.db.TreeOperations;
 import nu.huw.clarity.db.model.DataModelHelper;
 import nu.huw.clarity.db.model.NoteHelper;
 import nu.huw.clarity.model.Task;
-import nu.huw.clarity.ui.DetailActivity;
-import nu.huw.clarity.ui.MainActivity;
+import nu.huw.clarity.ui.activity.MainActivity;
 import org.threeten.bp.ZoneId;
 
 /**
@@ -79,7 +77,7 @@ public class NotificationService extends Service {
    * An AsyncTask that firstly updates the overdue/due soon status of every item in the database,
    * and secondly displays notifications for overdue tasks.
    */
-  private class NotificationTask extends AsyncTask<Void, Void, List<Task>> {
+  public class NotificationTask extends AsyncTask<Void, Void, List<Task>> {
 
     DataModelHelper dataModelHelper = new DataModelHelper(getApplicationContext());
     Bitmap background_wearable = BitmapFactory
@@ -193,21 +191,11 @@ public class NotificationService extends Service {
 
         // Set notification actions/intents
 
-        Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra("ENTRY", task);
         intent.putExtra("PERSPECTIVE", dataModelHelper.getForecastPerspective());
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-        stackBuilder.addNextIntentWithParentStack(intent);
-
-        // Set artificial back stack on Main Activity
-
-        Intent mainActivityIntent = stackBuilder.editIntentAt(0);
-        mainActivityIntent.putExtra("ENTRY", task);
-        mainActivityIntent.putExtra("PERSPECTIVE", dataModelHelper.getForecastPerspective());
-
-        PendingIntent pendingIntent = stackBuilder
-            .getPendingIntent(ID, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent
+            .getActivity(getApplicationContext(), ID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(pendingIntent);
 
         // Give the notification a unique ID

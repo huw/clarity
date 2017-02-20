@@ -7,7 +7,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:fitsSystemWindows="true"
-  tools:context="nu.huw.clarity.ui.MainActivity">
+  tools:context="nu.huw.clarity.ui.activity.MainActivity">
 
   <RelativeLayout
     android:layout_width="match_parent"
@@ -30,7 +30,7 @@
       android:layout_height="match_parent"
       android:layout_below="@id/toolbar_main"
       android:background="@color/background_navigation"
-      tools:context=".ui.MainActivity"/>
+      tools:context=".ui.activity.MainActivity"/>
 
   </RelativeLayout>
 

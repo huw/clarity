@@ -52,6 +52,7 @@ public class DetailInfoTaskFragment extends DetailInfoFragment {
   public void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
+    onAttachToParentFragment(getParentFragment());
     Bundle args = getArguments();
     if (args != null) {
       entry = args.getParcelable("ENTRY");
@@ -101,7 +102,7 @@ public class DetailInfoTaskFragment extends DetailInfoFragment {
         @Override
         public void onClick(View view) {
 
-          mListener.onProjectClick(project, perspective);
+          listener.onProjectClick(project, perspective);
         }
       });
     }

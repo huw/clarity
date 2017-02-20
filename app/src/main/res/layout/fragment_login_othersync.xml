@@ -12,7 +12,7 @@
   android:clipToPadding="false"
   android:orientation="vertical"
   android:theme="@style/ThemeOverlay.AppTheme.Dark"
-  tools:context=".ui.LoginActivity">
+  tools:context=".ui.activity.LoginActivity">
 
   <ProgressBar
     android:id="@+id/progressbar_loginothersync_spinner"

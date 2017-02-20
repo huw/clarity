@@ -29,7 +29,7 @@ public class DetailInfoFragment extends Fragment {
   private static final String TAG = DetailInfoFragment.class.getSimpleName();
   Entry entry;
   Perspective perspective;
-  OnDetailInfoInteractionListener mListener;
+  OnDetailInfoInteractionListener listener;
   Unbinder unbinder;
   @ColorInt
   int PRIMARY_TEXT_COLOR;
@@ -52,6 +52,7 @@ public class DetailInfoFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
+    onAttachToParentFragment(getParentFragment());
     Bundle args = getArguments();
     if (args != null) {
       entry = args.getParcelable("ENTRY");
@@ -70,21 +71,19 @@ public class DetailInfoFragment extends Fragment {
         "OnCreateView must be overridden by a child class of DetailInfoFragment");
   }
 
-  @Override
-  public void onAttach(android.content.Context context) {
-    super.onAttach(context);
-    if (context instanceof OnDetailInfoInteractionListener) {
-      mListener = (OnDetailInfoInteractionListener) context;
-    } else {
-      throw new RuntimeException(
-          context.toString() + " must implement OnDetailInteractionListener");
+  void onAttachToParentFragment(Fragment fragment) {
+    if (fragment instanceof OnDetailInfoInteractionListener) {
+      listener = (OnDetailInfoInteractionListener) fragment;
+    } else if (fragment != null) {
+      throw new ClassCastException(
+          fragment.toString() + " must implement OnDetailInteractionListener");
     }
   }
 
   @Override
   public void onDetach() {
     super.onDetach();
-    mListener = null;
+    listener = null;
   }
 
   /**
@@ -102,7 +101,7 @@ public class DetailInfoFragment extends Fragment {
         @Override
         public void onClick(View view) {
 
-          mListener.onContextClick(context, perspective);
+          listener.onContextClick(context, perspective);
         }
       });
     }

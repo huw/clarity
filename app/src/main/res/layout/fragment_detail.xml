@@ -7,7 +7,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:fitsSystemWindows="true"
-  tools:context="nu.huw.clarity.ui.DetailActivity">
+  tools:context="nu.huw.clarity.ui.activity.MainActivity">
 
   <android.support.design.widget.AppBarLayout
     android:id="@+id/appbarlayout_detail"
@@ -18,9 +18,13 @@
 
     <android.support.v7.widget.Toolbar
       android:id="@+id/toolbar_detail"
+      navigationIcon="@drawable/ic_done"
       android:layout_width="match_parent"
       android:layout_height="?attr/actionBarSize"
-      app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"/>
+      android:navigationIcon="@drawable/ic_done"
+      app:navigationIcon="@drawable/ic_done"
+      app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+      tools:targetApi="lollipop"/>
 
     <RelativeLayout
       android:layout_width="match_parent"

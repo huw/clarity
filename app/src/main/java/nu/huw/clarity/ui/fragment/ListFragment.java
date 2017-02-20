@@ -390,8 +390,8 @@ public class ListFragment extends Fragment implements
    */
   public interface OnListFragmentInteractionListener {
 
-    void onItemDetailInteraction(@NonNull Entry entry, @Nullable Perspective perspective);
+    void onItemDetailInteraction(@NonNull Entry entry, @NonNull Perspective perspective);
 
-    void onItemListInteraction(@NonNull Entry entry, @Nullable Perspective perspective);
+    void onItemListInteraction(@NonNull Entry entry, @NonNull Perspective perspective);
   }
 }

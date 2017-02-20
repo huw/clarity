@@ -56,6 +56,7 @@ public class DetailInfoProjectFragment extends DetailInfoFragment {
   public void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
+    onAttachToParentFragment(getParentFragment());
     Bundle args = getArguments();
     if (args != null) {
       entry = args.getParcelable("ENTRY");

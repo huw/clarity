@@ -43,7 +43,7 @@ import nu.huw.clarity.model.ID;
 import nu.huw.clarity.sync.DownloadHelper.DownloadConnectionException;
 import nu.huw.clarity.sync.DownloadHelper.DownloadFileTask;
 import nu.huw.clarity.sync.DownloadHelper.DownloadRedirectException;
-import nu.huw.clarity.ui.LoginActivity;
+import nu.huw.clarity.ui.activity.LoginActivity;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;

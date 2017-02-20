@@ -1,4 +1,4 @@
-package nu.huw.clarity.ui;
+package nu.huw.clarity.ui.activity;
 
 import android.accounts.Account;
 import android.animation.ArgbEvaluator;
@@ -42,6 +42,7 @@ import nu.huw.clarity.db.model.DataModelHelper;
 import nu.huw.clarity.model.Entry;
 import nu.huw.clarity.model.Perspective;
 import nu.huw.clarity.notification.NotificationService;
+import nu.huw.clarity.ui.fragment.DetailFragment;
 import nu.huw.clarity.ui.fragment.ListFragment;
 
 public class MainActivity extends AppCompatActivity implements
@@ -167,6 +168,16 @@ public class MainActivity extends AppCompatActivity implements
           }
         }
         fragment.setRetainInstance(true);
+      } else if (intent.hasExtra("ENTRY") && perspective.id.equals("ProcessForecast")) {
+
+        // We've received this from a notification
+        // Open up the detail fragment with the correct perspective in the background
+
+        Entry entry = intent.getParcelableExtra("ENTRY");
+        DetailFragment detailFragment = DetailFragment.newInstance(perspective, entry);
+        detailFragment.show(getSupportFragmentManager(), detailFragment.getTag());
+        fragment = ListFragment.newInstance(perspective, null);
+
       } else {
         fragment = ListFragment.newInstance(perspective, null);
       }
@@ -188,7 +199,6 @@ public class MainActivity extends AppCompatActivity implements
     navigationview_main_drawer
         .setNavigationItemSelectedListener(new MainActivity.NavigationViewListener());
     drawerlayout_main.addDrawerListener(new MainActivity.DrawerListener());
-
   }
 
   @Override
@@ -219,11 +229,13 @@ public class MainActivity extends AppCompatActivity implements
 
     // Register the notification service
     // Look for new notifications every 5 minutes
+    // And check right as we open the app as well
 
     AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
     Intent intent = new Intent(this, NotificationService.class);
     PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
 
+    startService(intent);
     alarmManager.cancel(pendingIntent);
     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
         SystemClock.elapsedRealtime() + 5 * 1000, 5 * 60 * 1000, pendingIntent);
@@ -271,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements
     if (drawerlayout_main.isDrawerOpen(GravityCompat.START)) {
       drawerlayout_main.closeDrawer(GravityCompat.START);
     } else if (getSupportFragmentManager().getBackStackEntryCount() == 0
-        && perspective != backPerspective) {
+        && !perspective.equals(backPerspective)) {
       changePerspectives(perspective, backPerspective);
       perspective = backPerspective;
     } else {
@@ -299,16 +311,13 @@ public class MainActivity extends AppCompatActivity implements
   }
 
   @Override
-  public void onItemDetailInteraction(@NonNull Entry entry, @Nullable Perspective perspective) {
+  public void onItemDetailInteraction(@NonNull Entry entry, @NonNull Perspective perspective) {
 
     // We've clicked a list item and want to show its details
-    // Create the detail activity and show it
+    // Create the detail fragment and show it
 
-    Intent intent = new Intent(this, DetailActivity.class);
-    intent.putExtra("ENTRY", entry);
-    intent.putExtra("PERSPECTIVE", perspective);
-    startActivity(intent);
-
+    DetailFragment detailFragment = DetailFragment.newInstance(perspective, entry);
+    detailFragment.show(getSupportFragmentManager(), detailFragment.getTag());
   }
 
   /**

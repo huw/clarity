@@ -47,6 +47,7 @@ public class DetailAttachmentFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
+    onAttachToParentFragment(getParentFragment());
     Bundle args = getArguments();
     if (args != null) {
       task = args.getParcelable("TASK");
@@ -79,14 +80,12 @@ public class DetailAttachmentFragment extends Fragment {
     return view;
   }
 
-  @Override
-  public void onAttach(android.content.Context context) {
-    super.onAttach(context);
-    if (context instanceof OnAttachmentListInteractionListener) {
-      listener = (OnAttachmentListInteractionListener) context;
-    } else {
-      throw new RuntimeException(
-          context.toString() + " must implement OnAttachmentListInteractionListener");
+  void onAttachToParentFragment(Fragment fragment) {
+    if (fragment instanceof OnAttachmentListInteractionListener) {
+      listener = (OnAttachmentListInteractionListener) fragment;
+    } else if (fragment != null) {
+      throw new ClassCastException(
+          fragment.toString() + " must implement OnAttachmentListInteractionListener");
     }
   }
 

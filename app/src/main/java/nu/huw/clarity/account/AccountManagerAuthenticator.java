@@ -8,7 +8,7 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import nu.huw.clarity.ui.LoginActivity;
+import nu.huw.clarity.ui.activity.LoginActivity;
 
 /**
  * AccountManagerAuthenticator is a class to authenticate and create accounts using the

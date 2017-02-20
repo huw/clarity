@@ -92,4 +92,12 @@ public class Perspective extends Base {
     out.writeString(value);
     out.writeString(viewMode);
   }
+
+  /**
+   * Compare perspectives based on their IDs rather than object references
+   */
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof Perspective && id.equals(((Perspective) obj).id);
+  }
 }

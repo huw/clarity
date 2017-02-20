@@ -12,7 +12,7 @@
   android:clipToPadding="false"
   android:orientation="vertical"
   android:theme="@style/ThemeOverlay.AppTheme.Dark"
-  tools:context=".ui.LoginActivity">
+  tools:context=".ui.activity.LoginActivity">
 
   <RelativeLayout
     android:layout_width="wrap_content"
