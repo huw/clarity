@@ -414,8 +414,8 @@ public class MainActivity extends AppCompatActivity implements
 
     // Get the current header colour
 
-    @ColorRes int colorFrom = ContextCompat.getColor(this, fromPerspective.color);
-    @ColorRes int colorTo = ContextCompat.getColor(this, toPerspective.color);
+    @ColorRes int colorFrom = ContextCompat.getColor(this, fromPerspective.colorID);
+    @ColorRes int colorTo = ContextCompat.getColor(this, toPerspective.colorID);
 
     // Set the navigationview_main_drawer highlight colour to the new perspective's
 

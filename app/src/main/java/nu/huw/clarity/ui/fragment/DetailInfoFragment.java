@@ -70,14 +70,14 @@ public class DetailInfoFragment extends Fragment {
     if (entry != null) {
       if (entry instanceof Task) {
         if (((Task) entry).isProject) {
-          return bindProjectDetails(R.layout.fragment_project_detail, inflater, container);
+          return bindProjectDetails(R.layout.fragment_detail_project, inflater, container);
         } else {
-          return bindTaskDetails(R.layout.fragment_task_detail, inflater, container);
+          return bindTaskDetails(R.layout.fragment_detail_task, inflater, container);
         }
       } else if (entry instanceof Context) {
-        return bindContextDetails(R.layout.fragment_context_detail, inflater, container);
+        return bindContextDetails(R.layout.fragment_detail_context, inflater, container);
       } else if (entry instanceof Folder) {
-        return bindFolderDetails(R.layout.fragment_folder_detail, inflater, container);
+        return bindFolderDetails(R.layout.fragment_detail_folder, inflater, container);
       }
     }
 

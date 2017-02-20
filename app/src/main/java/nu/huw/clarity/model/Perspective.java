@@ -25,7 +25,7 @@ public class Perspective extends Base {
         }
       };
   @ColorRes
-  public int color;
+  public int colorID;
   @ColorRes
   public int colorStateListID;
   @DrawableRes
@@ -53,7 +53,7 @@ public class Perspective extends Base {
     super(in);
 
     // res
-    color = in.readInt();
+    colorID = in.readInt();
     colorStateListID = in.readInt();
     icon = in.readInt();
     menuID = in.readInt();
@@ -76,7 +76,7 @@ public class Perspective extends Base {
     super.writeToParcel(out, flags);
 
     // res
-    out.writeInt(color);
+    out.writeInt(colorID);
     out.writeInt(colorStateListID);
     out.writeInt(icon);
     out.writeInt(menuID);

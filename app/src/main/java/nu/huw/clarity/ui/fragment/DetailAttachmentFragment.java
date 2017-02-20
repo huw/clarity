@@ -60,7 +60,7 @@ public class DetailAttachmentFragment extends Fragment {
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.fragment_attachment, container, false);
+    View view = inflater.inflate(R.layout.fragment_detail_attachment, container, false);
     ButterKnife.bind(this, view);
 
     // Get list of attachments and set adapter

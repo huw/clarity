@@ -112,31 +112,31 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     switch (viewType) {
       case Entry.VT_TASK:
         view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.fragment_task, parent, false);
+            .inflate(R.layout.item_list_task, parent, false);
         return new TaskViewHolder(view, this);
       case Entry.VT_CONTEXT:
         view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.fragment_context, parent, false);
+            .inflate(R.layout.item_list_context, parent, false);
         return new ContextViewHolder(view, this);
       case Entry.VT_FOLDER:
         view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.fragment_folder, parent, false);
+            .inflate(R.layout.item_list_folder, parent, false);
         return new FolderViewHolder(view, this);
       case Entry.VT_PROJECT:
         view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.fragment_project, parent, false);
+            .inflate(R.layout.item_list_project, parent, false);
         return new ProjectViewHolder(view, this);
       case Entry.VT_NESTED_TASK:
         view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.fragment_nested_task, parent, false);
+            .inflate(R.layout.item_list_nestedtask, parent, false);
         return new NestedTaskViewHolder(view, this);
       case Entry.VT_HEADER_ENTRY:
         view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.fragment_header_entry, parent, false);
+            .inflate(R.layout.item_listheader_entry, parent, false);
         return new EntryHeaderViewHolder(view, this);
       case Entry.VT_HEADER_COLLATION:
         view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.fragment_header_collation, parent, false);
+            .inflate(R.layout.item_listheader_collation, parent, false);
         return new CollationHeaderViewHolder(view, this);
     }
 

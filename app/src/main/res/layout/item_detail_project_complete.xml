@@ -26,8 +26,7 @@
     android:layout_height="wrap_content"
     android:layout_marginEnd="@dimen/horizontal_margin"
     android:layout_alignParentEnd="true"
-    android:layout_centerInParent="true"
-    android:enabled="false"/>
+    android:layout_centerInParent="true"/>
 
   <View
     android:id="@+id/divider_detailitem_projectcomplete"

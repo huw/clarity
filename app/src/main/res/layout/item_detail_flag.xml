@@ -27,7 +27,6 @@
     android:layout_alignParentEnd="true"
     android:layout_centerInParent="true"
     android:background="@drawable/selector_toggle_flag"
-    android:enabled="false"
     android:textOff=""
     android:textOn=""/>
 

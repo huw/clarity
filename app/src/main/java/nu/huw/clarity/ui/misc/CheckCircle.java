@@ -48,9 +48,8 @@ public class CheckCircle extends CheckBox {
 
     int[] baseState = super.onCreateDrawableState(extraSpace);
 
-        /*
-         Android handles multiple states just fine, so no need to specify weird rules for multiple.
-         */
+    // Android handles multiple states just fine, so no need to specify weird rules for multiple.
+
     if (flagged) mergeDrawableStates(baseState, STATE_FLAGGED);
     if (overdue) mergeDrawableStates(baseState, STATE_OVERDUE);
     if (dueSoon) mergeDrawableStates(baseState, STATE_DUE_SOON);

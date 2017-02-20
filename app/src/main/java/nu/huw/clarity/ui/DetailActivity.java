@@ -57,22 +57,6 @@ public class DetailActivity extends AppCompatActivity
   private Entry entry;
   private Perspective perspective;
 
-  private void setupToolbar() {
-
-    setSupportActionBar(toolbar_detail);
-    final ActionBar actionBar = getSupportActionBar();
-
-    if (actionBar != null) {
-      actionBar.setTitle("");
-      actionBar.setDisplayHomeAsUpEnabled(true);
-    }
-
-    // Set background colours depending on the view we just came from
-    TypedValue typedValue = new TypedValue();
-    getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-    relativelayout_detail_container.setBackgroundColor(typedValue.data);
-  }
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
@@ -101,7 +85,19 @@ public class DetailActivity extends AppCompatActivity
     setContentView(R.layout.activity_detail);
     ButterKnife.bind(this);
 
-    setupToolbar();
+    setSupportActionBar(toolbar_detail);
+    final ActionBar actionBar = getSupportActionBar();
+
+    if (actionBar != null) {
+      actionBar.setTitle("");
+      actionBar.setDisplayHomeAsUpEnabled(true);
+    }
+
+    // Set background colours depending on the view we just came from
+
+    TypedValue typedValue = new TypedValue();
+    getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+    relativelayout_detail_container.setBackgroundColor(typedValue.data);
 
     // Set the default text in the text field to the thing's name, and set the hint text to
     // the thing's type

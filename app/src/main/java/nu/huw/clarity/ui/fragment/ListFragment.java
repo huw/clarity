@@ -156,7 +156,7 @@ public class ListFragment extends Fragment implements
 
     // Setup swipe-to-refresh
 
-    int spinnerColor = ContextCompat.getColor(getContext(), perspective.color);
+    int spinnerColor = ContextCompat.getColor(getContext(), perspective.colorID);
 
     AccountManagerHelper AMHelper = new AccountManagerHelper(getContext());
     if (AMHelper.accountExists()) {

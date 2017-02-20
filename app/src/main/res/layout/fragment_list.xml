@@ -21,7 +21,7 @@
       android:scrollbars="vertical"
       app:layoutManager="LinearLayoutManager"
       tools:context=".ui.fragment.ListFragment"
-      tools:listitem="@layout/fragment_task"/>
+      tools:listitem="@layout/item_list_task"/>
 
   </android.support.v4.widget.SwipeRefreshLayout>
 
