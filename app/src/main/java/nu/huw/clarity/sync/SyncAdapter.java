@@ -51,6 +51,7 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.DavMethod;
+import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.threeten.bp.Instant;
@@ -156,6 +157,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     // Get list of downloadable files
 
     List<Uri> filesToDownload;
+    List<Uri> clientFiles = new ArrayList<>();
     boolean didDownloadFiles = false;
 
     try {
@@ -181,16 +183,20 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
       // We can also look at the responses to determine whether we want to download this file
 
       List<Uri> filesOnServer = new ArrayList<>();
+      String clientID = sharedPreferences.getString("CLIENT_IDENTIFIER", null);
 
       MultiStatusResponse[] responses = listFiles.getResponseBodyAsMultiStatus().getResponses();
       for (MultiStatusResponse response : responses) {
         Uri responseUri = Uri.parse(response.getHref());
-        if (ID.isValidFile(responseUri)) {
+        if (ID.isValidHistoryFile(responseUri)) {
           filesOnServer.add(responseUri);
+        } else if (clientID != null && ID.isValidClientFile(responseUri, clientID)) {
+          clientFiles.add(responseUri);
         }
       }
 
       Collections.sort(filesOnServer);
+      Collections.sort(clientFiles);
 
       // Find the URI of the tail ID
 
@@ -285,7 +291,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
           // a search and it only slows us down (unless it's a merge file, in which case it can be
           // used multiple times).
 
-          if (!ID.isMergeFile(currentTailUri)) {
+          if (!ID.isValidMergeFile(currentTailUri)) {
             filesOnServer.remove(currentTailUri);
           }
         }
@@ -478,6 +484,8 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     if (didDownloadFiles) {
 
+      // Create and upload a new client files
+
       sharedPreferences.edit().putString("LAST_SYNC_DATE", Instant.now().toString()).commit();
       Client clientFile = new Client(getContext());
 
@@ -511,6 +519,40 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         syncResult.stats.numIoExceptions++;
       } finally {
         client.getHttpConnectionManager().closeIdleConnections(0);
+      }
+
+      // Remove old client files (keep the latest two)
+
+      int numberOfClientFiles = clientFiles.size();
+      if (numberOfClientFiles > 2) {
+        for (int i = 0; i < numberOfClientFiles - 2; i++) {
+          try {
+
+            // Form a delete method & execute
+
+            Uri deleteUri = omniSyncUri.buildUpon()
+                .appendPath(clientFiles.get(i).getLastPathSegment())
+                .build();
+            DeleteMethod deleteMethod = new DeleteMethod(deleteUri.toString());
+            client.executeMethod(deleteMethod);
+
+            // Check status
+
+            int statusCode = deleteMethod.getStatusCode();
+            if (statusCode != 204) {
+              deleteMethod.releaseConnection();
+              throw new IOException(
+                  "Unexpected status " + statusCode + " " + deleteMethod.getStatusText());
+            }
+            deleteMethod.releaseConnection();
+
+          } catch (IOException e) {
+            Log.e(TAG, "Failed to delete old client file", e);
+            syncResult.stats.numIoExceptions++;
+          } finally {
+            client.getHttpConnectionManager().closeIdleConnections(0);
+          }
+        }
       }
     }
 

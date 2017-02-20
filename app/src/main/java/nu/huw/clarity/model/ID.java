@@ -12,7 +12,7 @@ public class ID {
   private static final String TAG = ID.class.getSimpleName();
   private static final Pattern idPattern = Pattern.compile("[a-zA-Z0-9_-]{11}");
   private static final Pattern strictIDPattern = Pattern.compile("^[a-zA-Z0-9_-]{11}$");
-  private static final Pattern filePattern = Pattern
+  private static final Pattern historyFilePattern = Pattern
       .compile("^[0-9]{14}=[a-zA-Z0-9_-]{11}\\+[a-zA-Z0-9_-]{11}(\\+[a-zA-Z0-9_-]{11})?\\.zip$");
   private static final Pattern transactionFilePattern = Pattern
       .compile("^[0-9]{14}=[a-zA-Z0-9_-]{11}\\+[a-zA-Z0-9_-]{11}\\.zip$");
@@ -64,7 +64,7 @@ public class ID {
 
   public static String getFirst(Uri uri) {
     List<String> matches = getMatches(uri);
-    if (isMergeFile(uri)) {
+    if (isValidMergeFile(uri)) {
       return matches.get(matches.size() - 3); // note: first match will be in the date string
     } else {
       return null;
@@ -75,16 +75,21 @@ public class ID {
     return Integer.valueOf(uri.getLastPathSegment().substring(0, 13));
   }
 
-  public static boolean isValidFile(Uri uri) {
-    return filePattern.matcher(uri.getLastPathSegment()).matches();
+  public static boolean isValidHistoryFile(Uri uri) {
+    return historyFilePattern.matcher(uri.getLastPathSegment()).matches();
   }
 
-  public static boolean isTransactionFile(Uri uri) {
+  public static boolean isValidTransactionFile(Uri uri) {
     return transactionFilePattern.matcher(uri.getLastPathSegment()).matches();
   }
 
-  public static boolean isMergeFile(Uri uri) {
+  public static boolean isValidMergeFile(Uri uri) {
     return mergeFilePattern.matcher(uri.getLastPathSegment()).matches();
+  }
+
+  public static boolean isValidClientFile(Uri uri, String clientID) {
+    Pattern clientFilePattern = Pattern.compile("^[0-9]{14}=" + clientID + "\\.client$");
+    return clientFilePattern.matcher(uri.getLastPathSegment()).matches();
   }
 
 }
