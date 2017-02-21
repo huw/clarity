@@ -2,8 +2,10 @@
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/relativelayout_detailitem_projectcomplete"
   android:layout_width="wrap_content"
   android:layout_height="48dp"
+  android:background="?attr/selectableItemBackground"
   tools:context=".ui.activity.MainActivity">
 
   <TextView
@@ -26,7 +28,8 @@
     android:layout_height="wrap_content"
     android:layout_marginEnd="@dimen/horizontal_margin"
     android:layout_alignParentEnd="true"
-    android:layout_centerInParent="true"/>
+    android:layout_centerInParent="true"
+    android:clickable="false"/>
 
   <View
     android:id="@+id/divider_detailitem_projectcomplete"

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -14,6 +15,8 @@ import nu.huw.clarity.model.Perspective;
 
 public class DetailInfoContextFragment extends DetailInfoFragment {
 
+  @BindView(R.id.relativelayout_detailitem_status)
+  RelativeLayout relativelayout_detailitem_status;
   @BindView(R.id.textview_detailitem_statusvalue)
   TextView textview_detailitem_statusvalue;
 
@@ -52,7 +55,8 @@ public class DetailInfoContextFragment extends DetailInfoFragment {
     unbinder = ButterKnife.bind(this, view);
     Context context = (Context) entry;
 
-    bindContextStatusValue(context, textview_detailitem_statusvalue);
+    bindContextStatusValue(context, relativelayout_detailitem_status,
+        textview_detailitem_statusvalue);
 
     return view;
   }
@@ -66,7 +70,8 @@ public class DetailInfoContextFragment extends DetailInfoFragment {
   /**
    * Binds the "Status" field
    */
-  private void bindContextStatusValue(Context context, TextView textView) {
+  private void bindContextStatusValue(Context context, RelativeLayout container,
+      TextView textView) {
     if (context.droppedEffective) {
       textView.setText(R.string.detail_dropped);
     }

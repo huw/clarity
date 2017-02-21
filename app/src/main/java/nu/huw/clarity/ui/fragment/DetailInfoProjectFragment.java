@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -18,24 +19,42 @@ import nu.huw.clarity.model.Task;
 
 public class DetailInfoProjectFragment extends DetailInfoFragment {
 
+  @BindView(R.id.relativelayout_detailitem_projecttype)
+  RelativeLayout relativelayout_detail_projecttype;
   @BindView(R.id.textview_detailitem_projecttypevalue)
   TextView textview_detailitem_projecttypevalue;
+  @BindView(R.id.relativelayout_detailitem_status)
+  RelativeLayout relativelayout_detailitem_status;
   @BindView(R.id.textview_detailitem_statusvalue)
   TextView textview_detailitem_statusvalue;
+  @BindView(R.id.relativelayout_detailitem_projectcomplete)
+  RelativeLayout relativelayout_detailitem_projectcomplete;
   @BindView(R.id.switch_detailitem_projectcomplete)
   Switch switch_detailitem_projectcomplete;
+  @BindView(R.id.relativelayout_detailitem_context)
+  RelativeLayout relativelayout_detailitem_context;
   @BindView(R.id.textview_detailitem_contextvalue)
   TextView textview_detailitem_contextvalue;
   @BindView(R.id.imagebutton_detailitem_context)
   ImageButton imagebutton_detailitem_context;
+  @BindView(R.id.relativelayout_detailitem_flag)
+  RelativeLayout relativelayout_detailitem_flag;
   @BindView(R.id.textview_detailitem_flagvalue)
   ToggleButton textview_detailitem_flagvalue;
+  @BindView(R.id.relativelayout_detailitem_duration)
+  RelativeLayout relativelayout_detailitem_duration;
   @BindView(R.id.textview_detailitem_durationvalue)
   TextView textview_detailitem_durationvalue;
+  @BindView(R.id.relativelayout_detailitem_defer)
+  RelativeLayout relativelayout_detailitem_defer;
   @BindView(R.id.textview_detailitem_defervalue)
   TextView textview_detailitem_defervalue;
+  @BindView(R.id.relativelayout_detailitem_due)
+  RelativeLayout relativelayout_detailitem_due;
   @BindView(R.id.textview_detailitem_duevalue)
   TextView textview_detailitem_duevalue;
+  @BindView(R.id.relativelayout_detailitem_repeat)
+  RelativeLayout relativelayout_detailitem_repeat;
   @BindView(R.id.textview_detailitem_repeatvalue)
   TextView textview_detailitem_repeatvalue;
 
@@ -74,15 +93,20 @@ public class DetailInfoProjectFragment extends DetailInfoFragment {
     unbinder = ButterKnife.bind(this, view);
     Task project = (Task) entry;
 
-    bindProjectTypeValue(project, textview_detailitem_projecttypevalue);
-    bindProjectStatusValue(project, textview_detailitem_statusvalue);
-    bindProjectCompleteValue(project, switch_detailitem_projectcomplete);
-    bindContextValue(project, textview_detailitem_contextvalue, imagebutton_detailitem_context);
-    bindFlaggedValue(project, textview_detailitem_flagvalue);
-    bindDurationValue(project, textview_detailitem_durationvalue);
-    bindDeferValue(project, textview_detailitem_defervalue);
-    bindDueValue(project, textview_detailitem_duevalue);
-    bindRepeatValue(project, textview_detailitem_repeatvalue);
+    bindProjectTypeValue(project, relativelayout_detail_projecttype,
+        textview_detailitem_projecttypevalue);
+    bindProjectStatusValue(project, relativelayout_detailitem_status,
+        textview_detailitem_statusvalue);
+    bindProjectCompleteValue(project, relativelayout_detailitem_projectcomplete,
+        switch_detailitem_projectcomplete);
+    bindContextValue(project, relativelayout_detailitem_context, textview_detailitem_contextvalue,
+        imagebutton_detailitem_context);
+    bindFlaggedValue(project, relativelayout_detailitem_flag, textview_detailitem_flagvalue);
+    bindDurationValue(project, relativelayout_detailitem_duration,
+        textview_detailitem_durationvalue);
+    bindDeferValue(project, relativelayout_detailitem_defer, textview_detailitem_defervalue);
+    bindDueValue(project, relativelayout_detailitem_due, textview_detailitem_duevalue);
+    bindRepeatValue(project, relativelayout_detailitem_repeat, textview_detailitem_repeatvalue);
 
     return view;
   }
@@ -96,7 +120,7 @@ public class DetailInfoProjectFragment extends DetailInfoFragment {
   /**
    * Binds the "Type" field
    */
-  private void bindProjectTypeValue(Task project, TextView textView) {
+  private void bindProjectTypeValue(Task project, RelativeLayout container, TextView textView) {
 
     @StringRes int typeStringID = R.string.detail_projectsequential;
     if (project.type.equals("single")) {
@@ -111,7 +135,7 @@ public class DetailInfoProjectFragment extends DetailInfoFragment {
   /**
    * Binds the "Status" field
    */
-  private void bindProjectStatusValue(Task project, TextView textView) {
+  private void bindProjectStatusValue(Task project, RelativeLayout container, TextView textView) {
     if (project.dropped) {
       textView.setText(R.string.detail_dropped);
     }
@@ -120,7 +144,8 @@ public class DetailInfoProjectFragment extends DetailInfoFragment {
   /**
    * Binds the "Complete when completing last action" field
    */
-  private void bindProjectCompleteValue(Task project, Switch switchButton) {
+  private void bindProjectCompleteValue(Task project, RelativeLayout container,
+      Switch switchButton) {
     if (project.completeWithChildren) {
       switchButton.setChecked(true);
     }

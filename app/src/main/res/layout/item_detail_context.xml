@@ -2,8 +2,10 @@
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/relativelayout_detailitem_context"
   android:layout_width="wrap_content"
   android:layout_height="48dp"
+  android:background="?attr/selectableItemBackground"
   tools:context=".ui.activity.MainActivity">
 
   <TextView
@@ -17,6 +19,19 @@
     android:text="@string/detail_context"
     android:textColor="@color/secondary_text_light"
     android:textSize="@dimen/subhead_size"/>
+
+  <!--<Spinner
+    android:id="@+id/textview_detailitem_contextvalue"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:layout_centerInParent="true"
+    android:layout_toEndOf="@id/textview_detailitem_contextlabel"
+    android:layout_toStartOf="@+id/imagebutton_detailitem_context"
+    android:gravity="end"
+    android:spinnerMode="dialog"
+    android:textColor="@color/secondary_text_light"
+    android:textSize="@dimen/subhead_size"/>-->
 
   <TextView
     android:id="@+id/textview_detailitem_contextvalue"

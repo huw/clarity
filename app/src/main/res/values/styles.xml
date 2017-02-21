@@ -9,6 +9,8 @@
     <item name="android:textColorPrimary">@color/primary_text_light</item>
     <item name="android:textColorSecondary">@color/secondary_text_light</item>
     <item name="android:textColorTertiary">@color/disabled_text_light</item>
+    <item name="android:dialogTheme">@style/Theme.AppTheme.Dialog</item>
+    <item name="android:alertDialogTheme">?attr/dialogTheme</item>
   </style>
 
   <style name="ThemeOverlay.AppTheme.Dark" parent="ThemeOverlay.AppCompat.Dark">
@@ -22,6 +24,12 @@
     <item name="colorControlNormal">@color/disabled_text_dark</item>
     <item name="colorControlHighlight">@color/primary_text_dark</item>
     <item name="android:textColor">@color/primary_text_dark</item>
+  </style>
+
+  <style name="Theme.AppTheme.Dialog" parent="Theme.AppCompat.Light.Dialog">
+    <item name="colorAccent">?attr/colorAccent</item>
+    <item name="colorPrimary">?attr/colorPrimary</item>
+    <item name="colorPrimaryDark">?attr/colorPrimaryDark</item>
   </style>
 
   <style name="AppTheme.Red" parent="AppTheme">

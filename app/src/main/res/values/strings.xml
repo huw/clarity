@@ -126,5 +126,6 @@
   <string name="sync_errortitle">Log in again</string>
   <string name="sync_errorpassphrase">Your passphrase has changed</string>
   <string name="sync_errorconnection">Couldn’t connect to the sync server</string>
+  <string name="detail_clear">Clear</string>
 
 </resources>
