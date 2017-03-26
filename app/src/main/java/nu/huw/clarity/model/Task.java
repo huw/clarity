@@ -342,6 +342,30 @@ public class Task extends Entry {
   }
 
   /**
+   * Get the task's defer date
+   */
+  @Nullable
+  public LocalDateTime getDateDefer() {
+    if (dateDefer != null) {
+      return dateDefer;
+    } else {
+      return dateDeferEffective;
+    }
+  }
+
+  /**
+   * Get the task's defer date
+   */
+  @Nullable
+  public LocalDateTime getDateDue() {
+    if (dateDue != null) {
+      return dateDue;
+    } else {
+      return dateDeferEffective;
+    }
+  }
+
+  /**
    * A task is considered 'completed' if it either has a completed date or has been dropped
    */
   public boolean isCompleted() {

@@ -5,23 +5,30 @@ import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.text.format.DateFormat;
 import android.util.Log;
+import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.LocalTime;
 
 public class TimePickerDialogFragment extends DialogFragment {
 
   private static final String TAG = TimePickerDialogFragment.class.getSimpleName();
   private OnTimeSetListener listener;
+  private LocalTime time;
 
   public TimePickerDialogFragment() {
   }
 
-  public static TimePickerDialogFragment newInstance(OnTimeSetListener listener) {
+  public static TimePickerDialogFragment newInstance(@Nullable LocalDateTime dateTime,
+      @NonNull OnTimeSetListener listener) {
     TimePickerDialogFragment timePickerDialogFragment = new TimePickerDialogFragment();
     timePickerDialogFragment.setRetainInstance(true);
     timePickerDialogFragment.setListener(listener);
+    if (dateTime != null) {
+      timePickerDialogFragment.time = dateTime.toLocalTime();
+    }
     return timePickerDialogFragment;
   }
 
@@ -36,7 +43,7 @@ public class TimePickerDialogFragment extends DialogFragment {
 
     // Use current date for calendar
 
-    LocalTime time = LocalTime.now();
+    if (time == null) time = LocalTime.now();
     int hour = time.getHour();
     int minute = time.getMinute();
 

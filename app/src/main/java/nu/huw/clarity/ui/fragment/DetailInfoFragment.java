@@ -5,7 +5,6 @@ import android.app.TimePickerDialog.OnTimeSetListener;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -15,10 +14,10 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
-import butterknife.BindView;
 import butterknife.Unbinder;
 import nu.huw.clarity.R;
 import nu.huw.clarity.model.Context;
@@ -48,14 +47,8 @@ public class DetailInfoFragment extends Fragment {
   int TEXT_COLOR_PRIMARY;
   @ColorInt
   int TEXT_COLOR_SECONDARY;
-  @Nullable
-  @BindView(R.id.relativelayout_detailitem_defer)
-  RelativeLayout relativelayout_detailitem_defer;
-  @Nullable
-  @BindView(R.id.textview_detailitem_defervalue)
-  TextView textview_detailitem_defervalue;
   private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MMM d yyyy hh:mma");
-  private OnDateSetListener onDeferDateSetListener;
+  private OnDateSetListener onDueDateSetListener;
 
   public DetailInfoFragment() {
   }
@@ -117,13 +110,13 @@ public class DetailInfoFragment extends Fragment {
   /**
    * Binds the "Context" field
    */
-  void bindContextValue(Task task, RelativeLayout container, TextView textView,
+  void bindContextValue(Task task, RelativeLayout container, Spinner spinner,
       ImageButton imageButton) {
     if (task.contextID != null) {
 
       final Context context = task.getContext(getContext());
-      textView.setText(context.name);
-      textView.setTextColor(TEXT_COLOR_PRIMARY);
+      //spinner.setText(context.name);
+      //spinner.setTextColor(TEXT_COLOR_PRIMARY);
 
       imageButton.setVisibility(View.VISIBLE);
       imageButton.setOnClickListener(new View.OnClickListener() {
@@ -165,9 +158,9 @@ public class DetailInfoFragment extends Fragment {
 
       String date = task.dateDefer.format(dateTimeFormatter);
 
-      textview_detailitem_defervalue.setText(date);
-      textview_detailitem_defervalue.setTextColor(TEXT_COLOR_PRIMARY);
-      textview_detailitem_defervalue.setTypeface(null, Typeface.NORMAL);
+      textView.setText(date);
+      textView.setTextColor(TEXT_COLOR_PRIMARY);
+      textView.setTypeface(null, Typeface.NORMAL);
 
     } else if (task.dateDeferEffective != null) {
 
@@ -175,86 +168,156 @@ public class DetailInfoFragment extends Fragment {
 
       // Set the text _and_ italicise it
 
-      textview_detailitem_defervalue.setText(date);
-      textview_detailitem_defervalue.setTextColor(TEXT_COLOR_PRIMARY);
-      textview_detailitem_defervalue.setTypeface(null, Typeface.ITALIC);
+      textView.setText(date);
+      textView.setTextColor(TEXT_COLOR_PRIMARY);
+      textView.setTypeface(null, Typeface.ITALIC);
 
     } else {
 
       // Remove style, set text to "None"
 
-      textview_detailitem_defervalue.setText(getString(R.string.detail_none));
-      textview_detailitem_defervalue.setTextColor(TEXT_COLOR_SECONDARY);
-      textview_detailitem_defervalue.setTypeface(null, Typeface.NORMAL);
+      textView.setText(getString(R.string.detail_none));
+      textView.setTextColor(TEXT_COLOR_SECONDARY);
+      textView.setTypeface(null, Typeface.NORMAL);
     }
-
-    // Setup listener for changes
-
-    onDeferDateSetListener = new OnDateSetListener() {
-      @Override
-      public void onDateSet(DatePicker datePicker, final int year, final int month,
-          final int dayOfMonth) {
-
-        final Task task = (Task) entry;
-        if (year == 0 && month == 0 && dayOfMonth == 0) {
-
-          // We cleared the date, reset the task's dateDefer
-
-          task.dateDefer = null;
-          bindDeferValue(task, container, textView);
-
-        } else {
-
-          // Open a time picker
-
-          TimePickerDialogFragment timePickerDialogFragment = TimePickerDialogFragment.newInstance(
-              new OnTimeSetListener() {
-                @Override
-                public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-
-                  // Actual code starts here
-                  // Save the new dateTime into the dateDefer field and rebind values
-
-                  task.dateDefer = LocalDateTime.of(year, month, dayOfMonth, hour, minute);
-                  bindDeferValue(task, container, textView);
-
-                }
-              });
-          timePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
-        }
-      }
-    };
 
     // Set click listener
 
-    container.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View view) {
+    if (!container.hasOnClickListeners()) {
+      container.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View view) {
 
-        DatePickerDialogFragment datePickerDialogFragment = DatePickerDialogFragment
-            .newInstance(onDeferDateSetListener, task.dateDefer != null);
-        datePickerDialogFragment.show(getChildFragmentManager(), DATE_PICKER_TAG);
+          onDueDateSetListener = new OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, final int year, final int month,
+                final int dayOfMonth) {
 
-      }
-    });
+              final Task task = (Task) entry;
+              if (year == 0 && month == 0 && dayOfMonth == 0) {
+
+                // We cleared the date, reset the task's dateDefer
+
+                task.dateDefer = null;
+                bindDeferValue(task, container, textView);
+
+              } else {
+
+                // Open a time picker
+
+                TimePickerDialogFragment timePickerDialogFragment = TimePickerDialogFragment
+                    .newInstance(task.getDateDefer(),
+                        new OnTimeSetListener() {
+                          @Override
+                          public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+
+                            // Actual code starts here
+                            // Save the new dateTime into the dateDefer field and rebind values
+                            // Remember that months, for some reason, start at zero
+
+                            task.dateDefer = LocalDateTime
+                                .of(year, month + 1, dayOfMonth, hour, minute);
+                            bindDeferValue(task, container, textView);
+
+                          }
+                        });
+                timePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
+              }
+            }
+          };
+
+          DatePickerDialogFragment datePickerDialogFragment = DatePickerDialogFragment
+              .newInstance(task.getDateDefer(), !task.isNotDeferredLocally(),
+                  onDueDateSetListener);
+          datePickerDialogFragment.show(getChildFragmentManager(), DATE_PICKER_TAG);
+
+        }
+      });
+    }
   }
 
   /**
    * Binds the "Due" field
    */
-  void bindDueValue(Task task, RelativeLayout container, TextView textView) {
+  void bindDueValue(final Task task, final RelativeLayout container, final TextView textView) {
     if (task.dateDue != null) {
 
       String date = task.dateDue.format(dateTimeFormatter);
+
       textView.setText(date);
       textView.setTextColor(TEXT_COLOR_PRIMARY);
+      textView.setTypeface(null, Typeface.NORMAL);
 
     } else if (task.dateDueEffective != null) {
 
       String date = task.dateDueEffective.format(dateTimeFormatter);
+
+      // Set the text _and_ italicise it
+
       textView.setText(date);
       textView.setTextColor(TEXT_COLOR_PRIMARY);
       textView.setTypeface(null, Typeface.ITALIC);
+
+    } else {
+
+      // Remove style, set text to "None"
+
+      textView.setText(getString(R.string.detail_none));
+      textView.setTextColor(TEXT_COLOR_SECONDARY);
+      textView.setTypeface(null, Typeface.NORMAL);
+    }
+
+    // Set click listener
+
+    if (!container.hasOnClickListeners()) {
+      container.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+          onDueDateSetListener = new OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, final int year, final int month,
+                final int dayOfMonth) {
+
+              final Task task = (Task) entry;
+              if (year == 0 && month == 0 && dayOfMonth == 0) {
+
+                // We cleared the date, reset the task's dateDefer
+
+                task.dateDue = null;
+                bindDueValue(task, container, textView);
+
+              } else {
+
+                // Open a time picker
+
+                TimePickerDialogFragment timePickerDialogFragment = TimePickerDialogFragment
+                    .newInstance(task.getDateDefer(),
+                        new OnTimeSetListener() {
+                          @Override
+                          public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+
+                            // Actual code starts here
+                            // Save the new dateTime into the dateDefer field and rebind values
+                            // Remember that months, for some reason, start at zero
+
+                            task.dateDue = LocalDateTime
+                                .of(year, month + 1, dayOfMonth, hour, minute);
+                            bindDueValue(task, container, textView);
+
+                          }
+                        });
+                timePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
+              }
+            }
+          };
+
+          DatePickerDialogFragment datePickerDialogFragment = DatePickerDialogFragment
+              .newInstance(task.getDateDue(), !task.isNotDueLocally(), onDueDateSetListener);
+          datePickerDialogFragment.show(getChildFragmentManager(), DATE_PICKER_TAG);
+
+        }
+      });
     }
   }
 

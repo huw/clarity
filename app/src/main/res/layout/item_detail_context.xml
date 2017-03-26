@@ -20,8 +20,8 @@
     android:textColor="@color/secondary_text_light"
     android:textSize="@dimen/subhead_size"/>
 
-  <!--<Spinner
-    android:id="@+id/textview_detailitem_contextvalue"
+  <Spinner
+    android:id="@+id/spinner_detailitem_contextvalue"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginEnd="16dp"
@@ -30,21 +30,6 @@
     android:layout_toStartOf="@+id/imagebutton_detailitem_context"
     android:gravity="end"
     android:spinnerMode="dialog"
-    android:textColor="@color/secondary_text_light"
-    android:textSize="@dimen/subhead_size"/>-->
-
-  <TextView
-    android:id="@+id/textview_detailitem_contextvalue"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginEnd="16dp"
-    android:layout_centerInParent="true"
-    android:layout_toEndOf="@id/textview_detailitem_contextlabel"
-    android:layout_toStartOf="@+id/imagebutton_detailitem_context"
-    android:ellipsize="end"
-    android:gravity="end"
-    android:maxLines="1"
-    android:text="@string/detail_none"
     android:textColor="@color/secondary_text_light"
     android:textSize="@dimen/subhead_size"/>
 

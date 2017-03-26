@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import butterknife.BindView;
@@ -26,8 +27,8 @@ public class DetailInfoTaskFragment extends DetailInfoFragment {
   ImageButton imagebutton_detailitem_project;
   @BindView(R.id.relativelayout_detailitem_context)
   RelativeLayout relativelayout_detailitem_context;
-  @BindView(R.id.textview_detailitem_contextvalue)
-  TextView textview_detailitem_contextvalue;
+  @BindView(R.id.spinner_detailitem_contextvalue)
+  Spinner textview_detailitem_contextvalue;
   @BindView(R.id.imagebutton_detailitem_context)
   ImageButton imagebutton_detailitem_context;
   @BindView(R.id.relativelayout_detailitem_flag)

@@ -7,26 +7,32 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import nu.huw.clarity.R;
 import org.threeten.bp.LocalDate;
+import org.threeten.bp.LocalDateTime;
 
 public class DatePickerDialogFragment extends DialogFragment {
 
   private static final String TAG = DatePickerDialogFragment.class.getSimpleName();
   private OnDateSetListener listener;
   private boolean enableClear;
+  private LocalDate date;
 
   public DatePickerDialogFragment() {
   }
 
-  public static DatePickerDialogFragment newInstance(OnDateSetListener listener,
-      boolean enableClear) {
+  public static DatePickerDialogFragment newInstance(@Nullable LocalDateTime dateTime,
+      boolean enableClear, @NonNull OnDateSetListener listener) {
     DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
     datePickerDialogFragment.setRetainInstance(true);
     datePickerDialogFragment.setListener(listener);
     datePickerDialogFragment.enableClear = enableClear;
+    if (dateTime != null) {
+      datePickerDialogFragment.date = dateTime.toLocalDate();
+    }
     return datePickerDialogFragment;
   }
 
@@ -39,11 +45,11 @@ public class DatePickerDialogFragment extends DialogFragment {
   @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-    // Use current date for calendar
+    // Use given date for calendar, otherwise current date
 
-    LocalDate date = LocalDate.now();
+    if (date == null) date = LocalDate.now();
     int year = date.getYear();
-    int month = date.getMonthValue();
+    int month = date.getMonthValue() - 1; // Months start at zero in the picker for some reason
     int dayOfMonth = date.getDayOfMonth();
 
     final DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), listener, year,

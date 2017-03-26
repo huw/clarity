@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -33,8 +34,8 @@ public class DetailInfoProjectFragment extends DetailInfoFragment {
   Switch switch_detailitem_projectcomplete;
   @BindView(R.id.relativelayout_detailitem_context)
   RelativeLayout relativelayout_detailitem_context;
-  @BindView(R.id.textview_detailitem_contextvalue)
-  TextView textview_detailitem_contextvalue;
+  @BindView(R.id.spinner_detailitem_contextvalue)
+  Spinner textview_detailitem_contextvalue;
   @BindView(R.id.imagebutton_detailitem_context)
   ImageButton imagebutton_detailitem_context;
   @BindView(R.id.relativelayout_detailitem_flag)
