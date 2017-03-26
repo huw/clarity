@@ -15,7 +15,7 @@
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     <item name="android:windowTranslucentStatus">true</item>
     <item name="android:datePickerDialogTheme">?attr/dialogTheme</item>
-    <!--<item name="android:timePickerDialogTheme">?attr/dialogTheme</item>-->
+    <item name="android:timePickerDialogTheme">?attr/dialogTheme</item>
   </style>
 
   <style name="ThemeOverlay.AppTheme.Dark" parent="ThemeOverlay.AppCompat.Dark">
