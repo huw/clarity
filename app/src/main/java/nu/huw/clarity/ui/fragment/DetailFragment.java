@@ -21,6 +21,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -44,6 +46,7 @@ import nu.huw.clarity.ui.adapter.AttachmentListAdapter.OnAttachmentListInteracti
 import nu.huw.clarity.ui.adapter.DetailPagerAdapter;
 import nu.huw.clarity.ui.fragment.DetailInfoFragment.OnDetailInfoInteractionListener;
 import nu.huw.clarity.ui.misc.CheckCircle;
+import org.threeten.bp.LocalDateTime;
 
 public class DetailFragment extends BottomSheetDialogFragment implements
     OnDetailInfoInteractionListener,
@@ -157,10 +160,27 @@ public class DetailFragment extends BottomSheetDialogFragment implements
     textinputedittext_detail_name.setHint(hintID);
     textinputlayout_detail_name.setHint(getResources().getString(hintID));
 
+    // Set name listener
+
+    textinputedittext_detail_name.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+      }
+
+      @Override
+      public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        entry.name = charSequence.toString();
+      }
+
+      @Override
+      public void afterTextChanged(Editable editable) {
+      }
+    });
+
     // Check circle
 
     if (entry instanceof Task) {
-      Task task = (Task) entry;
+      final Task task = (Task) entry;
 
       // Available tasks can have a flag, but they can't have colorised overdue/due soon
       // circles because the user doesn't want to start them yet.
@@ -179,6 +199,17 @@ public class DetailFragment extends BottomSheetDialogFragment implements
         checkcircle_detail.setOverdue(false);
         checkcircle_detail.setDueSoon(false);
       }
+
+      // Set on click listener
+
+      checkcircle_detail.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+          // Either nullify the completed date, or set it to the current time
+          task.dateCompleted = checkcircle_detail.isChecked() ? LocalDateTime.now() : null;
+        }
+      });
+
     } else {
       // Remove the check circle
       checkcircle_detail.setVisibility(View.GONE);
