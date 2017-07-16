@@ -8,8 +8,8 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Perspective;
-import nu.huw.clarity.model.Task;
+import nu.huw.clarity.model_old.Perspective;
+import nu.huw.clarity.model_old.Task;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 import nu.huw.clarity.ui.misc.CheckCircle;
 

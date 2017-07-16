@@ -6,8 +6,8 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Header;
-import nu.huw.clarity.model.Perspective;
+import nu.huw.clarity.model_old.Header;
+import nu.huw.clarity.model_old.Perspective;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 
 public class CollationHeaderViewHolder extends ListAdapter.ViewHolder {

@@ -12,9 +12,9 @@ import android.widget.ToggleButton;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Entry;
-import nu.huw.clarity.model.Perspective;
-import nu.huw.clarity.model.Task;
+import nu.huw.clarity.model_old.Entry;
+import nu.huw.clarity.model_old.Perspective;
+import nu.huw.clarity.model_old.Task;
 
 public class DetailInfoTaskFragment extends DetailInfoFragment {
 

@@ -16,10 +16,10 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import java.util.List;
 import nu.huw.clarity.R;
-import nu.huw.clarity.db.TreeOperations;
-import nu.huw.clarity.db.model.DataModelHelper;
-import nu.huw.clarity.db.model.NoteHelper;
-import nu.huw.clarity.model.Task;
+import nu.huw.clarity.db_old.TreeOperations;
+import nu.huw.clarity.db_old.model.DataModelHelper;
+import nu.huw.clarity.db_old.model.NoteHelper;
+import nu.huw.clarity.model_old.Task;
 import nu.huw.clarity.ui.activity.MainActivity;
 import org.threeten.bp.ZoneId;
 

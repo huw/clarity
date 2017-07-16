@@ -31,10 +31,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
-import nu.huw.clarity.db.model.ListLoader;
-import nu.huw.clarity.model.Entry;
-import nu.huw.clarity.model.Header;
-import nu.huw.clarity.model.Perspective;
+import nu.huw.clarity.db_old.model.ListLoader;
+import nu.huw.clarity.model_old.Entry;
+import nu.huw.clarity.model_old.Header;
+import nu.huw.clarity.model_old.Perspective;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 import nu.huw.clarity.ui.misc.DividerItemDecoration;
 

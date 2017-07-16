@@ -1,13 +1,14 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         applicationId "nu.huw.clarity"
         minSdkVersion 19
-        targetSdkVersion rootProject.ext.compileSdkVersion
+        targetSdkVersion 25
         versionCode 2
         versionName "0.1"
     }
@@ -32,14 +33,39 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.4'
-    compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
-    compile "com.android.support:design:${rootProject.ext.supportLibVersion}"
-    compile "com.android.support:support-v4:${rootProject.ext.supportLibVersion}"
-    compile "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}" 
-    compile "com.android.support:cardview-v7:${rootProject.ext.supportLibVersion}"
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.android.support:cardview-v7:25.3.1'
     compile 'org.apache.jackrabbit:jackrabbit-webdav:2.11.3'
     compile 'com.googlecode.plist:dd-plist:1.16'
-    compile 'com.jakewharton:butterknife:8.4.0'
-    annotationProcessor "com.jakewharton:butterknife-compiler:8.4.0"
+    compile 'android.arch.lifecycle:runtime:1.0.0-alpha3'
+    compile 'android.arch.lifecycle:extensions:1.0.0-alpha3'
+    compile 'android.arch.persistence.room:runtime:1.0.0-alpha3'
+    compile 'com.jakewharton:butterknife:8.7.0'
+    compile 'com.google.dagger:dagger:2.11'
+    compile 'com.google.dagger:dagger-android:2.11'
+    compile 'com.google.dagger:dagger-android-support:2.11'
+    compile 'org.jetbrains.anko:anko-sdk19:0.8.3'
+    compile 'org.jetbrains.anko:anko-support-v4:0.8.3'
+    compile 'org.jetbrains.anko:anko-appcompat-v7:0.8.3'
+    compile 'org.jetbrains.anko:anko-cardview-v7:0.8.3'
+    compile 'org.jetbrains.anko:anko-recyclerview-v7:0.8.3'
+    compile 'org.jetbrains.anko:anko-design:0.8.3'
+    annotationProcessor "com.jakewharton:butterknife-compiler:8.7.0"
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha3"
+    annotationProcessor "android.arch.persistence.room:compiler:1.0.0-alpha3"
+    annotationProcessor "com.google.dagger:dagger-compiler:2.11"
+    annotationProcessor "com.google.dagger:dagger-android-processor:2.11"
+    kapt "android.arch.lifecycle:compiler:1.0.0-alpha3"
+    kapt "android.arch.persistence.room:compiler:1.0.0-alpha3"
+    kapt "com.google.dagger:dagger-compiler:2.11"
+    kapt "com.google.dagger:dagger-android-processor:2.11"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

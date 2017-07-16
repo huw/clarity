@@ -7,6 +7,8 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager.TaskDescription;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.arch.lifecycle.LiveData;
+import android.arch.persistence.room.Room;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,20 +32,26 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import java.io.File;
 import java.util.List;
 import nu.huw.clarity.R;
 import nu.huw.clarity.account.AccountManagerHelper;
-import nu.huw.clarity.db.model.DataModelHelper;
-import nu.huw.clarity.model.Entry;
-import nu.huw.clarity.model.Perspective;
+import nu.huw.clarity.db.AppDatabase;
+import nu.huw.clarity.db_old.model.DataModelHelper;
+import nu.huw.clarity.model.Attachment;
+import nu.huw.clarity.model.ID;
+import nu.huw.clarity.model_old.Entry;
+import nu.huw.clarity.model_old.Perspective;
 import nu.huw.clarity.notification.NotificationService;
 import nu.huw.clarity.ui.fragment.DetailFragment;
 import nu.huw.clarity.ui.fragment.ListFragment;
+import org.threeten.bp.LocalDateTime;
 
 public class MainActivity extends AppCompatActivity implements
     ListFragment.OnListFragmentInteractionListener {
@@ -79,6 +87,17 @@ public class MainActivity extends AppCompatActivity implements
    */
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+
+    // Quickly testing database:
+    AppDatabase db = Room.inMemoryDatabaseBuilder(getApplicationContext(), AppDatabase.class)
+        .build();
+    Attachment sent = new Attachment(new ID("eVJuS9Id_wJ"), LocalDateTime.now(),
+        LocalDateTime.now(), "random", new ID("eVJuS9Id_wJ"), new File(""));
+    db.attachmentDao().addAttachment(
+        new Attachment(new ID("eVJuS9Id_wJ"), LocalDateTime.now(), LocalDateTime.now(), "random",
+            new ID("eVJuS9Id_wJ"), new File("")));
+    LiveData<Attachment> retrieved = db.attachmentDao().getAttachmentFromID(new ID("eVJuS9Id_wJ"));
+    Log.d(TAG, "" + sent.getId() + " " + retrieved.getValue().getId());
 
     super.onCreate(savedInstanceState);
 

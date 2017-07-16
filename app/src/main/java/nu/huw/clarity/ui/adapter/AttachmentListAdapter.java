@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import java.util.List;
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Attachment;
+import nu.huw.clarity.model_old.Attachment;
 
 public class AttachmentListAdapter extends ArrayAdapter<Attachment> {
 

@@ -12,9 +12,9 @@ import android.widget.EditText;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
-import nu.huw.clarity.db.model.NoteHelper;
-import nu.huw.clarity.model.Perspective;
-import nu.huw.clarity.model.Task;
+import nu.huw.clarity.db_old.model.NoteHelper;
+import nu.huw.clarity.model_old.Perspective;
+import nu.huw.clarity.model_old.Task;
 
 public class DetailNoteFragment extends Fragment {
 

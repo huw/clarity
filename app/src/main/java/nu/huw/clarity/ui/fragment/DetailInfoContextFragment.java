@@ -9,9 +9,9 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Context;
-import nu.huw.clarity.model.Entry;
-import nu.huw.clarity.model.Perspective;
+import nu.huw.clarity.model_old.Context;
+import nu.huw.clarity.model_old.Entry;
+import nu.huw.clarity.model_old.Perspective;
 
 public class DetailInfoContextFragment extends DetailInfoFragment {
 

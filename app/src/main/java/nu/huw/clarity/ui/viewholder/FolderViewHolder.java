@@ -7,8 +7,8 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import nu.huw.clarity.R;
-import nu.huw.clarity.model.Folder;
-import nu.huw.clarity.model.Perspective;
+import nu.huw.clarity.model_old.Folder;
+import nu.huw.clarity.model_old.Perspective;
 import nu.huw.clarity.ui.adapter.ListAdapter;
 
 /**
