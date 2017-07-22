@@ -11,10 +11,10 @@ import nu.huw.clarity.model.ID
 
 @Dao interface ContextDao {
 
-    @Query("Select * from Context where parentID = :arg0")
+    @Query("Select * from Context where parentID = :parent")
     fun getContextsFromParent(@TypeConverters(EntryIDConverter::class) parent: Context): LiveData<List<Context>>
 
-    @Query("Select * from Context where ID = :arg0")
+    @Query("Select * from Context where ID = :id")
     fun getContextFromID(id: ID): LiveData<Context>
 
     @Query("Select * from Context")

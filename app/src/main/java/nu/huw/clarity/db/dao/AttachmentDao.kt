@@ -9,10 +9,10 @@ import nu.huw.clarity.model.Task
 
 @Dao interface AttachmentDao {
 
-    @Query("Select * from Attachment where ParentID = :arg0")
+    @Query("Select * from Attachment where ParentID = :task")
     fun getAttachmentsFromTask(@TypeConverters(EntryIDConverter::class) task: Task): LiveData<List<Attachment>>
 
-    @Query("Select * from Attachment where ID = :arg0")
+    @Query("Select * from Attachment where ID = :id")
     fun getAttachmentFromID(id: ID): LiveData<Attachment>
 
     @Query("Select * from Attachment")
