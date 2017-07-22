@@ -16,4 +16,8 @@ open class Base(@PrimaryKey var id: ID = ID(), var dateAdded: LocalDateTime = Lo
     override fun equals(other: Any?): Boolean {
         return other is Base && id == other.id
     }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 }

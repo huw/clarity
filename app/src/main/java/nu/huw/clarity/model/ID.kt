@@ -12,7 +12,7 @@ data class ID(val value: String = IDHelper.generate()) {
         when (other) {
             is ID -> return value == other.value
             is String -> return value == other
-            else -> return this == other
+            else -> return false
         }
     }
 
@@ -25,5 +25,13 @@ data class ID(val value: String = IDHelper.generate()) {
      */
     fun String.toID(): ID {
         return ID(this)
+    }
+
+    /**
+     * Remember that Base relies on this producing unique results
+     * At the moment I think we're just hoping that's true ¯\_(ツ)_/¯
+     */
+    override fun hashCode(): Int {
+        return value.hashCode()
     }
 }

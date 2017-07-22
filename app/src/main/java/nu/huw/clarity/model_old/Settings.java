@@ -42,6 +42,10 @@ public class Settings {
   @NonNull
   public Duration getDueSoonDuration() {
     String value = dataModelHelper.getSettingFromID(ID_DUE_SOON_DURATION);
-    return Duration.parse(value);
+    if (value == null) {
+      return Duration.ofDays(3);
+    } else {
+      return Duration.parse(value);
+    }
   }
 }

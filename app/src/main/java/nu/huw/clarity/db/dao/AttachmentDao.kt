@@ -1,10 +1,7 @@
 package nu.huw.clarity.db.dao
 
 import android.arch.lifecycle.LiveData
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Insert
-import android.arch.persistence.room.Query
-import android.arch.persistence.room.TypeConverters
+import android.arch.persistence.room.*
 import nu.huw.clarity.db.EntryIDConverter
 import nu.huw.clarity.model.Attachment
 import nu.huw.clarity.model.ID
@@ -18,7 +15,13 @@ import nu.huw.clarity.model.Task
     @Query("Select * from Attachment where ID = :arg0")
     fun getAttachmentFromID(id: ID): LiveData<Attachment>
 
-    @Insert
+    @Query("Select * from Attachment")
+    fun getAllAttachments(): LiveData<List<Attachment>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addAttachment(attachment: Attachment)
+
+    @Delete
+    fun delete(attachment: Attachment)
 
 }
