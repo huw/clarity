@@ -43,3 +43,11 @@ enum class ViewModeState {
 enum class SortState {
     CONTEXT, PROJECT, DUE, DEFER, COMPLETED, ADDED, MODIFIED, FLAGGED, DURATION, NONE
 }
+
+enum class PerspectiveIconState {
+    FLAGGED, CONTEXTS, PROJECTS, INBOX, FORECAST, NEARBY
+}
+
+enum class PerspectiveColorState {
+    ORANGE, PURPLE, BLUE, BLUE_GREY, RED, GREEN
+}

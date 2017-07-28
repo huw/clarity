@@ -3,14 +3,22 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
+ext {
+    support_version = '26.0.0'
+    testing_version = '1.0.0'
+    architecture_version = '1.0.0-alpha7'
+    sdk_version = 26
+    build_version = '25.0.2'
+}
+
 android {
-    compileSdkVersion 26
-    buildToolsVersion "25.0.2"
+    compileSdkVersion sdk_version
+    buildToolsVersion build_version
 
     defaultConfig {
         applicationId "nu.huw.clarity"
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion sdk_version
         versionCode 2
         versionName "0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -41,27 +49,27 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'
-    androidTestCompile 'com.android.support:support-annotations:26.0.0-beta2'
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support.test:rules:0.5'
+    androidTestCompile "com.android.support:support-annotations:$support_version"
+    androidTestCompile "com.android.support.test:runner:$testing_version"
+    androidTestCompile "com.android.support.test:rules:$testing_version"
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.4'
-    compile 'com.android.support:appcompat-v7:26.0.0-beta2'
-    compile 'com.android.support:design:26.0.0-beta2'
-    compile 'com.android.support:support-v4:26.0.0-beta2'
-    compile 'com.android.support:recyclerview-v7:26.0.0-beta2'
-    compile 'com.android.support:cardview-v7:26.0.0-beta2'
+    compile "com.android.support:appcompat-v7:$support_version"
+    compile "com.android.support:design:$support_version"
+    compile "com.android.support:support-v4:$support_version"
+    compile "com.android.support:recyclerview-v7:$support_version"
+    compile "com.android.support:cardview-v7:$support_version"
     compile 'org.apache.jackrabbit:jackrabbit-webdav:2.11.3'
     compile 'com.googlecode.plist:dd-plist:1.16'
-    compile 'android.arch.lifecycle:runtime:1.0.0-alpha5'
-    compile 'android.arch.lifecycle:extensions:1.0.0-alpha5'
-    compile 'android.arch.persistence.room:runtime:1.0.0-alpha5'
+    compile "android.arch.lifecycle:runtime:$architecture_version"
+    compile "android.arch.lifecycle:extensions:$architecture_version"
+    compile "android.arch.persistence.room:runtime:$architecture_version"
     compile 'com.jakewharton:butterknife:8.7.0'
     compile 'com.google.dagger:dagger:2.11'
     androidTestCompile 'com.google.dagger:dagger:2.11'
     compile 'org.jetbrains.anko:anko:0.10.1'
     kapt "com.jakewharton:butterknife-compiler:8.7.0"
-    kapt "android.arch.lifecycle:compiler:1.0.0-alpha5"
-    kapt "android.arch.persistence.room:compiler:1.0.0-alpha5"
+    kapt "android.arch.lifecycle:compiler:$architecture_version"
+    kapt "android.arch.persistence.room:compiler:$architecture_version"
     kapt "com.google.dagger:dagger-compiler:2.11"
     kaptAndroidTest "com.google.dagger:dagger-compiler:2.11"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"

@@ -11,8 +11,7 @@ import nu.huw.clarity.model.Attachment
 import nu.huw.clarity.model.ID
 import nu.huw.clarity.model.Task
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,7 +21,7 @@ import javax.inject.Inject
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class AttachmentTest {
+class AttachmentDaoTest {
 
     @Inject
     lateinit var db: AppDatabase
@@ -37,32 +36,31 @@ class AttachmentTest {
         component.inject(this)
 
         // Setup data
-        val sent = Attachment(ID("eVJuS9Id_wJ"), LocalDateTime.now(), LocalDateTime.now(), "random", ID("eVJuS9Id_wJ"), File(""))
-        db.attachmentDao().addAttachment(sent)
+        val sent = Attachment(ID("eVJuS9Id_wJ"), LocalDateTime.now(), LocalDateTime.now(), "random", ID("eVJuS9Id_wZ"), File(""))
+        db.attachmentDao().add(sent)
     }
 
     @After
     fun teardown() {
         // Remove data
-        db.attachmentDao().delete(Attachment(ID("eVJuS9Id_wJ"), LocalDateTime.now(), LocalDateTime.now(), "random", ID("eVJuS9Id_wJ"), File("")))
+        db.attachmentDao().delete(Attachment(ID("eVJuS9Id_wJ"), LocalDateTime.now(), LocalDateTime.now(), "random", ID("eVJuS9Id_wZ"), File("")))
     }
 
     @Test
-    fun getAllAttachments() {
-        val listOfAttachments = db.attachmentDao().getAllAttachments()
-        val attachment = listOfAttachments.blockingObserve()?.first()
+    fun getAll() {
+        val listOfAttachments = db.attachmentDao().getAll()
+        assertFalse(listOfAttachments.blockingObserve()?.isEmpty()!!)
+    }
+
+    @Test
+    fun getFromId() {
+        val attachment = db.attachmentDao().getFromID(ID("eVJuS9Id_wJ")).blockingObserve()
         assertEquals(ID("eVJuS9Id_wJ"), attachment?.id)
     }
 
     @Test
-    fun getAttachmentFromId() {
-        val attachment = db.attachmentDao().getAttachmentFromID(ID("eVJuS9Id_wJ")).blockingObserve()
-        assertEquals(ID("eVJuS9Id_wJ"), attachment?.id)
-    }
-
-    @Test
-    fun getAttachmentFromTask() {
-        val attachment = db.attachmentDao().getAttachmentsFromTask(Task(ID("eVJuS9Id_wJ"))).blockingObserve()
+    fun getFromTask() {
+        val attachment = db.attachmentDao().getFromTask(Task(ID("eVJuS9Id_wZ"))).blockingObserve()
         assertTrue(attachment!!.any { it.id == ID("eVJuS9Id_wJ") })
     }
 

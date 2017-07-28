@@ -45,6 +45,8 @@ class Converters {
     @TypeConverter fun collationStateToString(state: CollationState?) = state?.name
     @TypeConverter fun viewModeStateToString(state: ViewModeState?) = state?.name
     @TypeConverter fun sortStateToString(state: SortState?) = state?.name
+    @TypeConverter fun iconStateToString(state: PerspectiveIconState?) = state?.name
+    @TypeConverter fun colorStateToString(state: PerspectiveColorState?) = state?.name
 
     @TypeConverter fun stringToDroppedState(string: String?) = DroppedState.valueOf(string!!)
     @TypeConverter fun stringToFlaggedState(string: String?) = FlaggedState.valueOf(string!!)
@@ -57,11 +59,41 @@ class Converters {
     @TypeConverter fun stringToCollationState(string: String?) = CollationState.valueOf(string!!)
     @TypeConverter fun stringToViewModeState(string: String?) = ViewModeState.valueOf(string!!)
     @TypeConverter fun stringToSortState(string: String?) = SortState.valueOf(string!!)
+    @TypeConverter fun stringToIconState(string: String?) = PerspectiveIconState.valueOf(string!!)
+    @TypeConverter fun stringToColorState(string: String?) = PerspectiveColorState.valueOf(string!!)
 }
 
-class EntryIDConverter {
+class LooseIDConverter {
+    @TypeConverter
+    fun stringToID(string: String?) = ID(string!!, allowAny = true)
+}
 
-    @TypeConverter fun taskToID(task: Task?) = task?.id?.value
+class IDConverter {
+
+    @TypeConverter fun attachmentToID(attachment: Attachment?) = attachment?.id?.value
     @TypeConverter fun contextToID(context: Context?) = context?.id?.value
+    @TypeConverter fun folderToID(folder: Folder?) = folder?.id?.value
+    @TypeConverter fun perspectiveToID(perspective: Perspective?) = perspective?.id?.value
+    @TypeConverter fun taskToID(task: Task?) = task?.id?.value
 
+}
+
+class ParentIDConverter {
+
+    @TypeConverter fun folderToID(folder: Folder?) = folder?.parentID?.value
+    @TypeConverter fun contextToID(context: Context?) = context?.parentID?.value
+    @TypeConverter fun taskToID(task: Task?) = task?.projectID?.value
+
+}
+
+class ContextIDConverter {
+    @TypeConverter fun taskToID(task: Task?) = task?.contextID?.value
+}
+
+class ProjectIDConverter {
+    @TypeConverter fun taskToID(task: Task?) = task?.projectID?.value
+}
+
+class NextIDConverter {
+    @TypeConverter fun taskToID(task: Task?) = task?.nextID?.value
 }

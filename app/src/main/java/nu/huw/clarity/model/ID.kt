@@ -1,8 +1,8 @@
 package nu.huw.clarity.model
 
-data class ID(val value: String = IDHelper.generate()) {
+data class ID(val value: String = IDHelper.generate(), val allowAny: Boolean = false) {
     init {
-        if (!IDHelper.validate(value)) throw IllegalArgumentException("Given ID $value does not validate")
+        if (!IDHelper.validate(value) && !allowAny) throw IllegalArgumentException("Given ID $value does not validate")
     }
 
     /**
