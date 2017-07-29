@@ -67,6 +67,8 @@ dependencies {
     compile 'com.google.dagger:dagger:2.11'
     androidTestCompile 'com.google.dagger:dagger:2.11'
     compile 'org.jetbrains.anko:anko:0.10.1'
+    compile "com.chibatching.kotpref:kotpref:2.1.2"
+    compile "com.chibatching.kotpref:initializer:2.1.2"
     kapt "com.jakewharton:butterknife-compiler:8.7.0"
     kapt "android.arch.lifecycle:compiler:$architecture_version"
     kapt "android.arch.persistence.room:compiler:$architecture_version"

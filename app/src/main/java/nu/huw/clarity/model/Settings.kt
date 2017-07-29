@@ -1,45 +1,30 @@
 package nu.huw.clarity.model
 
-import nu.huw.clarity.db_old.model.DataModelHelper
+import com.chibatching.kotpref.KotprefModel
 import org.threeten.bp.Duration
 import org.threeten.bp.LocalTime
 
-// TODO: Move androidContext into Dagger
-class Settings(androidContext: android.content.Context) {
+object Settings : KotprefModel() {
+    private var defaultDueTimeString by stringPref()
+    private var defaultDeferTimeString by stringPref()
+    private var dueSoonDurationString by stringPref()
+    val perspectiveOrder by stringSetPref { return@stringSetPref HashSet() }
 
-    private val ID_DEFAULT_DUE = "DefaultDueTime"
-    private val ID_DEFAULT_DEFER = "DefaultStartTime"
-    private val ID_DUE_SOON_DURATION = "DueSoonInterval"
-
-    // TODO: Move dataModelHelper into Dagger
-    private val dataModelHelper: DataModelHelper = DataModelHelper(androidContext)
-
-    /**
-     * Get a LocalTime object representing the default time in your time zone that tasks are due at
-     */
-    // TODO: Lazy load this?
-    val defaultDueTime: LocalTime
-        get() {
-            val value = dataModelHelper.getSettingFromID(ID_DEFAULT_DUE)
-            return LocalTime.parse(value)
+    var defaultDueTime: LocalTime
+        get() = LocalTime.parse(defaultDueTimeString)
+        set(time) {
+            defaultDueTimeString = time.toString()
         }
 
-    /**
-     * Get a LocalTime object representing the default time in your time zone that tasks are deferred
-     * to
-     */
-    val defaultDeferTime: LocalTime
-        get() {
-            val value = dataModelHelper.getSettingFromID(ID_DEFAULT_DEFER)
-            return LocalTime.parse(value)
+    var defaultDeferTime: LocalTime
+        get() = LocalTime.parse(defaultDeferTimeString)
+        set(time) {
+            defaultDeferTimeString = time.toString()
         }
 
-    /**
-     * Get a Duration object representing the time we consider something 'due soon' in
-     */
-    val dueSoonDuration: Duration
-        get() {
-            val value = dataModelHelper.getSettingFromID(ID_DUE_SOON_DURATION)
-            return Duration.parse(value)
+    var dueSoonDuration: Duration
+        get() = Duration.parse(dueSoonDurationString)
+        set(duration) {
+            dueSoonDurationString = duration.toString()
         }
 }
