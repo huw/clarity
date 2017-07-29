@@ -11,28 +11,28 @@ import java.io.File
 class Converters {
 
     @TypeConverter
-    fun dateToString(date: LocalDateTime?) = date?.atZone(ZoneId.systemDefault())?.toInstant().toString()
+    fun dateToString(date: LocalDateTime?) = if (date != null) date.atZone(ZoneId.systemDefault())?.toInstant().toString() else null
 
     @TypeConverter
-    fun stringToDate(string: String?): LocalDateTime = LocalDateTime.ofInstant(Instant.parse(string), ZoneId.systemDefault())
+    fun stringToDate(string: String?) = if (string != null) LocalDateTime.ofInstant(Instant.parse(string), ZoneId.systemDefault()) else null
 
     @TypeConverter
-    fun durationToString(duration: Duration?) = duration.toString()
+    fun durationToString(duration: Duration?) = duration?.toString()
 
     @TypeConverter
-    fun stringToDuration(string: String?): Duration = Duration.parse(string)
+    fun stringToDuration(string: String?) = if (string != null) Duration.parse(string) else null
 
     @TypeConverter
     fun IDToString(id: ID?) = id?.value
 
     @TypeConverter
-    fun stringToID(string: String?) = ID(string!!)
+    fun stringToID(string: String?) = if (string != null) ID(string) else null
 
     @TypeConverter
     fun fileToString(file: File?) = file?.path
 
     @TypeConverter
-    fun stringToFile(string: String?) = File(string)
+    fun stringToFile(string: String?) = if (string != null) File(string) else null
 
     @TypeConverter fun droppedStateToString(state: DroppedState?) = state?.name
     @TypeConverter fun flaggedStateToString(state: FlaggedState?) = state?.name
@@ -65,7 +65,7 @@ class Converters {
 
 class LooseIDConverter {
     @TypeConverter
-    fun stringToID(string: String?) = ID(string!!, allowAny = true)
+    fun stringToID(string: String?) = if (string != null) ID(string, allowAny = true) else null
 }
 
 class IDConverter {

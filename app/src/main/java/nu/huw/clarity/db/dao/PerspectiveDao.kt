@@ -15,13 +15,13 @@ import nu.huw.clarity.model.*
     fun getFromID(id: ID): LiveData<Perspective>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun add(folder: Perspective)
+    fun add(perspective: Perspective)
 
     @Delete
-    fun delete(folder: Perspective)
+    fun delete(perspective: Perspective)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun update(folder: Perspective)
+    fun update(perspective: Perspective)
 
 }
 
