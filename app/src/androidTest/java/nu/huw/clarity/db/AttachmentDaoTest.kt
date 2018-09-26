@@ -49,19 +49,19 @@ class AttachmentDaoTest {
     @Test
     fun getAll() {
         val listOfAttachments = db.attachmentDao().getAll()
-        assertFalse(listOfAttachments.blockingObserve()?.isEmpty()!!)
+        assertFalse(listOfAttachments.isEmpty())
     }
 
     @Test
     fun getFromId() {
-        val attachment = db.attachmentDao().getFromID(ID("eVJuS9Id_wJ")).blockingObserve()
-        assertEquals(ID("eVJuS9Id_wJ"), attachment?.id)
+        val attachment = db.attachmentDao().getFromID(ID("eVJuS9Id_wJ"))
+        assertEquals(ID("eVJuS9Id_wJ"), attachment.id)
     }
 
     @Test
     fun getFromTask() {
-        val attachment = db.attachmentDao().getFromTask(Task(ID("eVJuS9Id_wZ"))).blockingObserve()
-        assertTrue(attachment!!.any { it.id == ID("eVJuS9Id_wJ") })
+        val attachment = db.attachmentDao().getFromTask(Task(ID("eVJuS9Id_wZ")))
+        assertTrue(attachment.any { it.id == ID("eVJuS9Id_wJ") })
     }
 
 

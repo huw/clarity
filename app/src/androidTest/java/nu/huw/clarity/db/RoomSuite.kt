@@ -10,15 +10,3 @@ import java.util.concurrent.TimeUnit
 @RunWith(Suite::class)
 @Suite.SuiteClasses(AttachmentDaoTest::class, ContextDaoTest::class, FolderDaoTest::class, PerspectiveDaoTest::class, TaskDaoTest::class)
 class RoomSuite
-
-fun <T> LiveData<T>.blockingObserve(seconds: Long = 2): T? {
-    var value: T? = null
-    val latch = CountDownLatch(1)
-    val innerObserver = Observer<T> {
-        value = it
-        latch.countDown()
-    }
-    observeForever(innerObserver)
-    latch.await(seconds, TimeUnit.SECONDS)
-    return value
-}

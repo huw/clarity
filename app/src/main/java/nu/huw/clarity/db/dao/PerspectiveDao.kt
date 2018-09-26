@@ -9,10 +9,10 @@ import nu.huw.clarity.model.*
 @Dao interface PerspectiveDao {
 
     @Query("Select * from Perspective")
-    fun getAll(): LiveData<List<Perspective>>
+    fun getAll(): List<Perspective>
 
     @Query("Select * from Perspective where ID = :id")
-    fun getFromID(id: ID): LiveData<Perspective>
+    fun getFromID(id: ID): Perspective
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun add(perspective: Perspective)
@@ -24,15 +24,3 @@ import nu.huw.clarity.model.*
     fun update(perspective: Perspective)
 
 }
-
-fun PerspectiveDao.getForecast(): Perspective = Perspective(
-        id = ID("ProcessForecast", allowAny = true),
-        filterDuration = DurationFilterState.NONE,
-        filterFlagged = FlaggedFilterState.NONE,
-        filterStatus = StatusFilterState.REMAINING,
-        sort = SortState.DUE,
-        collation = CollationState.DUE,
-        name = "Forecast",
-        iconState = PerspectiveIconState.FORECAST,
-        colorState = PerspectiveColorState.RED
-)

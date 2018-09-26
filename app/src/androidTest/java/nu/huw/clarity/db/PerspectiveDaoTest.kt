@@ -8,7 +8,6 @@ import nu.huw.clarity.DaggerTestComponent
 import nu.huw.clarity.R
 import nu.huw.clarity.TestComponent
 import nu.huw.clarity.dagger.AppModule
-import nu.huw.clarity.db.dao.getForecast
 import nu.huw.clarity.model.ID
 import nu.huw.clarity.model.Perspective
 import nu.huw.clarity.model.PerspectiveColorState
@@ -50,14 +49,14 @@ class PerspectiveDaoTest {
     @Test
     fun getAll() {
         val list = db.perspectiveDao().getAll()
-        Assert.assertFalse(list.blockingObserve()?.isEmpty()!!)
+        Assert.assertFalse(list.isEmpty())
     }
 
     @Test
     fun getFromId() {
-        val perspective = db.perspectiveDao().getFromID(ID("eVJuS9Id_wJ")).blockingObserve()
-        Assert.assertEquals(ID("eVJuS9Id_wJ"), perspective?.id)
-        Assert.assertEquals(R.color.primary_green, perspective?.colorID) // Tests whether helper methods work
+        val perspective = db.perspectiveDao().getFromID(ID("eVJuS9Id_wJ"))
+        Assert.assertEquals(ID("eVJuS9Id_wJ"), perspective.id)
+        Assert.assertEquals(R.color.primary_green, perspective.colorID) // Tests whether helper methods work
     }
 
     @Test

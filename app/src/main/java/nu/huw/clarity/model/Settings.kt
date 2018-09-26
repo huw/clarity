@@ -5,10 +5,11 @@ import org.threeten.bp.Duration
 import org.threeten.bp.LocalTime
 
 object Settings : KotprefModel() {
-    private var defaultDueTimeString by stringPref()
-    private var defaultDeferTimeString by stringPref()
-    private var dueSoonDurationString by stringPref()
-    val perspectiveOrder by stringSetPref { return@stringSetPref HashSet() }
+    private var defaultDueTimeString by stringPref(default = "07:00")
+    private var defaultDeferTimeString by stringPref(default = "17:00")
+    private var dueSoonDurationString by stringPref(default = "PT72H")
+    val perspectiveOrder by stringSetPref(default = setOf("ProcessForecast",
+            "ProcessInbox", "ProcessProjects", "ProcessFlagged", "ProcessNearby", "ProcessReview"))
 
     var defaultDueTime: LocalTime
         get() = LocalTime.parse(defaultDueTimeString)

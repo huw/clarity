@@ -1,10 +1,9 @@
-package nu.huw.clarity
+package nu.huw.clarity.db
 
 import android.arch.persistence.room.Room
 import android.content.Context
 import dagger.Module
 import dagger.Provides
-import nu.huw.clarity.db.AppDatabase
 import javax.inject.Singleton
 
 @Module

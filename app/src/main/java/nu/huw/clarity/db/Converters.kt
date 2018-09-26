@@ -38,7 +38,7 @@ class Converters {
     @TypeConverter fun flaggedStateToString(state: FlaggedState?) = state?.name
     @TypeConverter fun blockedStateToString(state: BlockedState?) = state?.name
     @TypeConverter fun statusStateToString(state: StatusState?) = state?.name
-    @TypeConverter fun typeStateToString(state: TypeState?) = state?.name
+    @TypeConverter fun typeStateToString(state: CompletionRuleState?) = state?.name
     @TypeConverter fun statusFilterStateToString(state: StatusFilterState?) = state?.name
     @TypeConverter fun flaggedFilterStateToString(state: FlaggedFilterState?) = state?.name
     @TypeConverter fun durationFilterStateToString(state: DurationFilterState?) = state?.name
@@ -52,7 +52,7 @@ class Converters {
     @TypeConverter fun stringToFlaggedState(string: String?) = FlaggedState.valueOf(string!!)
     @TypeConverter fun stringToBlockedState(string: String?) = BlockedState.valueOf(string!!)
     @TypeConverter fun stringToStatusState(string: String?) = StatusState.valueOf(string!!)
-    @TypeConverter fun stringToTypeState(string: String?) = TypeState.valueOf(string!!)
+    @TypeConverter fun stringToTypeState(string: String?) = CompletionRuleState.valueOf(string!!)
     @TypeConverter fun stringToStatusFilterState(string: String?) = StatusFilterState.valueOf(string!!)
     @TypeConverter fun stringToFlaggedFilterState(string: String?) = FlaggedFilterState.valueOf(string!!)
     @TypeConverter fun stringToDurationFilterState(string: String?) = DurationFilterState.valueOf(string!!)
@@ -88,10 +88,16 @@ class ParentIDConverter {
 
 class ContextIDConverter {
     @TypeConverter fun taskToID(task: Task?) = task?.contextID?.value
+    @TypeConverter fun headerToID(header: Header?) = header?.contextID?.value
 }
 
 class ProjectIDConverter {
     @TypeConverter fun taskToID(task: Task?) = task?.projectID?.value
+    @TypeConverter fun headerToID(header: Header?) = header?.projectID?.value
+}
+
+class FolderIDConverter {
+    @TypeConverter fun headerToID(header: Header?) = header?.folderID?.value
 }
 
 class NextIDConverter {

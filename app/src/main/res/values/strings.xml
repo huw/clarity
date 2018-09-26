@@ -79,6 +79,9 @@
   <string name="listitem_headingyear">This year</string>
   <string name="listitem_headingnocomplete">Incomplete</string>
   <string name="listitem_headingtasks">Tasks</string>
+  <string name="listitem_headingcontexts">Contexts</string>
+  <string name="listitem_headingprojects">Projects</string>
+  <string name="listitem_headingfolders">Folders</string>
   <string name="listitem_headingitems">Items</string>
   <string name="listitem_headingnofolder">No folder</string>
   <string name="listitem_headingnoproject">No project</string>

@@ -16,7 +16,7 @@ enum class StatusState {
     ACTIVE, COMPLETED, DROPPED, ON_HOLD
 }
 
-enum class TypeState {
+enum class CompletionRuleState {
     SEQUENTIAL, PARALLEL, SINGLE_ACTION
 }
 
@@ -29,11 +29,11 @@ enum class FlaggedFilterState {
 }
 
 enum class DurationFilterState {
-    FIVE, FIFTEEN, THIRTY, HOUR, LONG, UNESTIMATED, NONE
+    NONE, UNESTIMATED, FIVE, FIFTEEN, THIRTY, HOUR, LONG
 }
 
 enum class CollationState {
-    CONTEXT, PROJECT, DUE, DEFER, COMPLETED, ADDED, MODIFIED, FLAGGED, NONE
+    TYPE, FOLDER, CONTEXT, PROJECT, DUE, DEFER, COMPLETED, ADDED, MODIFIED, FLAGGED, NONE
 }
 
 enum class ViewModeState {
@@ -50,4 +50,9 @@ enum class PerspectiveIconState {
 
 enum class PerspectiveColorState {
     ORANGE, PURPLE, BLUE, BLUE_GREY, RED, GREEN
+}
+
+enum class EntryTypeState {
+    // Defines the order for displaying entry types (contexts, tasks, folders, etc)
+    TASK, CONTEXT, PROJECT, FOLDER
 }

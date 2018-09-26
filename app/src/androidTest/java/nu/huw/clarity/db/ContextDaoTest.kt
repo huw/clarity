@@ -7,8 +7,8 @@ import nu.huw.clarity.ClarityApplication
 import nu.huw.clarity.DaggerTestComponent
 import nu.huw.clarity.TestComponent
 import nu.huw.clarity.dagger.AppModule
-import nu.huw.clarity.db.dao.getFromParent
 import nu.huw.clarity.model.Context
+import nu.huw.clarity.model.Header
 import nu.huw.clarity.model.ID
 import nu.huw.clarity.model.Task
 import org.junit.After
@@ -48,30 +48,36 @@ class ContextDaoTest {
     @Test
     fun getAll() {
         val list = db.contextDao().getAll()
-        assertFalse(list.blockingObserve()?.isEmpty()!!)
+        assertFalse(list.isEmpty()!!)
     }
 
     @Test
     fun getFromId() {
-        val context = db.contextDao().getFromID(ID("eVJuS9Id_wJ")).blockingObserve()
-        assertEquals(ID("eVJuS9Id_wJ"), context?.id)
+        val context = db.contextDao().getFromID(ID("eVJuS9Id_wJ"))
+        assertEquals(ID("eVJuS9Id_wJ"), context.id)
     }
 
     @Test
     fun getFromParent() {
-        val contexts = db.contextDao().getFromParent(Context(ID("eVJuS9Id_wZ"))).blockingObserve()
-        assertTrue(contexts!!.any { it.id == ID("eVJuS9Id_wJ") })
+        val contexts = db.contextDao().getFromParent(Context(ID("eVJuS9Id_wZ")))
+        assertTrue(contexts.any { it.id == ID("eVJuS9Id_wJ") })
     }
 
     @Test
     fun getFromNullParent() {
-        val contexts = db.contextDao().getFromParent(null).blockingObserve()
-        assertFalse(contexts!!.any { it.id == ID("eVJuS9Id_wJ") })
+        val contexts = db.contextDao().getFromParent(null)
+        assertFalse(contexts.any { it.id == ID("eVJuS9Id_wJ") })
     }
 
     @Test
     fun getFromTask() {
-        val context = db.contextDao().getFromTask(Task(contextID = ID("eVJuS9Id_wJ"))).blockingObserve()
-        assertEquals(ID("eVJuS9Id_wJ"), context?.id)
+        val context = db.contextDao().getFromTask(Task(contextID = ID("eVJuS9Id_wJ")))
+        assertEquals(ID("eVJuS9Id_wJ"), context.id)
+    }
+
+    @Test
+    fun getFromHeader() {
+        val context = db.contextDao().getFromHeader(Header("Test", contextID = ID("eVJuS9Id_wJ")))
+        assertEquals(ID("eVJuS9Id_wJ"), context.id)
     }
 }
